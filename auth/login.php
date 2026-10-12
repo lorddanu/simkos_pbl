@@ -25,7 +25,7 @@ unset($_SESSION['register_success']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masuk - SIMKOS</title>
-    <link rel="stylesheet" href="../assets/login.css">
+    <link rel="stylesheet" href="../assets/cs/login.css">
 </head>
 <body>
 <div class="auth-wrapper">

@@ -1,0 +1,386 @@
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --purple: #7165d1;
+    --purple-dark: #50469f;
+    --purple-light: #f0effb;
+    --green: #8bd044;
+    --red: #d76570;
+    --yellow: #f3dc54;
+    --white: #ffffff;
+    --text: #272443;
+    --muted: #77738d;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f4fb;
+    color: var(--text);
+}
+
+button, a {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.admin-header {
+    background: var(--purple);
+    color: var(--white);
+    padding: 22px 28px;
+    border-radius: 0 0 16px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.profile-icon {
+    width: 38px;
+    height: 38px;
+    border: 2px solid white;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 23px;
+}
+
+.admin-main {
+    width: min(100%, 1000px);
+    margin: 0 auto;
+    padding: 24px 22px 105px;
+}
+
+.page-title {
+    font-size: 20px;
+    margin: 0 0 20px;
+}
+
+.section-title {
+    font-size: 16px;
+    margin: 0 0 14px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    margin-bottom: 18px;
+}
+
+.stat-card {
+    background: var(--purple);
+    color: white;
+    padding: 16px;
+    min-height: 95px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.stat-number {
+    font-size: 29px;
+    line-height: 1;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.panel {
+    background: var(--purple);
+    color: white;
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 14px;
+}
+
+.activity-item,
+.attention-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,.16);
+    font-size: 12px;
+}
+
+.activity-item:last-child,
+.attention-item:last-child {
+    border-bottom: 0;
+}
+
+.item-description {
+    display: block;
+    font-size: 11px;
+    margin-top: 4px;
+    opacity: .85;
+}
+
+.status {
+    font-size: 11px;
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.status.pending {
+    color: var(--yellow);
+}
+
+.status.paid {
+    color: #a6f36d;
+}
+
+.status.late {
+    color: #ff9a9a;
+}
+
+.status.empty {
+    color: var(--yellow);
+}
+
+.bottom-nav {
+    position: fixed;
+    z-index: 10;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(100%, 1000px);
+    min-height: 78px;
+    background: var(--purple);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 8px 8px max(8px, env(safe-area-inset-bottom));
+    border-radius: 14px 14px 0 0;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    border: 0;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    border-radius: 12px;
+    padding: 7px 2px;
+}
+
+.nav-link .nav-icon {
+    font-size: 22px;
+}
+
+.nav-link.active {
+    background: rgba(255,255,255,.14);
+}
+
+.page-section {
+    display: none;
+}
+
+.page-section.active {
+    display: block;
+}
+
+.tabs {
+    display: flex;
+    background: var(--purple-light);
+    border-radius: 13px;
+    padding: 3px;
+    margin-bottom: 14px;
+}
+
+.tab-button {
+    flex: 1;
+    border: 0;
+    padding: 12px 8px;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--purple);
+    font-weight: 700;
+}
+
+.tab-button.active {
+    background: var(--purple);
+    color: white;
+}
+
+.payment-card {
+    background: var(--purple);
+    color: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.payment-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12px;
+}
+
+.payment-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.action-button {
+    color: white;
+    border: 0;
+    border-radius: 5px;
+    padding: 9px 4px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.btn-proof {
+    background: var(--purple-dark);
+}
+
+.btn-approve {
+    background: var(--green);
+}
+
+.btn-reject {
+    background: var(--red);
+}
+
+.simple-link {
+    color: inherit;
+}
+
+.empty-state {
+    background: var(--purple-light);
+    padding: 20px;
+    border-radius: 12px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.logout-link {
+    color: white;
+    font-size: 12px;
+}
+
+@media (min-width: 760px) {
+    .admin-header {
+        border-radius: 0 0 18px 18px;
+    }
+
+    .admin-main {
+        padding-top: 30px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .dashboard-columns {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 14px;
+        align-items: start;
+    }
+
+    .dashboard-columns .panel {
+        height: 100%;
+    }
+}
+
+
+/* Header dan menu profil */
+.admin-header {
+    position: relative;
+    z-index: 20;
+    align-items: center;
+}
+
+.profile-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.profile-button {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    padding: 5px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+}
+
+.profile-button svg {
+    width: 36px;
+    height: 36px;
+    fill: none;
+    stroke: white;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+}
+
+.profile-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 180px;
+    padding: 8px;
+    border-radius: 10px;
+    background: white;
+    color: #272443;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+.profile-dropdown[hidden] {
+    display: none;
+}
+
+.profile-name {
+    padding: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.profile-dropdown .logout-link {
+    display: block;
+    padding: 10px;
+    border-radius: 6px;
+    color: #7165d1;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.profile-dropdown .logout-link:hover {
+    background: #f0effb;
+}
