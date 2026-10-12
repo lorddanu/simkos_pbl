@@ -7,11 +7,11 @@ $errors = [];
 require_once __DIR__ . '/../database/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nama       = trim($_POST['nama'] ?? '');
-    $email      = trim($_POST['email'] ?? '');
-    $password   = $_POST['password'] ?? '';
+    $nama = trim($_POST['nama'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
     $konfirmasi = $_POST['konfirmasi'] ?? '';
-    $setuju     = isset($_POST['setuju']);
+    $setuju = isset($_POST['setuju']);
 
     if ($nama === '') {
         $errors[] = 'Nama lengkap wajib diisi.';
