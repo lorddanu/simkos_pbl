@@ -119,7 +119,6 @@ $pembayaran = [
 <main class="admin-main">
 
     <section id="dashboard" class="page-section active">
-        <h1 class="page-title">Dashboard admin</h1>
 
         <div class="stats-grid">
             <?php foreach ($statistik as $item): ?>
@@ -185,7 +184,6 @@ $pembayaran = [
     </section>
 
     <section id="pembayaran" class="page-section">
-        <h1 class="page-title">Verifikasi pembayaran</h1>
 
         <div class="tabs">
             <button class="tab-button active" type="button"
