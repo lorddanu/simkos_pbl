@@ -1,8 +1,7 @@
 <?php
 // SIMKOS - Penghuni terdaftar (prototype PHP native, tanpa database)
 // Jalankan: php -S localhost:8000 di dalam folder ini, lalu buka http://localhost:8000
-require __DIR__ . '/db.php';
-$user = require_login(); // wajib login, kalau belum diarahkan ke login.php
+session_start();
 
 $uploadDir = __DIR__ . '/uploads/';
 if (!is_dir($uploadDir)) {
@@ -10,14 +9,15 @@ if (!is_dir($uploadDir)) {
 }
 
 // Data contoh. Nanti ganti dengan data dari database (tabel kamar & pembayaran).
-$kamar = $user['kamar'] ? ['nama' => $user['kamar'], 'status' => 'Aktif'] : null; // null = belum punya kamar
+$kamar = ['nama' => 'Kamar A', 'status' => 'Aktif'];
 $tagihan = ['bulan' => 'November 2026', 'jumlah' => 650000, 'jatuh_tempo' => '15 Nov 2026'];
 
-csrf_token();
+$_SESSION['csrf'] = $_SESSION['csrf'] ?? bin2hex(random_bytes(16));
 $_SESSION['bukti'] = $_SESSION['bukti'] ?? null; // nama file bukti yang diunggah
 $error = $_SESSION['error'] ?? '';
 unset($_SESSION['error']);
 
+function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 function rupiah(int $n): string { return 'Rp ' . number_format($n, 0, ',', '.') . ',00'; }
 function go(string $page): never { header('Location: index.php?page=' . $page); exit; }
 
@@ -103,17 +103,7 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
   </header>
 
   <main>
-  <?php if ($page === 'dash' && !$kamar): ?>
-    <div class="card">
-      <h2 class="big">Halo, <?= h($user['nama']) ?></h2>
-      <small>Kamu belum terdaftar di kamar mana pun. Hubungi admin/pemilik kos untuk mendapatkan kamar.</small>
-    </div>
-    <form method="post" action="logout.php">
-      <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
-      <button class="btn alt" type="submit">Log out</button>
-    </form>
-
-  <?php elseif ($page === 'dash'): ?>
+  <?php if ($page === 'dash'): ?>
     <div class="card">
       <h2 class="big">Kamar Saya</h2>
       <div class="kamar"><span><?= h($kamar['nama']) ?></span><span class="aktif"><?= h($kamar['status']) ?></span></div>
@@ -145,11 +135,6 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
       <small>Sampaikan masukan untuk admin/pemilik kos</small>
       <a class="btn inv" href="index.php?page=feedback">Ketik Saran dan Kritik</a>
     </div>
-
-    <form method="post" action="logout.php">
-      <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
-      <button class="btn alt" type="submit">Log out (<?= h($user['nama']) ?>)</button>
-    </form>
 
   <?php elseif ($page === 'upload'): ?>
     <h2 class="t">Unggah bukti pembayaran</h2>

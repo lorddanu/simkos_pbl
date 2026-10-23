@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/db.php';
+require __DIR__ . '/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_ok()) {
     $_SESSION = [];
