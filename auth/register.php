@@ -1,7 +1,7 @@
 <?php
-require __DIR__ . '/db.php';
+require __DIR__ . '/../database/helpers.php';
 
-if (current_user()) { header('Location: index.php'); exit; }
+if (current_user()) { header('Location: ../penghuni/index.php'); exit; }
 
 $error = '';
 $nama = $email = '';
@@ -25,16 +25,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!$setuju) {
         $error = 'Centang persetujuan Persyaratan & Ketentuan dulu.';
     } else {
-        $cek = db()->prepare('SELECT 1 FROM users WHERE email = ?');
-        $cek->execute([$email]);
-        if ($cek->fetch()) {
-            $error = 'Email ini sudah terdaftar. Silakan masuk.';
-        } else {
-            $ins = db()->prepare('INSERT INTO users (nama, email, password_hash) VALUES (?, ?, ?)');
-            $ins->execute([$nama, $email, password_hash($password, PASSWORD_DEFAULT)]);
+        $pdo = db();
+        try {
+            $pdo->beginTransaction();
+            $st = $pdo->prepare('INSERT INTO penghuni (nama) VALUES (?) RETURNING id_penghuni');
+            $st->execute([$nama]);
+            $idPenghuni = (int) $st->fetchColumn();
+
+            $st = $pdo->prepare('INSERT INTO akun (id_penghuni, email, password_hash) VALUES (?, ?, ?)');
+            $st->execute([$idPenghuni, $email, password_hash($password, PASSWORD_DEFAULT)]);
+            $pdo->commit();
+
             $_SESSION['info'] = 'Akun berhasil dibuat. Silakan masuk.';
             header('Location: login.php');
             exit;
+        } catch (PDOException $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            $error = ($e->getCode() === '23505')
+                ? 'Email ini sudah terdaftar. Silakan masuk.'
+                : 'Pendaftaran gagal. Coba lagi.';
         }
     }
 }
@@ -46,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Buat Akun - SIMKOS</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body class="auth">
 <div class="auth-wrap">

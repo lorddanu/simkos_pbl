@@ -1,80 +1,113 @@
 <?php
-// SIMKOS - Penghuni terdaftar (prototype PHP native, tanpa database)
-// Jalankan: php -S localhost:8000 di dalam folder ini, lalu buka http://localhost:8000
-session_start();
+// SIMKOS - Dashboard penghuni (PostgreSQL)
+require __DIR__ . '/../database/helpers.php';
+$user = require_login();
+
+const HARI_JATUH_TEMPO = 15; // tagihan jatuh tempo tanggal 15 tiap bulan (sesuaikan)
+const BULAN = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli',
+               'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
 $uploadDir = __DIR__ . '/uploads/';
-if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0755, true);
-}
+if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
 
-// Data contoh. Nanti ganti dengan data dari database (tabel kamar & pembayaran).
-$kamar = ['nama' => 'Kamar A', 'status' => 'Aktif'];
-$tagihan = ['bulan' => 'November 2026', 'jumlah' => 650000, 'jatuh_tempo' => '15 Nov 2026'];
-
-$_SESSION['csrf'] = $_SESSION['csrf'] ?? bin2hex(random_bytes(16));
-$_SESSION['bukti'] = $_SESSION['bukti'] ?? null; // nama file bukti yang diunggah
-$error = $_SESSION['error'] ?? '';
-unset($_SESSION['error']);
-
-function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 function rupiah(int $n): string { return 'Rp ' . number_format($n, 0, ',', '.') . ',00'; }
 function go(string $page): never { header('Location: index.php?page=' . $page); exit; }
 
+$pdo = db();
+$idPenghuni = $user['id_penghuni'] ? (int) $user['id_penghuni'] : null;
+
+// ---------- Data: sewa aktif -> kamar ----------
+$sewa = null;
+if ($idPenghuni) {
+    $st = $pdo->prepare(
+        'SELECT s.id_sewa, k.nomor_kamar, k.harga_bulanan
+           FROM sewa s JOIN kamar k ON k.id_kamar = s.id_kamar
+          WHERE s.id_penghuni = ?
+            AND (s.tanggal_selesai IS NULL OR s.tanggal_selesai >= CURRENT_DATE)
+          ORDER BY s.tanggal_mulai DESC LIMIT 1'
+    );
+    $st->execute([$idPenghuni]);
+    $sewa = $st->fetch() ?: null;
+}
+
+// ---------- Data: pembayaran bulan ini ----------
+$periode = date('Y-m');
+$bulanIni = BULAN[(int) date('n')] . ' ' . date('Y');
+$jatuhTempo = HARI_JATUH_TEMPO . ' ' . substr(BULAN[(int) date('n')], 0, 3) . ' ' . date('Y');
+$bayar = null;
+if ($sewa) {
+    $st = $pdo->prepare(
+        'SELECT id_pembayaran, file_bukti, status_verifikasi
+           FROM pembayaran WHERE id_sewa = ? AND periode = ?
+          ORDER BY id_pembayaran DESC LIMIT 1'
+    );
+    $st->execute([$sewa['id_sewa'], $periode]);
+    $bayar = $st->fetch() ?: null;
+}
+$sudahUnggah = $bayar && $bayar['status_verifikasi'] !== 'ditolak'; // ditolak -> boleh unggah ulang
+$statusLabel = ['menunggu' => ['Menunggu verifikasi', 'wait'], 'diterima' => ['Lunas', 'ok'], 'ditolak' => ['Ditolak, unggah ulang', 'no']];
+[$labelStatus, $kelasStatus] = $bayar ? $statusLabel[$bayar['status_verifikasi']] : ['Belum dibayar', ''];
+
+$error = $_SESSION['error'] ?? '';
+unset($_SESSION['error']);
+
 // ---------- Proses form (POST) ----------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!hash_equals($_SESSION['csrf'], $_POST['csrf'] ?? '')) {
-        http_response_code(400);
-        exit('Permintaan tidak valid.');
-    }
+    if (!csrf_ok()) { http_response_code(400); exit('Permintaan tidak valid.'); }
     $aksi = $_POST['aksi'] ?? '';
 
-    if ($aksi === 'unggah') {
+    if ($aksi === 'unggah' && $sewa && !$sudahUnggah) {
         $f = $_FILES['bukti'] ?? null;
         if (!$f || $f['error'] === UPLOAD_ERR_NO_FILE) {
-            $_SESSION['error'] = 'Pilih foto bukti pembayaran dulu.';
-            go('upload');
+            $_SESSION['error'] = 'Pilih foto bukti pembayaran dulu.'; go('upload');
         }
         if ($f['error'] !== UPLOAD_ERR_OK || $f['size'] > 2 * 1024 * 1024) {
-            $_SESSION['error'] = 'Gagal mengunggah. Ukuran foto maksimal 2 MB.';
-            go('upload');
+            $_SESSION['error'] = 'Gagal mengunggah. Ukuran foto maksimal 2 MB.'; go('upload');
         }
         $mime = (new finfo(FILEINFO_MIME_TYPE))->file($f['tmp_name']);
         $ext = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'][$mime] ?? null;
         if (!$ext) {
-            $_SESSION['error'] = 'Format harus JPG, PNG, atau WebP.';
-            go('upload');
+            $_SESSION['error'] = 'Format harus JPG, PNG, atau WebP.'; go('upload');
         }
         $nama = bin2hex(random_bytes(8)) . '.' . $ext;
         if (!move_uploaded_file($f['tmp_name'], $uploadDir . $nama)) {
-            $_SESSION['error'] = 'Foto tidak bisa disimpan. Coba lagi.';
-            go('upload');
+            $_SESSION['error'] = 'Foto tidak bisa disimpan. Coba lagi.'; go('upload');
         }
-        $_SESSION['bukti'] = $nama;
+        $ins = $pdo->prepare(
+            'INSERT INTO pembayaran (id_sewa, jumlah, tanggal_bayar, file_bukti, tanggal_upload, periode)
+             VALUES (?, ?, CURRENT_DATE, ?, NOW(), ?)'   // status_verifikasi otomatis "menunggu"
+        );
+        $ins->execute([$sewa['id_sewa'], $sewa['harga_bulanan'], $nama, $periode]);
         go('proof');
     }
 
-    if ($aksi === 'saran') {
+    if ($aksi === 'saran' && $idPenghuni) {
         $kategori = $_POST['kategori'] ?? '';
         $catatan = trim($_POST['catatan'] ?? '');
-        // TODO: simpan $kategori dan $catatan ke database untuk dibaca admin.
+        if (!in_array($kategori, ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'], true)) {
+            $kategori = 'Lainnya';
+        }
+        $ins = $pdo->prepare('INSERT INTO keluhan (id_penghuni, isi_keluhan, kategori) VALUES (?, ?, ?)');
+        $ins->execute([$idPenghuni, $catatan !== '' ? $catatan : '(tanpa catatan)', $kategori]);
         go('sent');
     }
 
-    if ($aksi === 'reset') {
-        if ($_SESSION['bukti']) @unlink($uploadDir . $_SESSION['bukti']);
-        $_SESSION['bukti'] = null;
+    // Khusus demo: hapus bukti yang masih "menunggu" agar alur bisa diulang. Hapus blok ini di versi akhir.
+    if ($aksi === 'reset' && $bayar && $bayar['status_verifikasi'] === 'menunggu') {
+        $pdo->prepare('DELETE FROM pembayaran WHERE id_pembayaran = ?')->execute([$bayar['id_pembayaran']]);
+        if ($bayar['file_bukti']) @unlink($uploadDir . basename($bayar['file_bukti']));
         go('dash');
     }
     go('dash');
 }
 
 // ---------- Tentukan halaman (GET) ----------
-$sudahUnggah = $_SESSION['bukti'] !== null;
 $page = $_GET['page'] ?? 'dash';
 if (!in_array($page, ['dash', 'upload', 'proof', 'feedback', 'sent'], true)) $page = 'dash';
-if ($page === 'upload' && $sudahUnggah) $page = 'proof';   // sudah unggah -> lihat bukti
-if ($page === 'proof' && !$sudahUnggah) $page = 'upload';  // belum unggah -> form unggah
+if (!$sewa && in_array($page, ['upload', 'proof'], true)) $page = 'dash';
+if (!$idPenghuni && in_array($page, ['feedback', 'sent'], true)) $page = 'dash';
+if ($page === 'upload' && $sudahUnggah) $page = 'proof';
+if ($page === 'proof' && !$sudahUnggah) $page = 'upload';
 
 $navAktif = match ($page) { 'upload', 'proof' => 'pay', 'sent', 'feedback' => 'feedback', default => 'dash' };
 $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
@@ -86,7 +119,7 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SIMKOS - Penghuni</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
 <div class="phone">
@@ -103,31 +136,46 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
   </header>
 
   <main>
-  <?php if ($page === 'dash'): ?>
+  <?php if ($page === 'dash' && !$sewa): ?>
+    <div class="card">
+      <h2 class="big">Halo, <?= h($user['nama'] ?? $user['email']) ?></h2>
+      <small><?= $idPenghuni
+          ? 'Kamu belum terdaftar di kamar mana pun. Hubungi admin/pemilik kos untuk mendapatkan kamar.'
+          : 'Akun ini bukan akun penghuni.' ?></small>
+    </div>
+    <?php if ($idPenghuni): ?>
+      <a class="btn" href="index.php?page=feedback">Kirim Saran dan Kritik</a>
+    <?php endif; ?>
+    <form method="post" action="../auth/logout.php">
+      <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
+      <button class="btn alt" type="submit">Log out</button>
+    </form>
+
+  <?php elseif ($page === 'dash'): ?>
     <div class="card">
       <h2 class="big">Kamar Saya</h2>
-      <div class="kamar"><span><?= h($kamar['nama']) ?></span><span class="aktif"><?= h($kamar['status']) ?></span></div>
+      <div class="kamar"><span>Kamar <?= h($sewa['nomor_kamar']) ?></span><span class="aktif">Aktif</span></div>
     </div>
 
     <?php if (!$sudahUnggah): ?>
     <div class="card warn">
       <h2>Pengingat</h2>
-      <small>Pembayaran November jatuh tempo <?= h($tagihan['jatuh_tempo']) ?></small>
+      <small>Pembayaran <?= h(BULAN[(int) date('n')]) ?> jatuh tempo <?= h($jatuhTempo) ?></small>
     </div>
     <?php endif; ?>
 
     <div class="card">
       <h2>Status pembayaran bulan ini</h2>
       <div class="row">
-        <span><b><?= h($tagihan['bulan']) ?></b><br><?= rupiah($tagihan['jumlah']) ?></span>
-        <span class="badge <?= $sudahUnggah ? 'wait' : '' ?>"><?= $sudahUnggah ? 'Menunggu verifikasi' : 'Belum dibayar' ?></span>
+        <span><b><?= h($bulanIni) ?></b><br><?= rupiah((int) $sewa['harga_bulanan']) ?></span>
+        <span class="badge <?= h($kelasStatus) ?>"><?= h($labelStatus) ?></span>
       </div>
     </div>
 
     <?php if ($sudahUnggah): ?>
       <a class="btn alt" href="index.php?page=proof">Lihat bukti</a>
     <?php else: ?>
-      <a class="btn" href="index.php?page=upload">Unggah bukti pembayaran</a>
+      <a class="btn" href="index.php?page=upload"><?= $bayar ? 'Unggah ulang bukti pembayaran' : 'Unggah bukti pembayaran' ?></a>
     <?php endif; ?>
 
     <div class="card">
@@ -136,11 +184,16 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
       <a class="btn inv" href="index.php?page=feedback">Ketik Saran dan Kritik</a>
     </div>
 
+    <form method="post" action="../auth/logout.php">
+      <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
+      <button class="btn alt" type="submit">Log out (<?= h($user['nama'] ?? $user['email']) ?>)</button>
+    </form>
+
   <?php elseif ($page === 'upload'): ?>
     <h2 class="t">Unggah bukti pembayaran</h2>
-    <p class="s">Pembayaran <?= h($tagihan['bulan']) ?> - <?= rupiah($tagihan['jumlah']) ?></p>
+    <p class="s">Pembayaran <?= h($bulanIni) ?> - <?= rupiah((int) $sewa['harga_bulanan']) ?></p>
     <form method="post" enctype="multipart/form-data" class="form">
-      <input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>">
+      <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
       <input type="hidden" name="aksi" value="unggah">
       <label for="bukti">Foto bukti transfer (JPG, PNG, WebP, maks. 2 MB)</label>
       <input type="file" id="bukti" name="bukti" accept="image/jpeg,image/png,image/webp">
@@ -150,7 +203,6 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
       <button class="btn" type="submit">Kirim bukti</button>
     </form>
     <script>
-      // Pratinjau foto sebelum dikirim (opsional)
       document.getElementById('bukti').addEventListener('change', function (e) {
         var f = e.target.files[0], img = document.getElementById('pratinjau');
         if (!f) { img.hidden = true; return; }
@@ -160,20 +212,22 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
 
   <?php elseif ($page === 'proof'): ?>
     <h2 class="t">Bukti pembayaran</h2>
-    <p class="s"><?= h($tagihan['bulan']) ?> - Menunggu verifikasi</p>
-    <div class="proof"><img src="uploads/<?= h($_SESSION['bukti']) ?>" alt="Bukti pembayaran yang diunggah"></div>
+    <p class="s"><?= h($bulanIni) ?> - <?= h($labelStatus) ?></p>
+    <div class="proof"><img src="uploads/<?= h(basename($bayar['file_bukti'])) ?>" alt="Bukti pembayaran yang diunggah"></div>
     <div class="spacer"></div>
     <a class="btn" href="index.php?page=dash">Kembali ke Dashboard</a>
-    <form method="post">
-      <input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>">
+    <?php if ($bayar['status_verifikasi'] === 'menunggu'): ?>
+    <form method="post"><!-- khusus demo -->
+      <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
       <button class="btn alt" name="aksi" value="reset" type="submit">Ulangi demo (hapus bukti)</button>
     </form>
+    <?php endif; ?>
 
   <?php elseif ($page === 'feedback'): ?>
     <h2 class="t">Saran &amp; Kritik</h2>
     <p class="s">Masukan Anda akan dikirim langsung ke admin/pemilik kos</p>
     <form method="post" class="form">
-      <input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>">
+      <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
       <input type="hidden" name="aksi" value="saran">
       <label for="kat">Kategori</label>
       <select id="kat" name="kategori">
