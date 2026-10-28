@@ -9,6 +9,12 @@ DECLARE
     v_kamar INT;
     v_penghuni INT;
 BEGIN
+    -- Kamar demo kosong agar dapat dilihat oleh akun calon penghuni.
+    -- Kamar yang sudah ada tidak diubah statusnya.
+    INSERT INTO kamar (nomor_kamar, status, harga_bulanan)
+    VALUES ('B', 'kosong', 650000), ('C', 'kosong', 650000)
+    ON CONFLICT (nomor_kamar) DO NOTHING;
+
     IF NOT EXISTS (SELECT 1 FROM akun WHERE email = 'penghuni@simkos.test') THEN
         INSERT INTO kamar (nomor_kamar, status, harga_bulanan)
         VALUES ('A', 'terisi', 650000)
