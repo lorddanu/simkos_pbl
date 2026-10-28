@@ -8,10 +8,26 @@ CREATE TABLE akun (
                   ON DELETE CASCADE,          -- NULL untuk akun admin
     email         VARCHAR(150) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    role          VARCHAR(10) NOT NULL DEFAULT 'penghuni'
-                  CHECK (role IN ('penghuni', 'admin')),
+    role          VARCHAR(20) NOT NULL DEFAULT 'calon_penghuni'
+                  CHECK (role IN ('calon_penghuni', 'penghuni', 'admin')),
     created_at    TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+-- Migrasi untuk database yang sudah memiliki tabel akun versi sebelumnya.
+ALTER TABLE akun ALTER COLUMN role TYPE VARCHAR(20);
+ALTER TABLE akun DROP CONSTRAINT IF EXISTS akun_role_check;
+UPDATE akun SET role = 'calon_penghuni' WHERE role NOT IN ('calon_penghuni', 'penghuni', 'admin');
+ALTER TABLE akun ALTER COLUMN role SET DEFAULT 'calon_penghuni';
+ALTER TABLE akun ADD CONSTRAINT akun_role_check
+    CHECK (role IN ('calon_penghuni', 'penghuni', 'admin'));
+UPDATE akun a
+   SET role = 'calon_penghuni'
+ WHERE a.role = 'penghuni'
+   AND NOT EXISTS (
+       SELECT 1 FROM sewa s
+        WHERE s.id_penghuni = a.id_penghuni
+          AND (s.tanggal_selesai IS NULL OR s.tanggal_selesai >= CURRENT_DATE)
+   );
 
 -- Tambahan kolom (perlu disepakati kelompok)
 -- Form Saran & Kritik punya pilihan kategori

@@ -2,6 +2,7 @@
 // SIMKOS - Dashboard penghuni (PostgreSQL)
 require __DIR__ . '/../database/helpers.php';
 $user = require_login();
+if ($user['role'] !== 'penghuni') { header('Location: ../index.php'); exit; }
 
 const HARI_JATUH_TEMPO = 15; // tagihan jatuh tempo tanggal 15 tiap bulan (sesuaikan)
 const BULAN = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli',

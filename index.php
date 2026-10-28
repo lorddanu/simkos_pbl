@@ -1,11 +1,16 @@
 <?php
-// Pintu masuk aplikasi SIMKOS.
-// Belum login -> halaman login. Sudah login -> dashboard penghuni.
-session_start();
+// Arahkan akun ke halaman sesuai role.
+require __DIR__ . '/database/helpers.php';
+$user = current_user();
 
-if (!empty($_SESSION['user_id'])) {
-    header('Location: penghuni/index.php');
-} else {
+if (!$user) {
     header('Location: auth/login.php');
+} elseif ($user['role'] === 'penghuni') {
+    header('Location: penghuni/index.php');
+} elseif ($user['role'] === 'calon_penghuni') {
+    header('Location: calon_penghuni/index.php');
+} else {
+    http_response_code(403);
+    exit('Dashboard untuk role ini belum tersedia.');
 }
 exit;

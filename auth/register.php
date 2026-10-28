@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/../database/helpers.php';
 
-if (current_user()) { header('Location: ../penghuni/index.php'); exit; }
+if (current_user()) { header('Location: ../index.php'); exit; }
 
 $error = '';
 $nama = $email = '';
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $st->execute([$nama]);
             $idPenghuni = (int) $st->fetchColumn();
 
-            $st = $pdo->prepare('INSERT INTO akun (id_penghuni, email, password_hash) VALUES (?, ?, ?)');
+            $st = $pdo->prepare("INSERT INTO akun (id_penghuni, email, password_hash, role) VALUES (?, ?, ?, 'calon_penghuni')");
             $st->execute([$idPenghuni, $email, password_hash($password, PASSWORD_DEFAULT)]);
             $pdo->commit();
 

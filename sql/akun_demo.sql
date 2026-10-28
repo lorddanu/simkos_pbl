@@ -21,16 +21,16 @@ BEGIN
         INSERT INTO sewa (id_kamar, id_penghuni, tanggal_mulai)
         VALUES (v_kamar, v_penghuni, CURRENT_DATE - 60);
 
-        INSERT INTO akun (id_penghuni, email, password_hash)
-        VALUES (v_penghuni, 'penghuni@simkos.test', '$2y$10$Cf0SZneLmJWfV/v.bt6vuutPTC3yZPGDCekqDp6JBE0fRvBMk0swq');
+        INSERT INTO akun (id_penghuni, email, password_hash, role)
+        VALUES (v_penghuni, 'penghuni@simkos.test', '$2y$10$Cf0SZneLmJWfV/v.bt6vuutPTC3yZPGDCekqDp6JBE0fRvBMk0swq', 'penghuni');
     END IF;
 
     IF NOT EXISTS (SELECT 1 FROM akun WHERE email = 'calon@simkos.test') THEN
         INSERT INTO penghuni (nama) VALUES ('Calon Penghuni')
         RETURNING id_penghuni INTO v_penghuni;
 
-        INSERT INTO akun (id_penghuni, email, password_hash)
-        VALUES (v_penghuni, 'calon@simkos.test', '$2y$10$Cf0SZneLmJWfV/v.bt6vuutPTC3yZPGDCekqDp6JBE0fRvBMk0swq');
+        INSERT INTO akun (id_penghuni, email, password_hash, role)
+        VALUES (v_penghuni, 'calon@simkos.test', '$2y$10$Cf0SZneLmJWfV/v.bt6vuutPTC3yZPGDCekqDp6JBE0fRvBMk0swq', 'calon_penghuni');
     END IF;
 END
 $demo$;

@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/../database/helpers.php';
 
-if (current_user()) { header('Location: ../penghuni/index.php'); exit; }
+if (current_user()) { header('Location: ../index.php'); exit; }
 
 $error = '';
 $info = $_SESSION['info'] ?? '';
@@ -16,14 +16,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($email === '' || $password === '') {
         $error = 'Email dan kata sandi wajib diisi.';
     } else {
-        $st = db()->prepare('SELECT id_akun, password_hash FROM akun WHERE email = ?');
+        $st = db()->prepare('SELECT id_akun, password_hash, role FROM akun WHERE email = ?');
         $st->execute([$email]);
         $row = $st->fetch();
 
         if ($row && password_verify($password, $row['password_hash'])) {
             session_regenerate_id(true);
             $_SESSION['user_id'] = (int) $row['id_akun'];
-            header('Location: ../penghuni/index.php');
+            header('Location: ../index.php');
             exit;
         }
         $error = 'Email atau kata sandi salah.';
