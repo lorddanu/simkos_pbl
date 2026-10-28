@@ -1,0 +1,36 @@
+.calon-body{background:#fff;padding:0;min-height:100vh;align-items:stretch}
+.calon-body .phone{width:100%;max-width:440px;height:min(100vh,956px);height:min(100dvh,956px);max-height:none;min-height:0;border-radius:0;box-shadow:none}
+.calon-header{height:112px;min-height:112px;padding:58px 24px 4px;border-radius:0 0 12px 12px}
+.calon-header h1{font-size:30px}
+.akun-icon{width:34px;height:34px;flex:0 0 34px}
+.akun-logout{margin:0;padding:0;border:0;background:transparent;color:#fff;cursor:pointer}
+.calon-main{position:relative;gap:12px;padding:0 24px;justify-content:center}
+.calon-main.browse{justify-content:flex-start;overflow-y:auto;padding-top:22px;padding-bottom:22px}
+.calon-main.form-page{justify-content:flex-start;padding-top:14px}
+.calon-card{text-align:center;padding:64px 34px 30px;border-radius:16px;transform:translateY(-55px)}
+.calon-card h2{font-size:15px;margin:0 0 42px}
+.calon-card p{font-size:12px;line-height:1.25;margin:0 0 24px}
+.calon-card .btn{background:var(--pd);font-size:14px;padding:10px;border-radius:10px}
+.kamar-card{padding:0;border-radius:14px;overflow:hidden;flex:none;color:inherit;text-decoration:none}
+.room-photo-placeholder{display:block;width:100%;height:170px;background:#f2f0ff;border-bottom:1px dashed #aaa2ef}
+.detail-photo-placeholder{height:176px}
+.kamar-info{padding:10px 12px 14px}
+.kamar-card h2{margin:0 0 4px;font-size:15px}
+.kamar-card p{margin:0;font-size:13px}
+.room-detail{padding:0 0 16px;overflow:hidden}
+.detail-content{padding:12px 16px}
+.detail-content h2{color:var(--p);font-size:17px;margin:0 0 2px}
+.detail-content .price{color:var(--p);margin-bottom:12px}
+.facility-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;margin-top:8px}
+.facility-box{background:var(--p);color:white;border-radius:12px;padding:14px;margin-top:8px}
+.facility-box h3{font-size:15px;margin:0 0 8px}
+.bottom-action{margin-top:auto;padding:0 18px 18px}
+.apply-card{background:var(--p);color:white;padding:14px;border-radius:14px}
+.apply-card label{color:white;font-size:11px}
+.apply-card input,.apply-card select{background:#f2f0ff;border:1px solid #aaa2ef;border-radius:8px;padding:8px;font:400 12px Poppins,sans-serif;width:100%;margin:4px 0 10px}
+.apply-total{display:flex;justify-content:space-between;border-top:1px solid rgba(255,255,255,.6);margin-top:8px;padding-top:10px;font-size:13px}
+.confirm{text-align:center;padding:32px 10px}
+.confirm h2{color:var(--p);font-size:17px;margin:10px 0 4px}
+.confirm p{font-size:12px;color:#5a4fb0}
+.confirm-info{text-align:left}
+.empty-state{text-align:center;color:#5a4fb0;font-size:13px;margin:auto 0}
