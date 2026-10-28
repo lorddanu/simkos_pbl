@@ -36,9 +36,19 @@ function current_user(): ?array
 {
     if (empty($_SESSION['user_id'])) return null;
     $st = db()->prepare(
-        'SELECT a.id_akun, a.email, a.role, a.id_penghuni, p.nama
+        "SELECT a.id_akun, a.email,
+                CASE
+                    WHEN a.role = 'admin' THEN 'admin'
+                    WHEN EXISTS (
+                        SELECT 1 FROM sewa s
+                         WHERE s.id_penghuni = a.id_penghuni
+                           AND (s.tanggal_selesai IS NULL OR s.tanggal_selesai >= CURRENT_DATE)
+                    ) THEN 'penghuni'
+                    ELSE 'calon_penghuni'
+                END AS role,
+                a.id_penghuni, p.nama
            FROM akun a LEFT JOIN penghuni p ON p.id_penghuni = a.id_penghuni
-          WHERE a.id_akun = ?'
+          WHERE a.id_akun = ?"
     );
     $st->execute([$_SESSION['user_id']]);
     return $st->fetch() ?: null;
