@@ -29,6 +29,7 @@ if ($halaman === 'kamar') {
 .calon-header{height:112px;min-height:112px;padding:58px 24px 4px;border-radius:0 0 12px 12px}
 .calon-header h1{font-size:30px}
 .akun-icon{width:34px;height:34px;flex:0 0 34px}
+.akun-logout{margin:0;padding:0;border:0;background:transparent;color:#fff;cursor:pointer}
 .calon-main{position:relative;gap:12px;padding:0 24px;justify-content:center}
 .calon-card{text-align:center;padding:64px 34px 30px;border-radius:16px;transform:translateY(-55px)}
 .calon-card h2{font-size:15px;margin:0 0 42px}
@@ -45,7 +46,7 @@ if ($halaman === 'kamar') {
   <header class="calon-header">
     <?php if ($halaman === 'kamar'): ?><a class="icon" href="index.php" aria-label="Kembali ke dashboard"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M13 8l-4 4 4 4"/></svg></a><?php endif; ?>
     <h1>SIMKOS</h1>
-    <?php if ($halaman === 'dashboard'): ?><span class="icon akun-icon" aria-label="Akun"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="9" r="3"/><path d="M5.7 19c.8-3 3.2-4.5 6.3-4.5s5.5 1.5 6.3 4.5"/></svg></span><?php endif; ?>
+    <?php if ($halaman === 'dashboard'): ?><form method="post" action="../auth/logout.php"><input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>"><button class="icon akun-icon akun-logout" type="submit" aria-label="Keluar dari akun" title="Keluar"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="9" r="3"/><path d="M5.7 19c.8-3 3.2-4.5 6.3-4.5s5.5 1.5 6.3 4.5"/></svg></button></form><?php endif; ?>
   </header>
   <main class="calon-main">
     <?php if ($halaman === 'kamar'): ?>
