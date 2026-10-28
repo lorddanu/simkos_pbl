@@ -24,14 +24,15 @@ if ($halaman === 'kamar') {
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
 <style>
-.calon-header{padding-top:58px;padding-bottom:4px}
+.calon-body{background:#fff;padding:0;min-height:100vh;align-items:stretch}
+.calon-body .phone{width:100%;max-width:440px;height:100vh;height:100dvh;max-height:none;min-height:100vh;border-radius:0;box-shadow:none}
+.calon-header{height:112px;min-height:112px;padding:58px 24px 4px;border-radius:0 0 12px 12px}
 .calon-header h1{font-size:30px}
 .akun-icon{width:34px;height:34px;flex:0 0 34px}
-.calon-main{gap:12px}
-.calon-spacer{flex:1;min-height:24px}
-.calon-card{text-align:center;padding:42px 28px 30px;border-radius:16px}
-.calon-card h2{font-size:15px;margin:18px 0 42px}
-.calon-card p{font-size:12px;line-height:1.35;margin:0 0 24px}
+.calon-main{position:relative;gap:12px;padding:0 24px;justify-content:center}
+.calon-card{text-align:center;padding:64px 34px 30px;border-radius:16px;transform:translateY(-55px)}
+.calon-card h2{font-size:15px;margin:0 0 42px}
+.calon-card p{font-size:12px;line-height:1.25;margin:0 0 24px}
 .calon-card .btn{background:var(--pd);font-size:14px;padding:10px;border-radius:10px}
 .kamar-card{padding:16px;border-radius:14px}
 .kamar-card h2{margin:0 0 4px;font-size:15px}
@@ -39,7 +40,7 @@ if ($halaman === 'kamar') {
 .empty-state{text-align:center;color:#5a4fb0;font-size:13px;margin:auto 0}
 </style>
 </head>
-<body>
+<body class="calon-body">
 <div class="phone">
   <header class="calon-header">
     <?php if ($halaman === 'kamar'): ?><a class="icon" href="index.php" aria-label="Kembali ke dashboard"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M13 8l-4 4 4 4"/></svg></a><?php endif; ?>
@@ -58,18 +59,16 @@ if ($halaman === 'kamar') {
         </article>
       <?php endforeach; endif; ?>
     <?php else: ?>
-      <div class="calon-spacer"></div>
       <section class="card calon-card">
         <h2>Anda Belum memiliki kamar.</h2>
         <p>Anda belum terdaftar sebagai penghuni kos manapun.<br>Cari kamar kosong dan hubungi admin untuk survei.</p>
         <a class="btn" href="index.php?halaman=kamar">Lihat Kamar Kosong</a>
       </section>
-      <div class="calon-spacer"></div>
     <?php endif; ?>
-    <form method="post" action="../auth/logout.php">
+    <?php if ($halaman === 'kamar'): ?><form method="post" action="../auth/logout.php">
       <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
       <button class="btn alt" type="submit">Keluar (<?= h($user['nama'] ?? $user['email']) ?>)</button>
-    </form>
+    </form><?php endif; ?>
   </main>
 </div>
 </body>
