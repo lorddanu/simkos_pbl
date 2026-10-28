@@ -27,9 +27,9 @@
     <small>Transfer sesuai total tagihan agar verifikasi dapat diproses.</small>
   </section>
   <a class="btn payment-link" id="link-metode" href="index.php?halaman=metode&amp;id=<?= (int) $kamarDipilih['id_kamar'] ?>">Metode Pembayaran yang Tersedia <span aria-hidden="true">›</span></a>
-  <label class="field-label" for="bukti">Bukti Verifikasi</label>
-  <label class="proof-picker" for="bukti"><strong id="proof-label">Ketuk untuk unggah foto</strong><small>JPG, PNG, WebP · maksimal 5 MB</small></label>
-  <input class="proof-input" type="file" id="bukti" name="bukti" accept="image/jpeg,image/png,image/webp" required>
+  <label class="field-label" for="bukti">Bukti Verifikasi (opsional untuk simulasi)</label>
+  <label class="proof-picker" for="bukti"><strong id="proof-label">Ketuk untuk unggah foto</strong><small>Boleh dilewati · JPG, PNG, WebP maksimal 5 MB</small></label>
+  <input class="proof-input" type="file" id="bukti" name="bukti" accept="image/jpeg,image/png,image/webp">
   <label class="field-label" for="catatan">Catatan (opsional)</label>
   <textarea class="note-input" id="catatan" name="catatan" placeholder="Transfer dari rekening an. orang tua, dll."></textarea>
   <div class="bottom-action"><button class="btn" type="submit">Kirim untuk Diverifikasi</button></div>

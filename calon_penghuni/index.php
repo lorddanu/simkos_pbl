@@ -91,10 +91,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_b
     $tanggalSelesai = DateTime::createFromFormat('!Y-m-d', $nilaiSelesai);
     $tanggalHariIni = new DateTime('today');
     $bukti = $_FILES['bukti'] ?? null;
-    $mimeBukti = ($bukti && $bukti['error'] === UPLOAD_ERR_OK)
+    $adaBukti = $bukti && $bukti['error'] !== UPLOAD_ERR_NO_FILE;
+    $mimeBukti = ($adaBukti && $bukti['error'] === UPLOAD_ERR_OK)
         ? (new finfo(FILEINFO_MIME_TYPE))->file($bukti['tmp_name'])
         : null;
     $ekstensiBukti = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'][$mimeBukti] ?? null;
+    $buktiValid = !$adaBukti || (
+        $bukti['error'] === UPLOAD_ERR_OK &&
+        $bukti['size'] <= 5 * 1024 * 1024 &&
+        $ekstensiBukti !== null
+    );
 
     if (!$kamarDipilih) {
         $_SESSION['flash_error'] = 'Kamar sudah tidak tersedia. Silakan pilih kamar lain.';
@@ -109,36 +115,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_b
         $tanggalSelesai <= $tanggalMulai ||
         $jumlahBulan < 1 ||
         $jumlahBulan > 12 ||
-        !$bukti ||
-        $bukti['error'] !== UPLOAD_ERR_OK ||
-        $bukti['size'] > 5 * 1024 * 1024 ||
-        !$ekstensiBukti
+        !$buktiValid
     ) {
-        $error = 'Periksa tanggal, durasi sewa, dan bukti pembayaran (JPG, PNG, WebP; maksimal 5 MB).';
+        $error = 'Periksa tanggal dan durasi sewa. Jika mengunggah bukti, gunakan JPG, PNG, atau WebP maksimal 5 MB.';
         $halaman = 'ajukan';
     } else {
-        $namaBukti = bin2hex(random_bytes(12)) . '.' . $ekstensiBukti;
-        $folderBukti = __DIR__ . '/uploads';
-        if (!is_dir($folderBukti) && !mkdir($folderBukti, 0755, true) && !is_dir($folderBukti)) {
-            $error = 'Folder penyimpanan bukti tidak dapat dibuat.';
-            $halaman = 'ajukan';
-        } elseif (!move_uploaded_file($bukti['tmp_name'], $folderBukti . '/' . $namaBukti)) {
-            $error = 'Bukti pembayaran gagal disimpan. Coba unggah lagi.';
-            $halaman = 'ajukan';
-        } else {
-        // Metadata pengajuan masih di sesi sampai tabel pengajuan tersedia.
-        $_SESSION['pengajuan_sewa_demo'] = [
-            'id_kamar' => $idKamar,
-            'nomor_kamar' => $kamarDipilih['nomor_kamar'],
-            'tanggal_mulai' => $nilaiMulai,
-            'tanggal_selesai' => $nilaiSelesai,
-            'bulan' => $jumlahBulan,
-            'total' => (float) $kamarDipilih['harga_bulanan'] * $jumlahBulan,
-            'bukti' => $namaBukti,
-            'catatan' => trim($_POST['catatan'] ?? ''),
-        ];
-        header('Location: index.php?halaman=terkirim');
-        exit;
+        $namaBukti = null;
+        if ($adaBukti) {
+            $namaBukti = bin2hex(random_bytes(12)) . '.' . $ekstensiBukti;
+            $folderBukti = __DIR__ . '/uploads';
+            if (!is_dir($folderBukti) && !mkdir($folderBukti, 0755, true) && !is_dir($folderBukti)) {
+                $error = 'Folder penyimpanan bukti tidak dapat dibuat.';
+            } elseif (!move_uploaded_file($bukti['tmp_name'], $folderBukti . '/' . $namaBukti)) {
+                $error = 'Bukti pembayaran gagal disimpan. Coba unggah lagi.';
+            }
+        }
+
+        if ($error === '') {
+            // Metadata pengajuan masih di sesi sampai tabel pengajuan tersedia.
+            $_SESSION['pengajuan_sewa_demo'] = [
+                'id_kamar' => $idKamar,
+                'nomor_kamar' => $kamarDipilih['nomor_kamar'],
+                'tanggal_mulai' => $nilaiMulai,
+                'tanggal_selesai' => $nilaiSelesai,
+                'bulan' => $jumlahBulan,
+                'total' => (float) $kamarDipilih['harga_bulanan'] * $jumlahBulan,
+                'bukti' => $namaBukti,
+                'catatan' => trim($_POST['catatan'] ?? ''),
+            ];
+            header('Location: index.php?halaman=terkirim');
+            exit;
         }
     }
 }
