@@ -6,6 +6,7 @@
 .akun-logout{margin:0;padding:0;border:0;background:transparent;color:#fff;cursor:pointer}
 .calon-main{position:relative;gap:12px;padding:0 24px;justify-content:center}
 .calon-main.browse{justify-content:flex-start;overflow-y:auto;padding-top:22px;padding-bottom:22px}
+.calon-main.detail-page{gap:0;padding:0;overflow-y:auto;justify-content:flex-start}
 .calon-main.form-page{justify-content:flex-start;padding-top:14px}
 .calon-card{text-align:center;padding:64px 34px 30px;border-radius:16px;transform:translateY(-55px)}
 .calon-card h2{font-size:15px;margin:0 0 42px}
@@ -17,14 +18,18 @@
 .kamar-info{padding:10px 12px 14px}
 .kamar-card h2{margin:0 0 4px;font-size:15px}
 .kamar-card p{margin:0;font-size:13px}
-.room-detail{padding:0 0 16px;overflow:hidden}
-.detail-content{padding:12px 16px}
+.room-detail{background:#fff;color:#241f45;padding:0;overflow:hidden;border-radius:0;box-shadow:none}
+.room-detail .detail-photo-placeholder{height:min(54vw,240px);min-height:176px;border:0}
+.detail-content{padding:12px 20px 16px}
 .detail-content h2{color:var(--p);font-size:17px;margin:0 0 2px}
 .detail-content .price{color:var(--p);margin-bottom:12px}
 .facility-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;margin-top:8px}
+.facility-item{display:flex;align-items:center;gap:8px;min-width:0}
+.facility-icon,.facility-item svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .facility-box{background:var(--p);color:white;border-radius:12px;padding:14px;margin-top:8px}
 .facility-box h3{font-size:15px;margin:0 0 8px}
 .bottom-action{margin-top:auto;padding:0 18px 18px}
+.detail-page .bottom-action{width:100%;padding:12px 18px 18px}
 .apply-card{background:var(--p);color:white;padding:14px;border-radius:14px}
 .apply-card label{color:white;font-size:11px}
 .apply-card input,.apply-card select{background:#f2f0ff;border:1px solid #aaa2ef;border-radius:8px;padding:8px;font:400 12px Poppins,sans-serif;width:100%;margin:4px 0 10px}
@@ -34,3 +39,48 @@
 .confirm p{font-size:12px;color:#5a4fb0}
 .confirm-info{text-align:left}
 .empty-state{text-align:center;color:#5a4fb0;font-size:13px;margin:auto 0}
+.upload-heading h2{color:var(--p);font-size:20px;margin:0}
+.upload-heading p{font-size:12px;color:var(--p);margin:0}
+.upload-form{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;overflow-y:auto;padding-bottom:10px}
+.payment-card,.duration-card,.cost-card{background:var(--p);color:#fff;border-radius:12px;padding:10px}
+.monthly-price{font-size:16px;white-space:nowrap}
+.monthly-price small{font-size:10px}
+.date-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.date-row label{color:#fff;font-size:8px;line-height:1.3}
+.date-row input{display:block;width:100%;min-width:0;margin-top:4px;padding:6px 5px;border:0;border-radius:7px;background:#f2f0ff;color:#241f45;font:400 9px Poppins,sans-serif}
+.hint{display:block;margin-top:3px;font-size:8px;opacity:.8}
+.duration-card{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:9px}
+.duration-card label{color:#fff}
+.stepper{display:flex;align-items:center;gap:12px}
+.stepper button{width:22px;height:22px;border:0;border-radius:50%;background:#fff;color:var(--p);font-weight:700;font-size:15px;cursor:pointer}
+.stepper output{min-width:12px;text-align:center;font-weight:600}
+.cost-card{font-size:9px;padding:10px}
+.cost-row{display:flex;justify-content:space-between;gap:10px}
+.cost-card hr{border:0;border-top:1px solid rgba(255,255,255,.65);margin:8px 0}
+.cost-row.total-row{font-size:10px}
+.cost-card>small{display:block;font-size:7px;font-style:italic;opacity:.8;margin-top:5px}
+.payment-link{font-size:10px;text-align:left;padding:10px 12px;display:flex;justify-content:space-between;align-items:center}
+.payment-link span{font-size:20px;line-height:12px}
+.field-label{font-size:9px;color:var(--p);margin:0 2px -5px}
+.proof-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.proof-picker{min-height:82px;border:1px solid #a69df0;border-radius:8px;background:#f4f2ff;color:var(--p);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;text-align:center;font-size:10px}
+.proof-picker small{font-size:8px;font-weight:400}
+.note-input{width:100%;min-height:56px;resize:vertical;border:1px solid #a69df0;border-radius:8px;padding:8px;background:#f4f2ff;font:italic 9px Poppins,sans-serif}
+.upload-form .bottom-action{padding:4px 0 0;margin-top:auto}
+.upload-form .bottom-action .btn{font-size:10px;padding:10px}
+.calon-nav{display:flex;flex:none;background:var(--p);padding:7px 8px 10px;border-radius:12px 12px 0 0}
+.calon-nav a{flex:1;color:#fff;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px;border-radius:10px;font-size:8px}
+.calon-nav a svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.calon-nav a[aria-current="page"]{background:rgba(255,255,255,.22)}
+.method-screen{display:flex;flex-direction:column;gap:10px;flex:1;overflow:auto}
+.method-screen h2,.method-screen h3{color:var(--p);font-size:15px;margin:0}
+.method-option{display:flex;align-items:center;gap:10px;border:1px solid #a69df0;border-radius:8px;padding:10px;background:#f4f2ff;font-size:9px;color:var(--p)}
+.method-option div{display:flex;flex-direction:column;gap:4px}
+.method-mark{display:grid;place-items:center;width:28px;height:28px;border-radius:5px;color:#fff;font-size:8px;font-weight:700}
+.method-mark.bca{background:#0876bd}.method-mark.qris{background:#ed0033}
+.qris-placeholder{width:150px;height:150px;display:grid;place-items:center;margin:8px auto 0;background:#fff;border:1px solid #ccc;border-radius:5px;color:#222;font-weight:700}
+.method-screen .bottom-action{margin-top:auto;padding:0 0 8px}
+.complaint-form{display:flex;flex:1;flex-direction:column;gap:12px}
+.complaint-form label{color:var(--p);font-size:12px}
+.complaint-form textarea{width:100%;min-height:150px;border:1px solid #a69df0;border-radius:8px;padding:10px;font:400 12px Poppins,sans-serif}
+.complaint-form .btn{margin-top:auto}

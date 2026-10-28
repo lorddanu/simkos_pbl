@@ -8,7 +8,7 @@ if ($user['role'] !== 'calon_penghuni') {
     exit;
 }
 
-$halamanValid = ['dashboard', 'kamar', 'detail', 'ajukan', 'terkirim'];
+$halamanValid = ['dashboard', 'kamar', 'detail', 'ajukan', 'metode', 'keluhan', 'keluhan_terkirim', 'terkirim'];
 $halaman = $_GET['halaman'] ?? 'dashboard';
 if (!in_array($halaman, $halamanValid, true)) {
     $halaman = 'dashboard';
@@ -27,7 +27,7 @@ if ($halaman === 'kamar') {
 
 $idKamar = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0;
 $kamarDipilih = null;
-if (in_array($halaman, ['detail', 'ajukan'], true)) {
+if (in_array($halaman, ['detail', 'ajukan', 'metode'], true)) {
     $st = $pdo->prepare(
         "SELECT id_kamar, nomor_kamar, harga_bulanan
            FROM kamar
@@ -43,11 +43,32 @@ if (in_array($halaman, ['detail', 'ajukan'], true)) {
 
 $error = $_SESSION['flash_error'] ?? '';
 unset($_SESSION['flash_error']);
-$nilaiMulai = '';
-$nilaiSelesai = '';
-$jumlahBulan = 1;
+$nilaiMulai = preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['mulai'] ?? '') ? $_GET['mulai'] : '';
+$nilaiSelesai = preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['selesai'] ?? '') ? $_GET['selesai'] : '';
+$jumlahBulan = filter_input(INPUT_GET, 'bulan', FILTER_VALIDATE_INT) ?: 1;
+$jumlahBulan = max(1, min(12, $jumlahBulan));
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'ajukan') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_keluhan') {
+    if (!csrf_ok()) {
+        http_response_code(400);
+        exit('Permintaan tidak valid.');
+    }
+    $isiKeluhan = trim($_POST['isi_keluhan'] ?? '');
+    if ($isiKeluhan === '') {
+        $error = 'Tulis keluhan atau masukan terlebih dahulu.';
+        $halaman = 'keluhan';
+    } elseif (empty($user['id_penghuni'])) {
+        $error = 'Akun belum terhubung ke data penghuni.';
+        $halaman = 'keluhan';
+    } else {
+        $st = $pdo->prepare('INSERT INTO keluhan (id_penghuni, isi_keluhan) VALUES (?, ?)');
+        $st->execute([(int) $user['id_penghuni'], $isiKeluhan]);
+        header('Location: index.php?halaman=keluhan_terkirim');
+        exit;
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_bukti') {
     if (!csrf_ok()) {
         http_response_code(400);
         exit('Permintaan tidak valid.');
@@ -69,6 +90,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'ajukan'
     $tanggalMulai = DateTime::createFromFormat('!Y-m-d', $nilaiMulai);
     $tanggalSelesai = DateTime::createFromFormat('!Y-m-d', $nilaiSelesai);
     $tanggalHariIni = new DateTime('today');
+    $bukti = $_FILES['bukti'] ?? null;
+    $mimeBukti = ($bukti && $bukti['error'] === UPLOAD_ERR_OK)
+        ? (new finfo(FILEINFO_MIME_TYPE))->file($bukti['tmp_name'])
+        : null;
+    $ekstensiBukti = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'][$mimeBukti] ?? null;
 
     if (!$kamarDipilih) {
         $_SESSION['flash_error'] = 'Kamar sudah tidak tersedia. Silakan pilih kamar lain.';
@@ -82,12 +108,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'ajukan'
         $tanggalMulai < $tanggalHariIni ||
         $tanggalSelesai <= $tanggalMulai ||
         $jumlahBulan < 1 ||
-        $jumlahBulan > 12
+        $jumlahBulan > 12 ||
+        !$bukti ||
+        $bukti['error'] !== UPLOAD_ERR_OK ||
+        $bukti['size'] > 5 * 1024 * 1024 ||
+        !$ekstensiBukti
     ) {
-        $error = 'Periksa kembali tanggal sewa dan jumlah bulan.';
+        $error = 'Periksa tanggal, durasi sewa, dan bukti pembayaran (JPG, PNG, WebP; maksimal 5 MB).';
         $halaman = 'ajukan';
     } else {
-        // Prototipe: belum ada tabel pengajuan pada skema database.
+        $namaBukti = bin2hex(random_bytes(12)) . '.' . $ekstensiBukti;
+        $folderBukti = __DIR__ . '/uploads';
+        if (!is_dir($folderBukti) && !mkdir($folderBukti, 0755, true) && !is_dir($folderBukti)) {
+            $error = 'Folder penyimpanan bukti tidak dapat dibuat.';
+            $halaman = 'ajukan';
+        } elseif (!move_uploaded_file($bukti['tmp_name'], $folderBukti . '/' . $namaBukti)) {
+            $error = 'Bukti pembayaran gagal disimpan. Coba unggah lagi.';
+            $halaman = 'ajukan';
+        } else {
+        // Metadata pengajuan masih di sesi sampai tabel pengajuan tersedia.
         $_SESSION['pengajuan_sewa_demo'] = [
             'id_kamar' => $idKamar,
             'nomor_kamar' => $kamarDipilih['nomor_kamar'],
@@ -95,9 +134,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'ajukan'
             'tanggal_selesai' => $nilaiSelesai,
             'bulan' => $jumlahBulan,
             'total' => (float) $kamarDipilih['harga_bulanan'] * $jumlahBulan,
+            'bukti' => $namaBukti,
+            'catatan' => trim($_POST['catatan'] ?? ''),
         ];
         header('Location: index.php?halaman=terkirim');
         exit;
+        }
     }
 }
 
@@ -112,8 +154,9 @@ if ($halaman === 'terkirim') {
 }
 
 $mainClass = match ($halaman) {
-    'kamar', 'detail' => 'browse',
-    'ajukan' => 'form-page',
+    'kamar' => 'browse',
+    'detail' => 'detail-page',
+    'ajukan', 'metode', 'keluhan' => 'form-page',
     default => '',
 };
 
@@ -122,6 +165,15 @@ $urlKembali = match ($halaman) {
     'kamar' => 'index.php',
     'detail' => 'index.php?halaman=kamar',
     'ajukan' => 'index.php?halaman=detail&id=' . $idKamar,
+    'metode' => 'index.php?halaman=ajukan&id=' . $idKamar . '&mulai=' . rawurlencode($nilaiMulai) . '&selesai=' . rawurlencode($nilaiSelesai) . '&bulan=' . $jumlahBulan,
+    'keluhan' => 'index.php',
+    'keluhan_terkirim' => 'index.php',
+};
+
+$urlNavigasi = match ($halaman) {
+    'dashboard', 'terkirim' => 'index.php',
+    'metode' => 'index.php?halaman=ajukan&id=' . $idKamar . '&mulai=' . rawurlencode($nilaiMulai) . '&selesai=' . rawurlencode($nilaiSelesai) . '&bulan=' . $jumlahBulan,
+    default => 'index.php?halaman=ajukan&id=' . $idKamar . '&mulai=' . rawurlencode($nilaiMulai) . '&selesai=' . rawurlencode($nilaiSelesai) . '&bulan=' . $jumlahBulan,
 };
 
 require __DIR__ . '/views/layout.php';
