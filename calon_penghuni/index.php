@@ -142,6 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_b
                 'total' => (float) $kamarDipilih['harga_bulanan'] * $jumlahBulan,
                 'bukti' => $namaBukti,
                 'catatan' => trim($_POST['catatan'] ?? ''),
+                'tanggal_kirim' => date('Y-m-d'),
             ];
             header('Location: index.php?halaman=terkirim');
             exit;
@@ -163,6 +164,7 @@ $mainClass = match ($halaman) {
     'kamar' => 'browse',
     'detail' => 'detail-page',
     'ajukan', 'metode', 'keluhan' => 'form-page',
+    'terkirim' => 'confirm-page',
     default => '',
 };
 
