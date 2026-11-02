@@ -8,7 +8,7 @@ if ($user['role'] !== 'calon_penghuni') {
     exit;
 }
 
-$halamanValid = ['dashboard', 'kamar', 'detail', 'ajukan', 'keluhan', 'keluhan_terkirim', 'terkirim', 'notifikasi'];
+$halamanValid = ['dashboard', 'kamar', 'detail', 'ajukan', 'metode', 'keluhan', 'keluhan_terkirim', 'terkirim', 'notifikasi'];
 $halaman = $_GET['halaman'] ?? 'dashboard';
 if (!in_array($halaman, $halamanValid, true)) {
     $halaman = 'dashboard';
@@ -27,7 +27,7 @@ if ($halaman === 'kamar') {
 
 $idKamar = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0;
 $kamarDipilih = null;
-if (in_array($halaman, ['detail', 'ajukan'], true)) {
+if (in_array($halaman, ['detail', 'ajukan', 'metode'], true)) {
     $st = $pdo->prepare(
         "SELECT id_kamar, nomor_kamar, harga_bulanan
            FROM kamar
@@ -118,6 +118,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
             'bukti' => null,
             'catatan' => trim($_POST['catatan'] ?? ''),
             'tanggal_kirim' => date('Y-m-d'),
+            'status' => 'menunggu_persetujuan',
+            'persetujuan_pada' => time() + 20,
         ];
         $_SESSION['notifikasi_dilihat'] = false;
         header('Location: index.php?halaman=terkirim');
@@ -130,6 +132,16 @@ if (in_array($halaman, ['terkirim', 'notifikasi'], true)) {
     if (!$pengajuan && $halaman === 'terkirim') {
         header('Location: index.php');
         exit;
+    }
+    if (
+        $pengajuan &&
+        ($pengajuan['status'] ?? '') === 'menunggu_persetujuan' &&
+        time() >= (int) ($pengajuan['persetujuan_pada'] ?? PHP_INT_MAX)
+    ) {
+        $pengajuan['status'] = 'diterima';
+        $pengajuan['waktu_diterima'] = time();
+        $_SESSION['pengajuan_sewa_demo'] = $pengajuan;
+        $_SESSION['notifikasi_dilihat'] = false;
     }
 } else {
     $pengajuan = null;
