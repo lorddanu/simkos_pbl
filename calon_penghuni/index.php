@@ -8,7 +8,7 @@ if ($user['role'] !== 'calon_penghuni') {
     exit;
 }
 
-$halamanValid = ['dashboard', 'kamar', 'detail', 'ajukan', 'metode', 'keluhan', 'keluhan_terkirim', 'terkirim'];
+$halamanValid = ['dashboard', 'kamar', 'detail', 'ajukan', 'keluhan', 'keluhan_terkirim', 'terkirim'];
 $halaman = $_GET['halaman'] ?? 'dashboard';
 if (!in_array($halaman, $halamanValid, true)) {
     $halaman = 'dashboard';
@@ -27,7 +27,7 @@ if ($halaman === 'kamar') {
 
 $idKamar = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0;
 $kamarDipilih = null;
-if (in_array($halaman, ['detail', 'ajukan', 'metode'], true)) {
+if (in_array($halaman, ['detail', 'ajukan'], true)) {
     $st = $pdo->prepare(
         "SELECT id_kamar, nomor_kamar, harga_bulanan
            FROM kamar
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_k
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_bukti') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_pengajuan') {
     if (!csrf_ok()) {
         http_response_code(400);
         exit('Permintaan tidak valid.');
@@ -90,18 +90,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_b
     $tanggalMulai = DateTime::createFromFormat('!Y-m-d', $nilaiMulai);
     $tanggalSelesai = DateTime::createFromFormat('!Y-m-d', $nilaiSelesai);
     $tanggalHariIni = new DateTime('today');
-    $bukti = $_FILES['bukti'] ?? null;
-    $adaBukti = $bukti && $bukti['error'] !== UPLOAD_ERR_NO_FILE;
-    $mimeBukti = ($adaBukti && $bukti['error'] === UPLOAD_ERR_OK)
-        ? (new finfo(FILEINFO_MIME_TYPE))->file($bukti['tmp_name'])
-        : null;
-    $ekstensiBukti = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'][$mimeBukti] ?? null;
-    $buktiValid = !$adaBukti || (
-        $bukti['error'] === UPLOAD_ERR_OK &&
-        $bukti['size'] <= 5 * 1024 * 1024 &&
-        $ekstensiBukti !== null
-    );
-
     if (!$kamarDipilih) {
         $_SESSION['flash_error'] = 'Kamar sudah tidak tersedia. Silakan pilih kamar lain.';
         header('Location: index.php?halaman=kamar');
@@ -114,39 +102,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_b
         $tanggalMulai < $tanggalHariIni ||
         $tanggalSelesai <= $tanggalMulai ||
         $jumlahBulan < 1 ||
-        $jumlahBulan > 12 ||
-        !$buktiValid
+        $jumlahBulan > 12
     ) {
-        $error = 'Periksa tanggal dan durasi sewa. Jika mengunggah bukti, gunakan JPG, PNG, atau WebP maksimal 5 MB.';
+        $error = 'Periksa kembali tanggal dan durasi sewa.';
         $halaman = 'ajukan';
     } else {
-        $namaBukti = null;
-        if ($adaBukti) {
-            $namaBukti = bin2hex(random_bytes(12)) . '.' . $ekstensiBukti;
-            $folderBukti = __DIR__ . '/uploads';
-            if (!is_dir($folderBukti) && !mkdir($folderBukti, 0755, true) && !is_dir($folderBukti)) {
-                $error = 'Folder penyimpanan bukti tidak dapat dibuat.';
-            } elseif (!move_uploaded_file($bukti['tmp_name'], $folderBukti . '/' . $namaBukti)) {
-                $error = 'Bukti pembayaran gagal disimpan. Coba unggah lagi.';
-            }
-        }
-
-        if ($error === '') {
-            // Metadata pengajuan masih di sesi sampai tabel pengajuan tersedia.
-            $_SESSION['pengajuan_sewa_demo'] = [
-                'id_kamar' => $idKamar,
-                'nomor_kamar' => $kamarDipilih['nomor_kamar'],
-                'tanggal_mulai' => $nilaiMulai,
-                'tanggal_selesai' => $nilaiSelesai,
-                'bulan' => $jumlahBulan,
-                'total' => (float) $kamarDipilih['harga_bulanan'] * $jumlahBulan,
-                'bukti' => $namaBukti,
-                'catatan' => trim($_POST['catatan'] ?? ''),
-                'tanggal_kirim' => date('Y-m-d'),
-            ];
-            header('Location: index.php?halaman=terkirim');
-            exit;
-        }
+        // Metadata pengajuan masih di sesi sampai tabel pengajuan tersedia.
+        $_SESSION['pengajuan_sewa_demo'] = [
+            'id_kamar' => $idKamar,
+            'nomor_kamar' => $kamarDipilih['nomor_kamar'],
+            'tanggal_mulai' => $nilaiMulai,
+            'tanggal_selesai' => $nilaiSelesai,
+            'bulan' => $jumlahBulan,
+            'total' => (float) $kamarDipilih['harga_bulanan'] * $jumlahBulan,
+            'bukti' => null,
+            'catatan' => trim($_POST['catatan'] ?? ''),
+            'tanggal_kirim' => date('Y-m-d'),
+        ];
+        header('Location: index.php?halaman=terkirim');
+        exit;
     }
 }
 
