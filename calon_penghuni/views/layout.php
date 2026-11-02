@@ -36,7 +36,7 @@
   <?php if (in_array($halaman, ['ajukan', 'metode', 'keluhan', 'keluhan_terkirim'], true)): ?>
   <nav class="calon-nav" aria-label="Menu calon penghuni">
     <a href="index.php"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8v10H3z"/></svg>Dashboard</a>
-    <a href="<?= h($urlNavigasi) ?>" <?= in_array($halaman, ['ajukan', 'metode'], true) ? 'aria-current="page"' : '' ?>><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="12" cy="12" r="3"/></svg>Unggah</a>
+    <a href="<?= h($urlNavigasi) ?>" <?= in_array($halaman, ['ajukan', 'metode'], true) ? 'aria-current="page"' : '' ?>><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="12" cy="12" r="3"/></svg><?= $halaman === 'ajukan' ? 'Pengajuan' : 'Unggah' ?></a>
     <a href="index.php?halaman=keluhan" <?= in_array($halaman, ['keluhan', 'keluhan_terkirim'], true) ? 'aria-current="page"' : '' ?>><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H8l-4 4z"/></svg>Keluhan</a>
   </nav>
   <?php endif; ?>

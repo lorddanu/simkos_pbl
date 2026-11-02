@@ -1,5 +1,5 @@
 <div class="upload-heading">
-  <h2>Unggah Bukti Pembayaran</h2>
+  <h2>Ajukan Sewa Kamar</h2>
   <p>Kamar <?= h($kamarDipilih['nomor_kamar']) ?></p>
 </div>
 <?php if ($error): ?><p class="err" role="alert"><?= h($error) ?></p><?php endif; ?>
