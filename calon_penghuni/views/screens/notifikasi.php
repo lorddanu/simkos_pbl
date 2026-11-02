@@ -7,7 +7,7 @@
       <p>Status persetujuan diterima. Silakan ajukan pembayaran.</p>
       <small>Kamar <?= h($pengajuan['nomor_kamar']) ?></small>
       <div class="notification-actions">
-        <a class="btn" href="index.php?halaman=metode&amp;id=<?= (int) $pengajuan['id_kamar'] ?>">Ajukan Pembayaran</a>
+        <a class="btn" href="index.php?halaman=pembayaran">Ajukan Pembayaran</a>
         <a class="btn alt" href="index.php">Kembali ke Beranda</a>
       </div>
     </section>

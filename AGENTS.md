@@ -16,9 +16,11 @@ Panduan ini berlaku untuk seluruh repository. Baca juga [README.md](README.md) d
 - Alur calon penghuni menggunakan controller tunggal di `calon_penghuni/index.php`, layout bersama di `calon_penghuni/views/layout.php`, dan screen di `calon_penghuni/views/screens/`. Screen baru harus dimasukkan ke allowlist `$halamanValid`.
 - Gambar kamar memang sengaja berupa kotak kosong/placeholder. Jangan menambahkan foto atau menggantinya kecuali diminta.
 - Form pengajuan awal berjudul **Ajukan Sewa Kamar**. Form tersebut menerima tanggal, lama sewa, dan catatan opsional. Bukti pembayaran dan pilihan metode pembayaran tidak berada di form pengajuan awal.
+- Setelah pengajuan simulasi diterima, tombol **Ajukan Pembayaran** membuka `pembayaran.php`. Halaman ini tidak mengulang pilihan tanggal/lama sewa; ringkasan total, metode, unggah bukti opsional, catatan, dan kirim verifikasi tersedia di sana.
+- `metode.php` adalah layar BCA/QRIS demo yang dicapai dari form pembayaran. `pembayaran_terkirim.php` hanya mengonfirmasi pengiriman; metadata pembayaran masih di sesi dan belum diverifikasi admin.
 - Label navigasi **Pengajuan** hanya digunakan saat halaman `ajukan`; pertahankan label lain di halaman lain.
 - Status pengajuan calon saat ini hanya simulasi berbasis session: dimulai `menunggu_persetujuan`, lalu berubah menjadi `diterima` setelah 20 detik. Perubahan diproses saat halaman `terkirim`/`notifikasi` dimuat; layar menunggu menggunakan reload otomatis. Belum ada tabel pengajuan, persetujuan admin, atau notifikasi permanen.
-- Setelah status simulasi diterima, notifikasi menampilkan tombol **Ajukan Pembayaran** yang membuka layar metode demo. Layar metode masih memiliki teks kembali lama dan belum menyelesaikan pembayaran; jangan menganggap pembayaran sudah tercatat.
+- Setelah status simulasi diterima, notifikasi menampilkan tombol **Ajukan Pembayaran** yang membuka form pembayaran. Bukti boleh dikosongkan dalam simulasi. Pembayaran yang dikirim berstatus `menunggu_verifikasi` di sesi dan belum disetujui admin.
 - Jangan mengganti simulasi menjadi alur admin nyata, memperpendek/memperpanjang jeda, atau mengubah placeholder visual tanpa instruksi pengguna. Jika perubahan itu dibutuhkan untuk pekerjaan baru, jelaskan dampaknya dan sepakati alurnya terlebih dahulu.
 
 ## Praktik implementasi

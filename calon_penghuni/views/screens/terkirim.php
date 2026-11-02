@@ -17,4 +17,7 @@ $sisaDetik = max(0, (int) ($pengajuan['persetujuan_pada'] ?? time()) - time());
 <?php if ($menungguPersetujuan): ?>
 <script>window.setTimeout(() => window.location.reload(), <?= $sisaDetik * 1000 ?>);</script>
 <?php endif; ?>
-<div class="bottom-action"><a class="btn" href="index.php">Kembali ke Beranda</a></div>
+<div class="bottom-action confirm-actions">
+  <?php if (!$menungguPersetujuan): ?><a class="btn" href="index.php?halaman=pembayaran">Ajukan Pembayaran</a><?php endif; ?>
+  <a class="btn <?= !$menungguPersetujuan ? 'alt' : '' ?>" href="index.php">Kembali ke Beranda</a>
+</div>

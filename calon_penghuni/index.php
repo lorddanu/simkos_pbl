@@ -8,7 +8,7 @@ if ($user['role'] !== 'calon_penghuni') {
     exit;
 }
 
-$halamanValid = ['dashboard', 'kamar', 'detail', 'ajukan', 'metode', 'keluhan', 'keluhan_terkirim', 'terkirim', 'notifikasi'];
+$halamanValid = ['dashboard', 'kamar', 'detail', 'ajukan', 'pembayaran', 'metode', 'pembayaran_terkirim', 'keluhan', 'keluhan_terkirim', 'terkirim', 'notifikasi'];
 $halaman = $_GET['halaman'] ?? 'dashboard';
 if (!in_array($halaman, $halamanValid, true)) {
     $halaman = 'dashboard';
@@ -27,7 +27,7 @@ if ($halaman === 'kamar') {
 
 $idKamar = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0;
 $kamarDipilih = null;
-if (in_array($halaman, ['detail', 'ajukan', 'metode'], true)) {
+if (in_array($halaman, ['detail', 'ajukan'], true)) {
     $st = $pdo->prepare(
         "SELECT id_kamar, nomor_kamar, harga_bulanan
            FROM kamar
@@ -127,8 +127,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
     }
 }
 
-if (in_array($halaman, ['terkirim', 'notifikasi'], true)) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_pembayaran') {
+    if (!csrf_ok()) {
+        http_response_code(400);
+        exit('Permintaan tidak valid.');
+    }
+
+    $pengajuanPembayaran = $_SESSION['pengajuan_sewa_demo'] ?? null;
+    if (!$pengajuanPembayaran || ($pengajuanPembayaran['status'] ?? '') !== 'diterima') {
+        header('Location: index.php?halaman=notifikasi');
+        exit;
+    }
+
+    $fileBukti = $_FILES['bukti'] ?? null;
+    $adaBukti = $fileBukti && $fileBukti['error'] !== UPLOAD_ERR_NO_FILE;
+    $mimeBukti = ($adaBukti && $fileBukti['error'] === UPLOAD_ERR_OK)
+        ? (new finfo(FILEINFO_MIME_TYPE))->file($fileBukti['tmp_name'])
+        : null;
+    $ekstensiBukti = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'][$mimeBukti] ?? null;
+
+    if ($adaBukti && (
+        $fileBukti['error'] !== UPLOAD_ERR_OK ||
+        $fileBukti['size'] > 5 * 1024 * 1024 ||
+        $ekstensiBukti === null
+    )) {
+        $error = 'Bukti harus berupa JPG, PNG, atau WebP dengan ukuran maksimal 5 MB.';
+        $halaman = 'pembayaran';
+    } else {
+        $namaBukti = null;
+        if ($adaBukti) {
+            $folderBukti = __DIR__ . '/uploads';
+            if (!is_dir($folderBukti) && !mkdir($folderBukti, 0755, true) && !is_dir($folderBukti)) {
+                $error = 'Folder penyimpanan bukti tidak dapat dibuat.';
+            } else {
+                $namaBukti = bin2hex(random_bytes(12)) . '.' . $ekstensiBukti;
+                if (!move_uploaded_file($fileBukti['tmp_name'], $folderBukti . '/' . $namaBukti)) {
+                    $error = 'Bukti pembayaran gagal disimpan.';
+                }
+            }
+        }
+
+        if ($error === '') {
+            $_SESSION['pembayaran_demo'] = [
+                'id_kamar' => $pengajuanPembayaran['id_kamar'],
+                'nomor_kamar' => $pengajuanPembayaran['nomor_kamar'],
+                'total' => $pengajuanPembayaran['total'],
+                'tanggal_kirim' => date('Y-m-d'),
+                'bukti' => $namaBukti,
+                'catatan' => trim($_POST['catatan'] ?? ''),
+                'status' => 'menunggu_verifikasi',
+            ];
+            header('Location: index.php?halaman=pembayaran_terkirim');
+            exit;
+        }
+        $halaman = 'pembayaran';
+    }
+}
+
+if (in_array($halaman, ['terkirim', 'notifikasi', 'pembayaran', 'metode', 'pembayaran_terkirim'], true)) {
     $pengajuan = $_SESSION['pengajuan_sewa_demo'] ?? null;
+    if ($pengajuan && !isset($pengajuan['status'])) {
+        $pengajuan['status'] = 'menunggu_persetujuan';
+        $pengajuan['persetujuan_pada'] = time() + 20;
+        $_SESSION['pengajuan_sewa_demo'] = $pengajuan;
+    }
     if (!$pengajuan && $halaman === 'terkirim') {
         header('Location: index.php');
         exit;
@@ -143,8 +205,24 @@ if (in_array($halaman, ['terkirim', 'notifikasi'], true)) {
         $_SESSION['pengajuan_sewa_demo'] = $pengajuan;
         $_SESSION['notifikasi_dilihat'] = false;
     }
+    if (
+        in_array($halaman, ['pembayaran', 'metode'], true) &&
+        (!$pengajuan || ($pengajuan['status'] ?? '') !== 'diterima')
+    ) {
+        header('Location: index.php?halaman=notifikasi');
+        exit;
+    }
 } else {
     $pengajuan = null;
+}
+if ($halaman === 'pembayaran_terkirim') {
+    $pembayaran = $_SESSION['pembayaran_demo'] ?? null;
+    if (!$pembayaran) {
+        header('Location: index.php?halaman=pembayaran');
+        exit;
+    }
+} else {
+    $pembayaran = null;
 }
 if ($halaman === 'notifikasi') {
     $_SESSION['notifikasi_dilihat'] = true;
@@ -153,24 +231,27 @@ if ($halaman === 'notifikasi') {
 $mainClass = match ($halaman) {
     'kamar' => 'browse',
     'detail' => 'detail-page',
-    'ajukan', 'metode', 'keluhan', 'notifikasi' => 'form-page',
-    'terkirim' => 'confirm-page',
+    'ajukan', 'keluhan', 'notifikasi' => 'form-page',
+    'pembayaran' => 'payment-upload-page',
+    'metode' => 'payment-method-page',
+    'terkirim', 'pembayaran_terkirim' => 'confirm-page',
     default => '',
 };
 
 $urlKembali = match ($halaman) {
-    'dashboard', 'terkirim', 'notifikasi' => null,
+    'dashboard', 'terkirim', 'notifikasi', 'metode' => null,
     'kamar' => 'index.php',
     'detail' => 'index.php?halaman=kamar',
     'ajukan' => 'index.php?halaman=detail&id=' . $idKamar,
-    'metode' => 'index.php?halaman=ajukan&id=' . $idKamar . '&mulai=' . rawurlencode($nilaiMulai) . '&selesai=' . rawurlencode($nilaiSelesai) . '&bulan=' . $jumlahBulan,
+    'pembayaran' => 'index.php?halaman=notifikasi',
+    'pembayaran_terkirim' => 'index.php?halaman=pembayaran',
     'keluhan' => 'index.php',
     'keluhan_terkirim' => 'index.php',
 };
 
 $urlNavigasi = match ($halaman) {
-    'dashboard', 'terkirim' => 'index.php',
-    'metode' => 'index.php?halaman=ajukan&id=' . $idKamar . '&mulai=' . rawurlencode($nilaiMulai) . '&selesai=' . rawurlencode($nilaiSelesai) . '&bulan=' . $jumlahBulan,
+    'dashboard', 'terkirim', 'metode', 'pembayaran_terkirim' => 'index.php',
+    'pembayaran' => 'index.php?halaman=pembayaran',
     default => 'index.php?halaman=ajukan&id=' . $idKamar . '&mulai=' . rawurlencode($nilaiMulai) . '&selesai=' . rawurlencode($nilaiSelesai) . '&bulan=' . $jumlahBulan,
 };
 
