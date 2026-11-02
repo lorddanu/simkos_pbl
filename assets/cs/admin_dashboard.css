@@ -384,3 +384,768 @@ button {
 .profile-dropdown .logout-link:hover {
     background: #f0effb;
 }
+
+/* Tombol unduh laporan pembayaran */
+.report-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin: 20px 0 24px;
+}
+
+#downloadReport {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#downloadReport:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+#downloadReport:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+    .report-actions {
+        justify-content: stretch;
+    }
+
+    #downloadReport {
+        width: 100%;
+    }
+}
+
+/* TAB DATA */
+.data-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 0px;
+    margin-bottom: 6px;
+    background: #f0effb;
+    border-radius: 16px;
+}
+
+.data-tab {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: #7065ce;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.data-tab.active {
+    background: #7065ce;
+    color: white;
+}
+
+.data-tab-content[hidden] {
+    display: none;
+}
+
+/* RINGKASAN KAMAR */
+.kamar-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.kamar-stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px;
+    border-radius: 16px;
+    background: #7065ce;
+    color: white;
+    font-weight: bold;
+}
+
+.kamar-stat-number {
+    font-size: 28px;
+}
+
+/* TOMBOL TAMBAH */
+.btn-tambah-kamar {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 8px;
+    border: none;
+    border-radius: 14px;
+    background: #7065ce;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* KARTU KAMAR */
+.daftar-kamar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.kamar-card {
+    padding: 12px;
+    border: 1px solid #8174f5;
+    border-radius: 14px;
+    background: #f3f1ff;
+}
+
+.kamar-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.kamar-card h3 {
+    margin: 0 0 4px;
+    color: #7065ce;
+    font-size: 14px;
+}
+
+.kamar-card p,
+.kamar-card small {
+    display: block;
+    margin: 0 0 3px;
+    color: #8174c9;
+    font-size: 12px;
+}
+
+.kamar-status {
+    font-size: 12px;
+    text-align: right;
+}
+
+.kamar-status.kosong {
+    color: #65b92f;
+}
+
+.kamar-status.menunggu {
+    color: #d1a500;
+}
+
+.kamar-status.terisi {
+    color: #e34848;
+}
+
+.kamar-card-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.btn-kamar {
+    min-height: 32px;
+    padding: 7px 4px;
+    border: none;
+    border-radius: 5px;
+    background: #514797;
+    color: white;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.btn-kamar:hover,
+.btn-tambah-kamar:hover {
+    opacity: 0.85;
+}
+
+/* HALAMAN PENGHUNI */
+#tab-penghuni .section-title {
+    margin: 18px 0 10px;
+    color: #514797;
+    font-size: 15px;
+}
+
+.penghuni-card {
+    padding: 14px;
+    margin-bottom: 12px;
+    border: 1px solid #8174f5;
+    border-radius: 14px;
+    background: #f3f1ff;
+}
+
+.penghuni-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.penghuni-info h3 {
+    margin: 0 0 5px;
+    color: #514797;
+    font-size: 14px;
+}
+
+.penghuni-info p,
+.penghuni-info small {
+    display: block;
+    margin: 0 0 4px;
+    color: #8174c9;
+    font-size: 12px;
+}
+
+.penghuni-status {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.penghuni-status.menunggu {
+    color: #c59b00;
+}
+
+.penghuni-status.aktif {
+    color: #55a832;
+}
+
+.penghuni-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.btn-penghuni {
+    flex: 1;
+    min-height: 34px;
+    padding: 8px;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.btn-tolak {
+    background: #d94b55;
+}
+
+.btn-setujui {
+    background: #65ad43;
+}
+
+.btn-detail {
+    background: #514797;
+}
+
+.btn-penghuni:hover {
+    opacity: 0.85;
+}
+
+
+/* HALAMAN LAPORAN */
+
+#laporan {
+    padding: 0;
+    background: #fff;
+    min-height: 100%;
+}
+
+.laporan-header {
+    min-height: 108px;
+    padding: 25px 18px 12px;
+    box-sizing: border-box;
+    background: #7164cc;
+    color: #fff;
+    border-radius: 0 0 8px 8px;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+.laporan-header h1 {
+    margin: 0 0 0 0;
+    font-size: 23px;
+    font-weight: 700;
+}
+
+.laporan-profil {
+    width: 25px;
+    height: 25px;
+    margin-bottom: 0;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    position: relative;
+}
+
+.laporan-profil span {
+    font-size: 11px;
+}
+
+.laporan-subtitle {
+    margin: 0 0 12px;
+    color: #7164cc;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.laporan-statistik {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    margin-bottom: 12px;
+}
+
+.laporan-stat-card {
+    min-height: 62px;
+    padding: 16px 13px;
+    box-sizing: border-box;
+    border-radius: 14px;
+    background: #7164cc;
+    color: #fff;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.laporan-stat-card strong {
+    font-size: 30px;
+    line-height: 1.1;
+}
+
+.laporan-stat-card span {
+    margin-top: 4px;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.laporan-card {
+    padding: 9px 10px;
+    margin-bottom: 7px;
+    border: 1px solid #a69cf5;
+    border-radius: 11px;
+    background: #f5f3ff;
+}
+
+.laporan-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.laporan-card-header strong {
+    display: block;
+    color: #7164cc;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.laporan-card-header small {
+    display: block;
+    margin-top: 2px;
+    color: #8d83df;
+    font-size: 12px;
+}
+
+.laporan-status {
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.status-baru {
+    color: #7164cc;
+}
+
+.status-dibaca {
+    color: #65b83e;
+}
+
+.laporan-pesan {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    margin: 10px 0;
+}
+
+.laporan-kategori {
+    flex-shrink: 0;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: #73bf9b;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.kategori-pelayanan {
+    background: #73bf9b;
+}
+
+.laporan-pesan p {
+    margin: 2px 0 0;
+    color: #8d83df;
+    font-size: 11px;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+.laporan-actions {
+    display: flex;
+    gap: 7px;
+}
+
+.laporan-btn {
+    flex: 1;
+    min-height: 19px;
+    padding: 4px 6px;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.btn-balas {
+    background: #514797;
+}
+
+.btn-dibaca {
+    background: #88c947;
+}
+
+.laporan-btn:hover {
+    opacity: 0.85;
+}
+
+/* Tampilan layar kecil */
+@media (max-width: 380px) {
+    .laporan-content {
+        padding-right: 12px;
+        padding-left: 12px;
+    }
+
+    .laporan-card {
+        padding: 8px;
+    }
+
+    .laporan-pesan {
+        gap: 5px;
+    }
+}
+
+/*  tampilan tambah kamar dan ubah kamar */
+.kamar-form-content {
+    padding: 20px 22px 100px;
+    background: #fff;
+    min-height: 100%;
+}
+
+.kamar-form-content h2 {
+    margin: 0 0 16px;
+    color: #7164cc;
+    font-size: 22px;
+}
+
+.kamar-form-content label {
+    display: block;
+    margin: 14px 4px 5px;
+    color: #7164cc;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.kamar-form-content input,
+.kamar-form-content textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #8c80ff;
+    border-radius: 12px;
+    background: #f1effb;
+    color: #514797;
+    font: inherit;
+}
+
+.kamar-form-content textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.kamar-form-content input[type="file"] {
+    padding: 20px 10px;
+}
+
+.kamar-form-content .btn-primary,
+.kamar-form-content .btn-secondary {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 8px;
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+.kamar-form-content .btn-primary {
+    margin-top: 80px;
+    border: none;
+    background: #7164cc;
+    color: white;
+}
+
+.kamar-form-content .btn-secondary {
+    border: 1px solid #7164cc;
+    background: #f1effb;
+    color: #7164cc;
+}
+
+/* INFORMASI KAMAR */
+.status-kamar-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px;
+    margin: 15px 0 25px;
+    background: #f1efff;
+    border: 1px solid #7969e8;
+    border-radius: 12px;
+}
+
+.status-kamar-info h3 {
+    margin: 0 0 5px;
+    color: #7062d5;
+}
+
+.status-kamar-info p {
+    margin: 0;
+    font-size: 12px;
+    color: #7969e8;
+}
+
+.status-kamar-info div:last-child {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.status-kamar-info small {
+    font-size: 11px;
+    font-style: italic;
+    color: #7969e8;
+}
+
+.status-kamar-info strong {
+    color: #60b83c;
+    font-size: 13px;
+}
+
+/* PILIHAN STATUS KAMAR */
+.form-label {
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+
+#formUbahStatus .status-option {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #8b7df0;
+    border-radius: 10px;
+    background: #f1efff;
+    cursor: pointer;
+}
+
+#formUbahStatus .status-option.selected {
+    background: #7162d2;
+    color: white;
+}
+
+#formUbahStatus .status-option input[type="radio"] {
+    display: block;
+    width: 17px;
+    height: 17px;
+    min-width: 17px;
+    flex: 0 0 17px;
+    margin: 0;
+    accent-color: white;
+}
+
+#formUbahStatus .status-option-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+#formUbahStatus .status-option-info strong {
+    font-size: 13px;
+}
+
+#formUbahStatus .status-option-info small {
+    font-size: 10px;
+    font-style: italic;
+}
+
+/* STATUS PENGHUNI */
+.status-penghuni-buttons {
+    display: flex;
+    gap: 10px;
+    margin: 8px 0 12px;
+}
+
+.status-penghuni-buttons label {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    border: 1px solid #7969e8;
+    border-radius: 10px;
+    background: #f1efff;
+    color: #7062d5;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.status-penghuni-buttons label:has(input:checked) {
+    background: #7162d2;
+    color: white;
+}
+
+.status-penghuni-buttons input {
+    display: none;
+}
+
+/* PETUNJUK FORM */
+.form-hint {
+    display: block;
+    margin: 10px 0 25px;
+    color: #7969e8;
+    font-size: 10px;
+    font-style: italic;
+}
+
+#penghuniKamar {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #7969e8;
+    border-radius: 8px;
+    background-color: #f1effb;
+    font-size: 13px;
+    color: #333;
+    cursor: pointer;
+}
+
+/* RIWAYAT HUNI KAMAR */
+.riwayat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 15px 0 25px;
+}
+
+.riwayat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid #8b7df0;
+    border-radius: 10px;
+    background: #e8e5fa;
+}
+
+.riwayat-item div,
+.riwayat-kamar-info div,
+.riwayat-bayar div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.riwayat-item strong,
+.riwayat-kamar-info strong,
+.riwayat-bayar strong {
+    font-size: 12px;
+    color: #7062d5;
+}
+
+.riwayat-item small,
+.riwayat-kamar-info small,
+.riwayat-bayar small {
+    font-size: 10px;
+    color: #7969e8;
+    font-style: italic;
+}
+
+.riwayat-status,
+.riwayat-bayar span {
+    font-size: 10px;
+    color: #60b83c;
+}
+
+.riwayat-status.selesai {
+    color: #7969e8;
+}
+
+/* RIWAYAT PENGHUNI */
+.riwayat-subtitle {
+    display: block;
+    margin-top: -8px;
+    margin-bottom: 15px;
+    color: #7969e8;
+    font-size: 10px;
+    font-style: italic;
+}
+
+.riwayat-pembungkus {
+    padding: 12px;
+    margin-bottom: 25px;
+    border: 1px solid #8b7df0;
+    border-radius: 10px;
+    background: #f1efff;
+}
+
+.riwayat-pembungkus h3 {
+    margin: 0 0 10px;
+    color: #7062d5;
+    font-size: 13px;
+}
+
+.riwayat-kamar-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+}
+
+.garis-riwayat {
+    border-top: 1px solid #aaa0ed;
+    margin: 5px 0 12px;
+}
+
+.riwayat-bayar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #aaa0ed;
+}
+
+.riwayat-bayar:last-child {
+    border-bottom: none;
+}
