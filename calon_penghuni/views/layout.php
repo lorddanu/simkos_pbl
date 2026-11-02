@@ -6,11 +6,11 @@
 <title>SIMKOS - Calon Penghuni</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
-<link rel="stylesheet" href="../assets/css/calon_penghuni.css?v=3">
+<link rel="stylesheet" href="../assets/css/calon_penghuni.css?v=4">
 </head>
 <body class="calon-body">
 <div class="phone">
-  <header class="calon-header <?= $halaman === 'pembayaran' ? 'payment-compact-header' : ($halaman === 'metode' ? 'method-compact-header' : '') ?>">
+  <header class="calon-header <?= $halaman === 'pembayaran' ? 'payment-compact-header' : ($halaman === 'metode' ? 'method-compact-header' : ($halaman === 'pembayaran_terkirim' ? 'receipt-compact-header' : '')) ?>">
     <?php if ($urlKembali !== null): ?>
       <a class="icon" href="<?= h($urlKembali) ?>" aria-label="Kembali">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M13 8l-4 4 4 4"/></svg>
@@ -18,10 +18,12 @@
     <?php endif; ?>
     <h1>SIMKOS</h1>
     <div class="header-actions" style="display:flex;align-items:center;gap:14px;margin-left:auto;flex:0 0 auto">
+      <?php if ($halaman !== 'pembayaran_terkirim'): ?>
       <a class="header-action" href="index.php?halaman=notifikasi" aria-label="Notifikasi" title="Notifikasi" style="display:grid;place-items:center;width:28px;height:34px;flex:none;color:#fff;text-decoration:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
         <?php if (!empty($_SESSION['pengajuan_sewa_demo']) && empty($_SESSION['notifikasi_dilihat'])): ?><span class="notification-dot" aria-label="Ada notifikasi baru"></span><?php endif; ?>
       </a>
+      <?php endif; ?>
       <form method="post" action="../auth/logout.php">
         <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
         <button class="icon akun-icon akun-logout" type="submit" aria-label="Keluar dari akun" title="Keluar">

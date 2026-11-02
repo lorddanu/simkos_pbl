@@ -5,6 +5,10 @@
 .calon-header.payment-compact-header h1{font-size:20px}
 .calon-header.method-compact-header{height:74px;min-height:74px;padding:25px 18px 6px;border-radius:0 0 6px 6px}
 .calon-header.method-compact-header h1{font-size:25px}
+.calon-header.receipt-compact-header{height:62px;min-height:62px;padding:24px 16px 4px;border-radius:0 0 6px 6px}
+.calon-header.receipt-compact-header h1{font-size:22px}
+.receipt-compact-header .akun-icon{width:28px;height:28px;flex-basis:28px}
+.receipt-compact-header .akun-icon svg{width:28px;height:28px}
 .calon-header h1{font-size:30px}
 .header-actions{display:flex;align-items:center;gap:14px;margin-left:auto}
 .header-actions form{margin:0}
@@ -52,8 +56,13 @@
 .confirm-info>div,.confirm-info>strong{display:flex;justify-content:space-between;gap:8px;margin:4px 0}
 .confirm-info>div span:last-child,.confirm-info>strong span:last-child{text-align:right}
 .confirm-info .pending-status{color:#ffd83d;font-weight:600;text-align:right}
+.confirm-info hr{width:100%;border:0;border-top:1px solid rgba(255,255,255,.7);margin:10px 0}
+.confirm-info>strong{font-size:11px}
 .confirm-page .bottom-action{padding:0 0 14px}
 .confirm-actions{display:flex;flex-direction:column;gap:10px}
+.payment-receipt-page{padding:0 14px;justify-content:flex-start}
+.payment-receipt{padding-top:48px}
+.payment-receipt-info{margin-top:14px;padding:12px}
 .notification-screen{width:100%;padding:10px 4px;}
 .notification-screen h2{color:var(--p);font-size:18px;margin:0 0 14px}
 .notification-card{display:flex;align-items:flex-start;gap:10px;padding:14px;border-radius:12px;background:#f2f0ff;border:1px solid #d4cef9;color:#38305f}

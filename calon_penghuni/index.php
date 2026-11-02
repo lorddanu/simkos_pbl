@@ -234,17 +234,17 @@ $mainClass = match ($halaman) {
     'ajukan', 'keluhan', 'notifikasi' => 'form-page',
     'pembayaran' => 'payment-upload-page',
     'metode' => 'payment-method-page',
-    'terkirim', 'pembayaran_terkirim' => 'confirm-page',
+    'terkirim' => 'confirm-page',
+    'pembayaran_terkirim' => 'confirm-page payment-receipt-page',
     default => '',
 };
 
 $urlKembali = match ($halaman) {
-    'dashboard', 'terkirim', 'notifikasi', 'metode' => null,
+    'dashboard', 'terkirim', 'notifikasi', 'metode', 'pembayaran_terkirim' => null,
     'kamar' => 'index.php',
     'detail' => 'index.php?halaman=kamar',
     'ajukan' => 'index.php?halaman=detail&id=' . $idKamar,
     'pembayaran' => 'index.php?halaman=notifikasi',
-    'pembayaran_terkirim' => 'index.php?halaman=pembayaran',
     'keluhan' => 'index.php',
     'keluhan_terkirim' => 'index.php',
 };

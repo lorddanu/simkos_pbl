@@ -68,6 +68,12 @@ flowchart TD
     I --> J[Ikon pesan / Notifikasi]
     J --> K[Halaman Pengajuan Diterima]
     K --> L[Ajukan Pembayaran]
+    L --> M[Form Unggah Bukti Pembayaran]
+    M --> N{Lihat metode?}
+    N -- Ya --> O[Informasi BCA / QRIS]
+    O --> M
+    N -- Tidak --> P[Kirim pembayaran]
+    P --> Q[Konfirmasi Bukti Terkirim]
 ```
 
 ### Rincian layar calon penghuni
@@ -75,13 +81,13 @@ flowchart TD
 - `dashboard.php`: ringkasan calon penghuni dan tombol untuk melihat kamar kosong.
 - `kamar.php`: daftar kamar dengan `status = 'kosong'`; kotak foto sengaja kosong sebagai placeholder yang siap diisi.
 - `detail.php`: detail harga dan fasilitas kamar. Ikon fasilitas berupa SVG di markup; gambar kamar tetap placeholder kosong sesuai permintaan desain.
-- `ajukan.php`: judul **Ajukan Sewa Kamar**, tanggal mulai/akhir, jumlah bulan (1–12), catatan opsional, serta tombol kirim. Ringkasan total, link metode pembayaran, dan unggah bukti tidak ditampilkan di formulir pengajuan awal. Label menu bawah berubah menjadi **Pengajuan** hanya di halaman ini.
+- `ajukan.php`: judul **Ajukan Sewa Kamar**, tanggal mulai/akhir, jumlah bulan (1-12), catatan opsional, serta tombol kirim. Ringkasan total, link metode pembayaran, dan unggah bukti tidak ditampilkan di formulir pengajuan awal. Label menu bawah berubah menjadi **Pengajuan** hanya di halaman ini.
 - `terkirim.php`: menampilkan status awal dan memuat ulang halaman setelah sisa waktu simulasi.
 - `notifikasi.php`: menampilkan status pengajuan. Setelah diterima, tersedia tombol **Ajukan Pembayaran** dan **Kembali ke Beranda**. Tombol pembayaran membuka form pembayaran pasca-persetujuan.
 - `pembayaran.php`: form **Unggah Bukti Pembayaran**. Kartu harga/tanggal sewa dan pengatur lama sewa tidak diulang; ringkasan total, tautan metode, unggah bukti opsional, catatan, dan tombol kirim tetap tersedia.
-- `pembayaran_terkirim.php`: konfirmasi pengiriman pembayaran dengan status **Menunggu Verifikasi** (simulasi).
+- `pembayaran_terkirim.php`: konfirmasi seperti desain **Bukti Terkirim**, dengan nominal, tanggal unggah, status **Menunggu verifikasi**, total pembayaran, dan tombol **Kembali ke Beranda**. Header pada layar ini ringkas dan menyembunyikan ikon pesan/tombol kembali.
 - `keluhan.php` dan `keluhan_terkirim.php`: formulir masukan dan layar konfirmasi. Penyimpanan keluhan menggunakan database jika akun memiliki `id_penghuni`.
-- `metode.php`: layar metode pembayaran demo (BCA/QRIS), dibuka dari tautan **Metode Pembayaran yang Tersedia** pada form pembayaran dan menyediakan tombol kembali ke form.
+- `metode.php`: layar metode pembayaran demo (BCA/QRIS), dibuka dari tautan **Metode Pembayaran yang Tersedia** pada form pembayaran dan menyediakan tombol **Kembali ke Unggah Bukti**.
 
 ## 5. Simulasi status dan notifikasi 20 detik
 
@@ -120,7 +126,7 @@ Gunakan akun demo hanya untuk lingkungan lokal/presentasi.
 3. Isi tanggal mulai dan akhir, pilih lama sewa, lalu kirim. Bukti pembayaran tidak diperlukan pada tahap pengajuan ini.
 4. Layar menunjukkan **Pengajuan Dikirim / Menunggu Persetujuan**. Biarkan halaman terbuka selama 20 detik; layar memuat ulang otomatis dan menampilkan **Pengajuan Diterima**.
 5. Buka ikon pesan untuk melihat notifikasi penerimaan dan tombol **Ajukan Pembayaran**.
-6. Di halaman pembayaran, bukti boleh dikosongkan untuk simulasi. Gunakan tautan metode jika ingin melihat informasi BCA/QRIS, lalu kirim form untuk melihat konfirmasi pembayaran.
+6. Di halaman pembayaran, bagian tanggal/harga sewa dan pengatur jumlah bulan tidak diulang; ringkasan biaya ditampilkan di kartu tagihan. Bukti boleh dikosongkan untuk simulasi. Gunakan tautan metode untuk melihat informasi BCA/QRIS, kembali ke form, lalu kirim untuk melihat konfirmasi **Bukti Terkirim**.
 
 ## 7. Menjalankan di XAMPP
 
