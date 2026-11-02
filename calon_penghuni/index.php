@@ -8,7 +8,7 @@ if ($user['role'] !== 'calon_penghuni') {
     exit;
 }
 
-$halamanValid = ['dashboard', 'kamar', 'detail', 'ajukan', 'keluhan', 'keluhan_terkirim', 'terkirim'];
+$halamanValid = ['dashboard', 'kamar', 'detail', 'ajukan', 'keluhan', 'keluhan_terkirim', 'terkirim', 'notifikasi'];
 $halaman = $_GET['halaman'] ?? 'dashboard';
 if (!in_array($halaman, $halamanValid, true)) {
     $halaman = 'dashboard';
@@ -119,31 +119,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
             'catatan' => trim($_POST['catatan'] ?? ''),
             'tanggal_kirim' => date('Y-m-d'),
         ];
+        $_SESSION['notifikasi_dilihat'] = false;
         header('Location: index.php?halaman=terkirim');
         exit;
     }
 }
 
-if ($halaman === 'terkirim') {
+if (in_array($halaman, ['terkirim', 'notifikasi'], true)) {
     $pengajuan = $_SESSION['pengajuan_sewa_demo'] ?? null;
-    if (!$pengajuan) {
+    if (!$pengajuan && $halaman === 'terkirim') {
         header('Location: index.php');
         exit;
     }
 } else {
     $pengajuan = null;
 }
+if ($halaman === 'notifikasi') {
+    $_SESSION['notifikasi_dilihat'] = true;
+}
 
 $mainClass = match ($halaman) {
     'kamar' => 'browse',
     'detail' => 'detail-page',
-    'ajukan', 'metode', 'keluhan' => 'form-page',
+    'ajukan', 'metode', 'keluhan', 'notifikasi' => 'form-page',
     'terkirim' => 'confirm-page',
     default => '',
 };
 
 $urlKembali = match ($halaman) {
-    'dashboard', 'terkirim' => null,
+    'dashboard', 'terkirim', 'notifikasi' => null,
     'kamar' => 'index.php',
     'detail' => 'index.php?halaman=kamar',
     'ajukan' => 'index.php?halaman=detail&id=' . $idKamar,

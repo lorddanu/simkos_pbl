@@ -1,7 +1,12 @@
 .calon-body{background:#fff;padding:0;min-height:100vh;align-items:stretch}
 .calon-body .phone{width:100%;max-width:440px;height:min(100vh,956px);height:min(100dvh,956px);max-height:none;min-height:0;border-radius:0;box-shadow:none}
-.calon-header{height:112px;min-height:112px;padding:58px 24px 4px;border-radius:0 0 12px 12px}
+.calon-header{height:112px;min-height:112px;padding:58px 16px 4px 24px;border-radius:0 0 12px 12px}
 .calon-header h1{font-size:30px}
+.header-actions{display:flex;align-items:center;gap:14px;margin-left:auto}
+.header-actions form{margin:0}
+.header-action{position:relative;width:28px;height:28px;display:grid;place-items:center;color:#fff;text-decoration:none}
+.header-action svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.notification-dot{position:absolute;top:0;right:0;width:7px;height:7px;border-radius:50%;background:#ffd83d;border:1px solid var(--p)}
 .akun-icon{width:34px;height:34px;flex:0 0 34px}
 .akun-logout{margin:0;padding:0;border:0;background:transparent;color:#fff;cursor:pointer}
 .calon-main{position:relative;gap:12px;padding:0 24px;justify-content:center}
@@ -34,16 +39,23 @@
 .apply-card label{color:white;font-size:11px}
 .apply-card input,.apply-card select{background:#f2f0ff;border:1px solid #aaa2ef;border-radius:8px;padding:8px;font:400 12px Poppins,sans-serif;width:100%;margin:4px 0 10px}
 .apply-total{display:flex;justify-content:space-between;border-top:1px solid rgba(255,255,255,.6);margin-top:8px;padding-top:10px;font-size:13px}
-.confirm{text-align:center;padding:32px 10px}
-.confirm h2{color:var(--p);font-size:17px;margin:10px 0 4px}
-.confirm p{font-size:12px;color:#5a4fb0}
+.confirm{text-align:center;padding:48px 4px 0}
+.confirm h2{color:var(--p);font-size:16px;margin:8px 0 4px}
+.confirm p{font-size:11px;line-height:1.3;color:#5a4fb0;margin:0 0 14px}
 .calon-main.confirm-page{padding:0 14px;justify-content:flex-start}
-.confirm-info{text-align:left;font-size:11px;padding:12px;margin-top:14px}
+.confirm-info{text-align:left;font-size:10px;padding:12px 14px;margin-top:0}
 .confirm-info>div,.confirm-info>strong{display:flex;justify-content:space-between;gap:8px;margin:4px 0}
 .confirm-info>div span:last-child,.confirm-info>strong span:last-child{text-align:right}
-.confirm-info hr{border:0;border-top:1px solid rgba(255,255,255,.7);margin:10px 0}
-.confirm-info>strong{font-size:11px}
+.confirm-info .pending-status{color:#ffd83d;font-weight:600;text-align:right}
 .confirm-page .bottom-action{padding:0 0 14px}
+.notification-screen{width:100%;padding:10px 4px;}
+.notification-screen h2{color:var(--p);font-size:18px;margin:0 0 14px}
+.notification-card{display:flex;align-items:flex-start;gap:10px;padding:14px;border-radius:12px;background:#f2f0ff;border:1px solid #d4cef9;color:#38305f}
+.notification-card-icon{width:34px;height:34px;display:grid;place-items:center;flex:none;border-radius:50%;background:var(--p);color:#fff}
+.notification-card-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.notification-card h3{color:var(--p);font-size:13px;margin:0 0 4px}
+.notification-card p,.notification-empty{font-size:11px;line-height:1.45;margin:0 0 8px;color:#5a4fb0}
+.notification-card strong{font-size:10px;color:#8a6b00}
 .empty-state{text-align:center;color:#5a4fb0;font-size:13px;margin:auto 0}
 .upload-heading h2{color:var(--p);font-size:20px;margin:0}
 .upload-heading p{font-size:12px;color:var(--p);margin:0}

@@ -17,12 +17,18 @@
       </a>
     <?php endif; ?>
     <h1>SIMKOS</h1>
-    <form method="post" action="../auth/logout.php">
-      <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
-      <button class="icon akun-icon akun-logout" type="submit" aria-label="Keluar dari akun" title="Keluar">
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="9" r="3"/><path d="M5.7 19c.8-3 3.2-4.5 6.3-4.5 3.1 0 5.5 1.5 6.3 4.5"/></svg>
-      </button>
-    </form>
+    <div class="header-actions">
+      <a class="header-action" href="index.php?halaman=notifikasi" aria-label="Notifikasi" title="Notifikasi">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+        <?php if (!empty($_SESSION['pengajuan_sewa_demo']) && empty($_SESSION['notifikasi_dilihat'])): ?><span class="notification-dot" aria-label="Ada notifikasi baru"></span><?php endif; ?>
+      </a>
+      <form method="post" action="../auth/logout.php">
+        <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
+        <button class="icon akun-icon akun-logout" type="submit" aria-label="Keluar dari akun" title="Keluar">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="9" r="3"/><path d="M5.7 19c.8-3 3.2-4.5 6.3-4.5 3.1 0 5.5 1.5 6.3 4.5"/></svg>
+        </button>
+      </form>
+    </div>
   </header>
   <main class="calon-main <?= h($mainClass) ?>">
     <?php require __DIR__ . '/screens/' . $halaman . '.php'; ?>
