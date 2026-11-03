@@ -82,7 +82,7 @@ button {
 .stat-card {
     background: var(--purple);
     color: white;
-    padding: 16px;
+    padding: 12px;
     min-height: 95px;
     border-radius: 16px;
     display: flex;
@@ -91,7 +91,7 @@ button {
 }
 
 .stat-number {
-    font-size: 29px;
+    font-size: 20px;
     line-height: 1;
     font-weight: 800;
     margin-bottom: 5px;
@@ -1220,4 +1220,60 @@ button {
 
 #btnKonfirmasiHapus {
     background: #d26368;
+}
+
+/* FORM BALASAN ADMIN */
+.form-balasan {
+    margin-top: 18px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 10px;
+}
+
+.form-balasan[hidden] {
+    display: none;
+}
+
+.form-balasan label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.form-balasan textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.balasan-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.btn-batal-balasan,
+.btn-kirim-balasan {
+    padding: 9px 16px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-batal-balasan {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.btn-kirim-balasan {
+    background: #2563eb;
+    color: white;
 }

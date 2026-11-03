@@ -423,3 +423,11 @@ document.getElementById('btnKonfirmasiHapus').addEventListener('click', () => {
 
     document.getElementById('popupHapusKamar').hidden = true;
 });
+
+// Balas admin
+function toggleBalasan(button) {
+    const laporanCard = button.closest('.laporan-card');
+    const formBalasan = laporanCard.querySelector('.form-balasan');
+
+    formBalasan.hidden = !formBalasan.hidden;
+}
