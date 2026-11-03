@@ -23,7 +23,7 @@ include __DIR__ . '/../includes/header.php';
 
 <main class="admin-main">
     <!-- HALAMAN LAPORAN -->
-    <section id="laporan-pembayaran" class="page-section active">
+    <section id="laporan" class="page-section active">
     <div class="laporan-content">
 
         <!-- RINGKASAN -->

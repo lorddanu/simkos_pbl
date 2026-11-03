@@ -43,238 +43,242 @@ include __DIR__ . '/../includes/header.php';
 ?>
 
 <main class="admin-main">
-<!-- DATA SIMKOS -->
-<section id="data" class="page-section active">
+    <!-- DATA SIMKOS -->
+    <section id="data" class="page-section active">
 
-    <!-- TAB DATA -->
-    <div class="data-tabs">
-        <button
-            type="button"
-            class="data-tab active"
-            data-data-tab="kamar"
-        >
-            Kamar
-        </button>
+        <!-- TAB DATA -->
+        <div class="data-tabs">
+            <button
+                type="button"
+                class="data-tab active"
+                data-data-tab="kamar"
+            >
+                Kamar
+            </button>
 
-        <button
-            type="button"
-            class="data-tab"
-            data-data-tab="penghuni"
-        >
-            Penghuni
-        </button>
-    </div>
-
-    <!-- TAB KAMAR -->
-    <div id="tab-kamar" class="data-tab-content">
-
-        <!-- RINGKASAN -->
-        <div class="kamar-stats">
-            <article class="kamar-stat-card">
-                <span class="kamar-stat-number">
-                    <?= $totalKamar ?>
-                </span>
-                <span>Total Kamar</span>
-            </article>
-
-            <article class="kamar-stat-card">
-                <span class="kamar-stat-number">
-                    <?= $totalKosong ?>
-                </span>
-                <span>Kosong</span>
-            </article>
+            <button
+                type="button"
+                class="data-tab"
+                data-data-tab="penghuni"
+            >
+                Penghuni
+            </button>
         </div>
 
-        <!-- TAMBAH KAMAR -->
-        <button
-            type="button"
-            class="btn-tambah-kamar"
-            id="btnTambahKamar"
-        >
-            + Tambah Kamar
-        </button>
+        <!-- TAB KAMAR -->
+        <div id="tab-kamar" class="data-tab-content">
 
-        <!-- DAFTAR KAMAR -->
-        <div class="daftar-kamar">
+            <!-- RINGKASAN -->
+            <div class="kamar-stats">
+                <article class="kamar-stat-card">
+                    <span class="kamar-stat-number">
+                        <?= $totalKamar ?>
+                    </span>
+                    <span>Total Kamar</span>
+                </article>
 
-            <article class="kamar-card" data-id="1">
-                <div class="kamar-card-header">
-                    <div>
-                        <h3>Kamar A</h3>
-                        <p>Rp 650.000/bulan</p>
+                <article class="kamar-stat-card">
+                    <span class="kamar-stat-number">
+                        <?= $totalKosong ?>
+                    </span>
+                    <span>Kosong</span>
+                </article>
+            </div>
+
+            <!-- TAMBAH KAMAR -->
+            <button
+                type="button"
+                class="btn-tambah-kamar"
+                id="btnTambahKamar"
+            >
+                + Tambah Kamar
+            </button>
+
+            <!-- DAFTAR KAMAR -->
+            <div class="daftar-kamar">
+
+                <article class="kamar-card" data-id="1">
+                    <div class="kamar-card-header">
+                        <div>
+                            <h3>Kamar A</h3>
+                            <p>Rp 650.000/bulan</p>
+                        </div>
+                        <span class="kamar-status kosong">Kosong</span>
                     </div>
-                    <span class="kamar-status kosong">Kosong</span>
+
+                    <div class="kamar-card-actions">
+                        <button
+                            type="button"
+                            class="btn-kamar"
+                            data-ubah-kamar
+                        >
+                            Ubah
+                        </button>
+                        <button
+                            type="button"
+                            class="btn-kamar"
+                            data-ubah-status
+                        >
+                            Ubah Status
+                        </button>
+                    </div>
+                </article>
+
+                <article class="kamar-card" data-id="2">
+                    <div class="kamar-card-header">
+                        <div>
+                            <h3>Kamar B</h3>
+                            <p>Rp 650.000/bulan</p>
+                            <small>Rian Saputra (calon)</small>
+                        </div>
+                        <span class="kamar-status menunggu">
+                            Menunggu pembayaran
+                        </span>
+                    </div>
+
+                    <div class="kamar-card-actions">
+                        <button type="button" class="btn-kamar">Ubah</button>
+                        <button type="button" class="btn-kamar">Lihat Pembayaran</button>
+                    </div>
+                </article>
+
+                <article class="kamar-card" data-id="3">
+                    <div class="kamar-card-header">
+                        <div>
+                            <h3>Kamar C</h3>
+                            <p>Rp 650.000/bulan</p>
+                            <small>Dewi Lestari (calon)</small>
+                        </div>
+                        <span class="kamar-status menunggu">
+                            Menunggu pembayaran
+                        </span>
+                    </div>
+
+                    <div class="kamar-card-actions">
+                        <button type="button" class="btn-kamar">Ubah</button>
+                        <button type="button" class="btn-kamar">Lihat Pembayaran</button>
+                    </div>
+                </article>
+
+                <article class="kamar-card" data-id="4">
+                    <div class="kamar-card-header">
+                        <div>
+                            <h3>Kamar D</h3>
+                            <p>Rp 650.000/bulan</p>
+                        </div>
+                        <span class="kamar-status kosong">Kosong</span>
+                    </div>
+
+                    <div class="kamar-card-actions">
+                        <button type="button" class="btn-kamar">Ubah</button>
+                        <button type="button" class="btn-kamar">Ubah Status</button>
+                    </div>
+                </article>
+
+                <article class="kamar-card" data-id="5">
+                    <div class="kamar-card-header">
+                        <div>
+                            <h3>Kamar E</h3>
+                            <p>Rp 650.000/bulan</p>
+                            <small>Andi Wijaya</small>
+                        </div>
+                        <span class="kamar-status terisi">Terisi</span>
+                    </div>
+
+                    <div class="kamar-card-actions">
+                        <button type="button" class="btn-kamar">Ubah</button>
+                        <button
+                            type="button"
+                            class="btn-kamar"
+                            data-riwayat-kamar
+                        >
+                            Riwayat Huni Kamar
+                        </button>
+                    </div>
+                </article>
+
+            </div>
+        </div>
+
+        <!-- TAB PENGHUNI -->
+        <div id="tab-penghuni" class="data-tab-content" hidden>
+
+            <h2 class="section-title">Pengajuan Sewa Masuk</h2>
+
+            <article class="penghuni-card">
+                <div class="penghuni-info">
+                    <div>
+                        <h3>Rian Saputra</h3>
+                        <p>Memilih Kamar B</p>
+                        <small>Pengajuan sewa baru</small>
+                    </div>
+                    <span class="penghuni-status menunggu">Menunggu</span>
                 </div>
 
-                <div class="kamar-card-actions">
-                    <button type="button" class="btn-kamar">Ubah</button>
-                    <button
-                        type="button"
-                        class="btn-kamar"
-                        data-ubah-status
-                    >
-                        Ubah Status
+                <div class="penghuni-actions">
+                    <button type="button" class="btn-penghuni btn-tolak">Tolak</button>
+                    <button type="button" class="btn-penghuni btn-setujui">Setujui</button>
+                </div>
+            </article>
+
+            <h2 class="section-title">Calon Penghuni</h2>
+
+            <article class="penghuni-card">
+                <div class="penghuni-info">
+                    <div>
+                        <h3>Dewi Lestari</h3>
+                        <p>Kamar C</p>
+                        <small>Menunggu proses sewa</small>
+                    </div>
+                    <span class="penghuni-status menunggu">Calon</span>
+                </div>
+
+                <div class="penghuni-actions">
+                    <button type="button" class="btn-penghuni btn-detail">
+                        Lihat Pembayaran
                     </button>
                 </div>
             </article>
 
-            <article class="kamar-card" data-id="2">
-                <div class="kamar-card-header">
+            <h2 class="section-title">Penghuni Aktif</h2>
+
+            <article class="penghuni-card">
+                <div class="penghuni-info">
                     <div>
-                        <h3>Kamar B</h3>
-                        <p>Rp 650.000/bulan</p>
-                        <small>Rian Saputra (calon)</small>
+                        <h3>Andi Wijaya</h3>
+                        <p>Kamar E</p>
+                        <small>Status sewa aktif</small>
                     </div>
-                    <span class="kamar-status menunggu">
-                        Menunggu pembayaran
-                    </span>
+                    <span class="penghuni-status aktif">Aktif</span>
                 </div>
 
-                <div class="kamar-card-actions">
-                    <button type="button" class="btn-kamar">Ubah</button>
-                    <button type="button" class="btn-kamar">Lihat Pembayaran</button>
-                </div>
-            </article>
-
-            <article class="kamar-card" data-id="3">
-                <div class="kamar-card-header">
-                    <div>
-                        <h3>Kamar C</h3>
-                        <p>Rp 650.000/bulan</p>
-                        <small>Dewi Lestari (calon)</small>
-                    </div>
-                    <span class="kamar-status menunggu">
-                        Menunggu pembayaran
-                    </span>
-                </div>
-
-                <div class="kamar-card-actions">
-                    <button type="button" class="btn-kamar">Ubah</button>
-                    <button type="button" class="btn-kamar">Lihat Pembayaran</button>
-                </div>
-            </article>
-
-            <article class="kamar-card" data-id="4">
-                <div class="kamar-card-header">
-                    <div>
-                        <h3>Kamar D</h3>
-                        <p>Rp 650.000/bulan</p>
-                    </div>
-                    <span class="kamar-status kosong">Kosong</span>
-                </div>
-
-                <div class="kamar-card-actions">
-                    <button type="button" class="btn-kamar">Ubah</button>
-                    <button type="button" class="btn-kamar">Ubah Status</button>
-                </div>
-            </article>
-
-            <article class="kamar-card" data-id="5">
-                <div class="kamar-card-header">
-                    <div>
-                        <h3>Kamar E</h3>
-                        <p>Rp 650.000/bulan</p>
-                        <small>Andi Wijaya</small>
-                    </div>
-                    <span class="kamar-status terisi">Terisi</span>
-                </div>
-
-                <div class="kamar-card-actions">
-                    <button type="button" class="btn-kamar">Ubah</button>
+                <div class="penghuni-actions">
                     <button
                         type="button"
-                        class="btn-kamar"
-                        data-riwayat-kamar
+                        class="btn-penghuni btn-detail"
+                        data-ubah-penghuni
                     >
-                        Riwayat Huni Kamar
+                        Ubah Data
+                    </button>
+                    <button
+                        type="button"
+                        class="btn-penghuni btn-detail"
+                        data-riwayat-penghuni
+                    >
+                        Riwayat Penghuni
                     </button>
                 </div>
             </article>
 
         </div>
-    </div>
-
-    <!-- TAB PENGHUNI -->
-    <div id="tab-penghuni" class="data-tab-content" hidden>
-
-        <h2 class="section-title">Pengajuan Sewa Masuk</h2>
-
-        <article class="penghuni-card">
-            <div class="penghuni-info">
-                <div>
-                    <h3>Rian Saputra</h3>
-                    <p>Memilih Kamar B</p>
-                    <small>Pengajuan sewa baru</small>
-                </div>
-                <span class="penghuni-status menunggu">Menunggu</span>
-            </div>
-
-            <div class="penghuni-actions">
-                <button type="button" class="btn-penghuni btn-tolak">Tolak</button>
-                <button type="button" class="btn-penghuni btn-setujui">Setujui</button>
-            </div>
-        </article>
-
-        <h2 class="section-title">Calon Penghuni</h2>
-
-        <article class="penghuni-card">
-            <div class="penghuni-info">
-                <div>
-                    <h3>Dewi Lestari</h3>
-                    <p>Kamar C</p>
-                    <small>Menunggu proses sewa</small>
-                </div>
-                <span class="penghuni-status menunggu">Calon</span>
-            </div>
-
-            <div class="penghuni-actions">
-                <button type="button" class="btn-penghuni btn-detail">
-                    Lihat Pembayaran
-                </button>
-            </div>
-        </article>
-
-        <h2 class="section-title">Penghuni Aktif</h2>
-
-        <article class="penghuni-card">
-            <div class="penghuni-info">
-                <div>
-                    <h3>Andi Wijaya</h3>
-                    <p>Kamar E</p>
-                    <small>Status sewa aktif</small>
-                </div>
-                <span class="penghuni-status aktif">Aktif</span>
-            </div>
-
-            <div class="penghuni-actions">
-                <button
-                    type="button"
-                    class="btn-penghuni btn-detail"
-                    data-ubah-penghuni
-                >
-                    Ubah Data
-                </button>
-                <button
-                    type="button"
-                    class="btn-penghuni btn-detail"
-                    data-riwayat-penghuni
-                >
-                    Riwayat Penghuni
-                </button>
-            </div>
-        </article>
-
-    </div>
     </section>
 
     <!-- HALAMAN TAMBAH KAMAR -->
     <section id="tambah-kamar" class="page-section">
-
         <div class="kamar-form-content">
             <h2>Tambah Kamar Baru</h2>
 
             <form id="formTambahKamar">
-
                 <label for="tambahNomor">Nomor / Nama Kamar</label>
                 <input
                     type="text"
@@ -320,49 +324,66 @@ include __DIR__ . '/../includes/header.php';
                 >
                     Batal
                 </button>
-
             </form>
         </div>
-
     </section>
 
-    <!-- HALAMAN UBAH KAMAR -->
+    <!-- HALAMAN UBAH DATA KAMAR -->
     <section id="ubah-kamar" class="page-section">
-
         <div class="kamar-form-content">
             <h2>Ubah Data Kamar</h2>
 
             <form id="formUbahKamar">
-
                 <input type="hidden" id="ubahId" name="id_kamar">
 
-                <label for="ubahNomor">Nomor / Nama Kamar</label>
+                <label for="ubahNomor">Nomor / nama kamar</label>
                 <input
                     type="text"
                     id="ubahNomor"
                     name="nomor_kamar"
+                    placeholder="Kamar A"
                     required
                 >
 
-                <label for="ubahHarga">Harga Sewa per Bulan (Rp)</label>
+                <label for="ubahHarga">Harga sewa per bulan (Rp)</label>
                 <input
                     type="number"
                     id="ubahHarga"
                     name="harga_bulanan"
+                    placeholder="650000"
                     min="1"
                     required
                 >
 
                 <label for="ubahDeskripsi">Deskripsi Kamar</label>
-                <textarea id="ubahDeskripsi" name="deskripsi"></textarea>
+                <textarea
+                    id="ubahDeskripsi"
+                    name="deskripsi"
+                    placeholder="Tuliskan deskripsi kamar"
+                ></textarea>
 
                 <label for="ubahFoto">Foto Kamar</label>
-                <input
-                    type="file"
-                    id="ubahFoto"
-                    name="foto"
-                    accept=".jpg,.jpeg,.png"
+                <div class="upload-foto">
+                    <input
+                        type="file"
+                        id="ubahFoto"
+                        name="foto"
+                        accept=".jpg,.jpeg,.png"
+                    >
+
+                    <label for="ubahFoto">
+                        <strong>Ketuk untuk unggah foto</strong>
+                        <small>JPG/PNG, maks 5 MB</small>
+                    </label>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-hapus-kamar"
+                    id="btnHapusKamar"
                 >
+                    Hapus Kamar
+                </button>
 
                 <button type="submit" class="btn-primary">
                     Simpan Perubahan
@@ -375,17 +396,37 @@ include __DIR__ . '/../includes/header.php';
                 >
                     Batal
                 </button>
-
             </form>
         </div>
-
     </section>
+
+    <!-- POPUP KONFIRMASI HAPUS -->
+    <div class="popup-overlay" id="popupHapusKamar" hidden>
+        <div class="popup-hapus">
+            <h3>Hapus Kamar?</h3>
+            <p>Kamar ini akan hilang dari daftar.</p>
+
+            <div class="popup-hapus-actions">
+                <button
+                    type="button"
+                    id="btnBatalHapus"
+                >
+                    Batal
+                </button>
+
+                <button
+                    type="button"
+                    id="btnKonfirmasiHapus"
+                >
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- HALAMAN UBAH STATUS KAMAR -->
     <section id="ubah-status-kamar" class="page-section">
-
         <div class="kamar-form-content">
-
             <h2>Ubah Status Kamar</h2>
 
             <!-- INFORMASI KAMAR -->
@@ -402,7 +443,6 @@ include __DIR__ . '/../includes/header.php';
             </div>
 
             <form id="formUbahStatus">
-
                 <input
                     type="hidden"
                     id="statusIdKamar"
@@ -418,7 +458,6 @@ include __DIR__ . '/../includes/header.php';
                         value="Kosong"
                         checked
                     >
-
                     <span class="status-option-info">
                         <strong>Kosong</strong>
                         <small>Kamar siap dihuni dan tampil di daftar kamar tersedia.</small>
@@ -431,7 +470,6 @@ include __DIR__ . '/../includes/header.php';
                         name="status"
                         value="Tidak tersedia"
                     >
-
                     <span class="status-option-info">
                         <strong>Tidak tersedia</strong>
                         <small>Renovasi atau ditutup sementara, tidak tampil di halaman publik.</small>
@@ -444,7 +482,6 @@ include __DIR__ . '/../includes/header.php';
                         name="status"
                         value="Terisi"
                     >
-
                     <span class="status-option-info">
                         <strong>Terisi</strong>
                         <small>Kamar sedang dihuni oleh penghuni aktif.</small>
@@ -452,7 +489,6 @@ include __DIR__ . '/../includes/header.php';
                 </label>
 
                 <label for="catatanStatus">Catatan (opsional)</label>
-
                 <textarea
                     id="catatanStatus"
                     name="catatan"
@@ -474,22 +510,16 @@ include __DIR__ . '/../includes/header.php';
                 >
                     Batal
                 </button>
-
             </form>
-
         </div>
-
     </section>
 
     <!-- HALAMAN UBAH DATA PENGHUNI -->
     <section id="ubah-data-penghuni" class="page-section">
-
         <div class="kamar-form-content">
-
             <h2>Ubah Data Penghuni</h2>
 
             <form id="formUbahPenghuni">
-
                 <input
                     type="hidden"
                     id="penghuniId"
@@ -523,7 +553,6 @@ include __DIR__ . '/../includes/header.php';
                 >
 
                 <label for="penghuniKamar">Kamar</label>
-
                 <select
                     id="penghuniKamar"
                     name="id_kamar"
@@ -547,7 +576,6 @@ include __DIR__ . '/../includes/header.php';
 
                 <label>Status Penghuni</label>
                 <div class="status-penghuni-buttons">
-
                     <label>
                         <input
                             type="radio"
@@ -566,7 +594,6 @@ include __DIR__ . '/../includes/header.php';
                         >
                         Nonaktif
                     </label>
-
                 </div>
 
                 <small class="form-hint">
@@ -584,21 +611,16 @@ include __DIR__ . '/../includes/header.php';
                 >
                     Batal
                 </button>
-
             </form>
-
         </div>
-
     </section>
 
     <!-- HALAMAN RIWAYAT HUNI KAMAR -->
     <section id="riwayat-huni-kamar" class="page-section">
-
         <div class="kamar-form-content">
             <h2>Riwayat Huni Kamar E</h2>
 
             <div class="riwayat-list">
-
                 <article class="riwayat-item">
                     <div>
                         <strong>Andi Wijaya</strong>
@@ -622,7 +644,6 @@ include __DIR__ . '/../includes/header.php';
                     </div>
                     <span class="riwayat-status selesai">Selesai</span>
                 </article>
-
             </div>
 
             <button
@@ -633,12 +654,10 @@ include __DIR__ . '/../includes/header.php';
                 Kembali
             </button>
         </div>
-
     </section>
 
     <!-- HALAMAN RIWAYAT PENGHUNI -->
     <section id="riwayat-penghuni" class="page-section">
-
         <div class="kamar-form-content">
             <h2>Riwayat Penghuni</h2>
 
@@ -648,7 +667,6 @@ include __DIR__ . '/../includes/header.php';
 
             <!-- RIWAYAT KAMAR -->
             <div class="riwayat-pembungkus">
-
                 <h3>Riwayat Kamar</h3>
 
                 <div class="riwayat-kamar-info">
@@ -712,7 +730,6 @@ include __DIR__ . '/../includes/header.php';
                     </div>
                     <span>Lunas</span>
                 </div>
-
             </div>
 
             <button
@@ -723,7 +740,6 @@ include __DIR__ . '/../includes/header.php';
                 Kembali
             </button>
         </div>
-
     </section>
 </main>
 

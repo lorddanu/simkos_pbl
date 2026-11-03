@@ -898,7 +898,7 @@ button {
 }
 
 .kamar-form-content .btn-primary {
-    margin-top: 80px;
+    margin-top: 1px;
     border: none;
     background: #7164cc;
     color: white;
@@ -1148,4 +1148,76 @@ button {
 
 .riwayat-bayar:last-child {
     border-bottom: none;
+}
+
+/* TOMBOL HAPUS KAMAR */
+.btn-hapus-kamar {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 7px;
+    border: none;
+    border-radius: 14px;
+    background: #d26368;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 90px;
+}
+
+/* POPUP HAPUS KAMAR */
+.popup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.popup-overlay[hidden] {
+    display: none;
+}
+
+.popup-hapus {
+    width: 100%;
+    max-width: 350px;
+    padding: 20px;
+    border-radius: 15px;
+    background: #7162d2;
+    color: white;
+}
+
+.popup-hapus h3 {
+    margin: 0 0 3px;
+    color: #e56c76;
+    font-size: 15px;
+}
+
+.popup-hapus p {
+    margin: 0 0 12px;
+    font-size: 13px;
+}
+
+.popup-hapus-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.popup-hapus-actions button {
+    flex: 1;
+    padding: 9px;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+}
+
+#btnBatalHapus {
+    background: #5d51b6;
+}
+
+#btnKonfirmasiHapus {
+    background: #d26368;
 }

@@ -382,3 +382,44 @@ document.querySelectorAll('[data-kembali-riwayat]').forEach(button => {
         });
     });
 });
+
+// Membuka halaman ubah data kamar
+document.querySelectorAll('[data-ubah-kamar]').forEach(button => {
+    button.addEventListener('click', () => {
+
+        const kartu = button.closest('.kamar-card');
+
+        const id = kartu.dataset.id;
+        const nomor = kartu.querySelector('h3').textContent.trim();
+
+        document.getElementById('ubahId').value = id;
+        document.getElementById('ubahNomor').value = nomor;
+        document.getElementById('ubahHarga').value = 650000;
+
+        document.getElementById('ubahDeskripsi').value =
+            'Dekat kampus, 10 menit jalan kaki. Parkir motor tersedia.';
+
+        document.getElementById('ubahFoto').value = '';
+
+        tampilkanSectionKamar('ubah-kamar');
+    });
+});
+
+// Membuka popup hapus kamar
+document.getElementById('btnHapusKamar').addEventListener('click', () => {
+    document.getElementById('popupHapusKamar').hidden = false;
+});
+
+// Membatalkan hapus
+document.getElementById('btnBatalHapus').addEventListener('click', () => {
+    document.getElementById('popupHapusKamar').hidden = true;
+});
+
+// Konfirmasi hapus
+document.getElementById('btnKonfirmasiHapus').addEventListener('click', () => {
+    const idKamar = document.getElementById('ubahId').value;
+
+    alert('Kamar dengan ID ' + idKamar + ' siap dihapus.');
+
+    document.getElementById('popupHapusKamar').hidden = true;
+});
