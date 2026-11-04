@@ -1,9 +1,9 @@
-
 <?php
-session_start();
-$_SESSION = [];
-session_destroy();
+require __DIR__ . '/../database/helpers.php';
 
-header("Location: login.php");
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_ok()) {
+    $_SESSION = [];
+    session_destroy();
+}
+header('Location: login.php');
 exit;
-?>
