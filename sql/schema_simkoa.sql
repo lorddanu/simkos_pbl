@@ -74,3 +74,15 @@ CREATE INDEX idx_sewa_kamar ON sewa(id_kamar);
 CREATE INDEX idx_sewa_penghuni ON sewa(id_penghuni);
 CREATE INDEX idx_pembayaran_sewa ON pembayaran(id_sewa);
 CREATE INDEX idx_pembayaran_status ON pembayaran(status_verifikasi);
+
+-- tabel akun
+CREATE TABLE akun (
+    id_akun SERIAL PRIMARY KEY,
+    nama VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL
+        CHECK (role IN ('admin', 'penghuni'))
+);
+
+CREATE INDEX idx_akun_email ON akun(email);
