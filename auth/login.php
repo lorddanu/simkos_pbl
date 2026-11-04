@@ -59,5 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </form>
   <p class="auth-foot">Belum punya akun? <a href="register.php">Daftar di Sini</a></p>
 </div>
+<div id="demo-reset-config" hidden data-endpoint="../reset_demo.php" data-home="login.php" data-csrf="<?= h(csrf_token()) ?>"></div>
+<script src="../assets/js/reset_demo_on_reload.js"></script>
 </body>
 </html>

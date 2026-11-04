@@ -43,5 +43,7 @@
   </nav>
   <?php endif; ?>
 </div>
+<div id="demo-reset-config" hidden data-endpoint="../reset_demo.php" data-home="index.php" data-csrf="<?= h(csrf_token()) ?>"></div>
+<script src="../assets/js/reset_demo_on_reload.js"></script>
 </body>
 </html>

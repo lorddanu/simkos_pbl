@@ -35,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_pengajuan'])) {
             if ($rowPengajuan['status_kamar'] !== 'kosong') {
                 throw new RuntimeException('Kamar sudah tidak tersedia.');
             }
+            demo_track_before_change('pengajuan_sewa', $idPengajuan);
             $st = $pdo->prepare(
                 "UPDATE pengajuan_sewa
                     SET status = 'menunggu_pembayaran', ditinjau_oleh = ?, ditinjau_pada = NOW(),
@@ -45,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_pengajuan'])) {
             $_SESSION['flash_admin'] = 'Pengajuan disetujui. Calon penghuni dapat mengajukan pembayaran.';
         } elseif ($aksiPengajuan === 'tolak') {
             $alasan = trim($_POST['catatan_admin'] ?? '');
+            demo_track_before_change('pengajuan_sewa', $idPengajuan);
             $st = $pdo->prepare(
                 "UPDATE pengajuan_sewa
                     SET status = 'ditolak', ditinjau_oleh = ?, ditinjau_pada = NOW(),

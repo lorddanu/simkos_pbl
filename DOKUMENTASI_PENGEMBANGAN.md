@@ -2,7 +2,7 @@
 
 Dokumen ini menjelaskan struktur dan alur yang saat ini ada di proyek SIMKOS agar anggota kelompok, dosen, atau pengembang berikutnya dapat melanjutkan pekerjaan dengan konteks yang sama.
 
-> **Penting:** aplikasi masih memiliki bagian simulasi. Pengajuan sewa calon penghuni dan notifikasinya disimpan di `$_SESSION`, belum di tabel database, dan belum terhubung ke tindakan admin.
+> **Penting:** alur pengajuan dan pembayaran menggunakan PostgreSQL agar calon penghuni dan admin dapat menjalankan proses yang sama. Perubahan simulasi dicatat per sesi browser dan dibatalkan saat browser di-refresh; data dasar akun dan kamar tetap dipertahankan.
 
 ## 1. Gambaran sistem
 
@@ -20,7 +20,7 @@ flowchart TD
     E -->|Belum ada sewa aktif| G[Dashboard calon penghuni]
 ```
 
-Role `admin` dikenali oleh helper autentikasi, tetapi halaman dashboard admin belum tersedia di proyek ini.
+Role `admin` dikenali oleh helper autentikasi dan diarahkan ke `admin/dashboard.php`.
 
 ## 2. Struktur folder penting
 
@@ -40,6 +40,7 @@ Role `admin` dikenali oleh helper autentikasi, tetapi halaman dashboard admin be
 | `assets/css/calon_penghuni.css` | Gaya khusus tampilan calon penghuni, termasuk tampilan mobile. |
 | `sql/schema_simkoa.sql` | Tabel inti kamar, penghuni, sewa, pembayaran, dan keluhan. |
 | `sql/tambahan_penghuni.sql` | Tabel akun/migrasi role dan tambahan kolom aplikasi. |
+| `sql/migrasi_alur_pengajuan.sql` | Tabel pengajuan sewa dan relasi pembayaran untuk alur admin. |
 | `sql/akun_demo.sql` | Data kamar dan akun demo untuk presentasi. |
 
 ## 3. Login dan penentuan role
@@ -64,16 +65,19 @@ flowchart TD
     E --> F[Isi tanggal dan lama sewa]
     F --> G[Kirim pengajuan]
     G --> H[Pengajuan Dikirim: Menunggu Persetujuan]
-    H -->|Setelah 20 detik| I[Status simulasi menjadi Pengajuan Diterima]
-    I --> J[Ikon pesan / Notifikasi]
-    J --> K[Halaman Pengajuan Diterima]
+    H --> I{Keputusan admin}
+    I -->|Setujui| J[Pengajuan Diterima]
+    I -->|Tolak| X[Pengajuan Ditolak]
+    J --> K[Ikon pesan / Notifikasi]
     K --> L[Ajukan Pembayaran]
-    L --> M[Form Unggah Bukti Pembayaran]
+    L --> M[Form Pembayaran]
     M --> N{Lihat metode?}
     N -- Ya --> O[Informasi BCA / QRIS]
     O --> M
     N -- Tidak --> P[Kirim pembayaran]
-    P --> Q[Konfirmasi Bukti Terkirim]
+    P --> R{Verifikasi admin}
+    R -->|Terima| S[Sewa Aktif]
+    R -->|Tolak| T[Ajukan Pembayaran Lagi]
 ```
 
 ### Rincian layar calon penghuni
@@ -82,33 +86,31 @@ flowchart TD
 - `kamar.php`: daftar kamar dengan `status = 'kosong'`; kotak foto sengaja kosong sebagai placeholder yang siap diisi.
 - `detail.php`: detail harga dan fasilitas kamar. Ikon fasilitas berupa SVG di markup; gambar kamar tetap placeholder kosong sesuai permintaan desain.
 - `ajukan.php`: judul **Ajukan Sewa Kamar**, tanggal mulai/akhir, jumlah bulan (1-12), catatan opsional, serta tombol kirim. Ringkasan total, link metode pembayaran, dan unggah bukti tidak ditampilkan di formulir pengajuan awal. Label menu bawah berubah menjadi **Pengajuan** hanya di halaman ini.
-- `terkirim.php`: menampilkan status awal dan memuat ulang halaman setelah sisa waktu simulasi.
+- `terkirim.php`: menampilkan status pengajuan yang sedang menunggu keputusan admin.
 - `notifikasi.php`: menampilkan status pengajuan. Setelah diterima, tersedia tombol **Ajukan Pembayaran** dan **Kembali ke Beranda**. Tombol pembayaran membuka form pembayaran pasca-persetujuan.
 - `pembayaran.php`: form **Unggah Bukti Pembayaran**. Kartu harga/tanggal sewa dan pengatur lama sewa tidak diulang; ringkasan total, tautan metode, unggah bukti opsional, catatan, dan tombol kirim tetap tersedia.
 - `pembayaran_terkirim.php`: konfirmasi seperti desain **Bukti Terkirim**, dengan nominal, tanggal unggah, status **Menunggu verifikasi**, total pembayaran, dan tombol **Kembali ke Beranda**. Header pada layar ini ringkas dan menyembunyikan ikon pesan/tombol kembali.
 - `keluhan.php` dan `keluhan_terkirim.php`: formulir masukan dan layar konfirmasi. Penyimpanan keluhan menggunakan database jika akun memiliki `id_penghuni`.
 - `metode.php`: layar metode pembayaran demo (BCA/QRIS), dibuka dari tautan **Metode Pembayaran yang Tersedia** pada form pembayaran dan menyediakan tombol **Kembali ke Unggah Bukti**.
 
-## 5. Simulasi status dan notifikasi 20 detik
+## 5. Alur admin dan reset simulasi
 
-Saat formulir pengajuan berhasil dikirim, `calon_penghuni/index.php` menyimpan data demo berikut di sesi PHP:
+1. Calon penghuni mengirim pengajuan sewa. Status tersimpan sebagai `menunggu_persetujuan`.
+2. Admin memilih setujui atau tolak dari halaman data penghuni. Jika disetujui, calon dapat mengajukan pembayaran.
+3. Pembayaran masuk ke daftar verifikasi admin. Bukti unggahan opsional untuk simulasi.
+4. Jika admin menolak pembayaran, calon dapat mengirim pembayaran lagi. Jika admin menerima, sistem membuat sewa, menandai kamar terisi, dan role efektif akun menjadi penghuni.
+5. Perubahan transaksi selama alur dicatat per sesi PHP. Saat browser mendeteksi refresh, `assets/js/reset_demo_on_reload.js` mengirim reset ke `reset_demo.php`; helper menghapus baris yang dibuat simulasi dan memulihkan baris yang diubah. Data dasar akun/kamar tetap ada.
 
-- ID dan nomor kamar, tanggal mulai/akhir, jumlah bulan, total biaya simulasi, catatan, dan tanggal kirim.
-- `status = menunggu_persetujuan`.
-- `persetujuan_pada = waktu kirim + 20 detik`.
-- Penanda notifikasi belum dibaca.
-
-Ketika layar `terkirim` atau `notifikasi` dimuat, controller memeriksa waktu. Jika sudah melewati `persetujuan_pada`, status sesi berubah menjadi `diterima`. JavaScript pada layar menunggu memuat ulang halaman setelah sisa waktu, sehingga perubahan tampak otomatis. Halaman notifikasi kemudian menampilkan tampilan penerimaan dan tombol **Ajukan Pembayaran**. Titik kecil pada ikon pesan menandai notifikasi yang belum dibuka.
-
-Jeda 20 detik ini hanya perilaku demo. Tidak ada admin yang benar-benar menyetujui pengajuan, tidak ada pesan yang dikirim ke luar aplikasi, dan data pengajuan/pembayaran hilang ketika sesi berakhir. Jika browser menutup halaman, status pengajuan tetap diperbarui saat pengguna membuka kembali `terkirim`, `notifikasi`, atau halaman pembayaran setelah waktunya lewat. Bukti yang dipilih (jika ada) disimpan di `calon_penghuni/uploads/`; metadata pembayaran hanya ada di sesi dan tidak diverifikasi otomatis.
+Reset ini berlaku untuk alur yang dilakukan dalam browser/sesi yang sama. Jangan gunakan perilaku demo ini sebagai mekanisme reset data untuk pengguna produksi atau beberapa browser bersamaan. Data transaksi lama yang dibuat sebelum fitur rollback dipasang tidak termasuk daftar perubahan dan tidak akan ikut dihapus.
 
 ## 6. Database dan data demo
 
 1. Buat database PostgreSQL sesuai konfigurasi lokal.
 2. Jalankan `sql/schema_simkoa.sql` untuk tabel inti.
 3. Jalankan `sql/tambahan_penghuni.sql` untuk tabel akun/migrasi dan kolom tambahan.
-4. Jalankan `sql/akun_demo.sql` untuk data presentasi.
-5. Sesuaikan koneksi pada `database/database.php` dengan server lokal. Jangan menaruh kredensial produksi di repository.
+4. Jalankan `sql/migrasi_alur_pengajuan.sql` untuk tabel dan status alur persetujuan/pembayaran.
+5. Jalankan `sql/akun_demo.sql` untuk data presentasi.
+6. Sesuaikan koneksi pada `database/database.php` dengan server lokal. Jangan menaruh kredensial produksi di repository.
 
 Akun demo yang dicantumkan di `sql/akun_demo.sql`:
 
@@ -124,9 +126,10 @@ Gunakan akun demo hanya untuk lingkungan lokal/presentasi.
 1. Masuk dengan akun calon penghuni.
 2. Buka **Lihat Kamar Kosong**, pilih kamar B atau C, lalu pilih **Ajukan Sewa Kamar**.
 3. Isi tanggal mulai dan akhir, pilih lama sewa, lalu kirim. Bukti pembayaran tidak diperlukan pada tahap pengajuan ini.
-4. Layar menunjukkan **Pengajuan Dikirim / Menunggu Persetujuan**. Biarkan halaman terbuka selama 20 detik; layar memuat ulang otomatis dan menampilkan **Pengajuan Diterima**.
-5. Buka ikon pesan untuk melihat notifikasi penerimaan dan tombol **Ajukan Pembayaran**.
-6. Di halaman pembayaran, bagian tanggal/harga sewa dan pengatur jumlah bulan tidak diulang; ringkasan biaya ditampilkan di kartu tagihan. Bukti boleh dikosongkan untuk simulasi. Gunakan tautan metode untuk melihat informasi BCA/QRIS, kembali ke form, lalu kirim untuk melihat konfirmasi **Bukti Terkirim**.
+4. Login sebagai admin di browser yang sama, buka daftar pengajuan, lalu setujui atau tolak pengajuan.
+5. Jika disetujui, login kembali sebagai calon dan ajukan pembayaran. Bukti boleh dikosongkan untuk simulasi.
+6. Login sebagai admin dan terima atau tolak pembayaran. Jika diterima, sewa aktif dan role akun berubah menjadi penghuni.
+7. Refresh browser untuk mengembalikan progres transaksi simulasi ke keadaan semula. Akun dan data kamar dasar tidak dihapus.
 
 ## 7. Menjalankan di XAMPP
 
@@ -138,12 +141,9 @@ Gunakan akun demo hanya untuk lingkungan lokal/presentasi.
 
 ## 8. Catatan untuk pekerjaan berikutnya
 
-1. **Persistensi pengajuan:** buat tabel pengajuan sewa dan simpan data di database. Ganti `$_SESSION['pengajuan_sewa_demo']` agar data tidak hilang saat sesi berakhir dan dapat dilihat admin.
-2. **Persetujuan admin:** jika simulasi selesai, ganti timer 20 detik dengan aksi admin yang mengubah status menjadi `diterima` atau `ditolak`.
-3. **Notifikasi permanen:** simpan notifikasi di tabel database, ikat ke akun penerima, dan simpan waktu dibaca. Saat ini notifikasi hanya mencerminkan satu pengajuan yang tersimpan di sesi.
-4. **Pembayaran pasca-persetujuan:** form pembayaran dan layar metode sudah tersedia sebagai simulasi. Lengkapi penyimpanan pembayaran ke database dan verifikasi admin; status pembayaran saat ini hanya `menunggu_verifikasi` di sesi.
-5. **Penyelesaian sewa:** setelah langkah pembayaran disepakati, buat alur yang mencatat sewa dan mengubah status kamar secara transaksional agar akun calon otomatis menjadi penghuni.
-6. **Dashboard admin:** role `admin` belum diarahkan ke halaman dashboard admin karena fiturnya belum dibuat.
+1. **Notifikasi permanen:** notifikasi saat ini berasal dari status pengajuan dan kolom `notifikasi_dibaca`, tanpa pengiriman email/pesan eksternal.
+2. **Reset multi-browser:** rollback simulasi saat ini disimpan dalam sesi browser; jika perlu demo lintas browser, pindahkan perubahan sementara ke penyimpanan simulasi terisolasi per demo.
+3. **Penyempurnaan admin:** beberapa area statistik/laporan dan formulir manajemen kamar masih berupa tampilan statis.
 7. **Validasi dan keamanan:** pertahankan prepared statements, CSRF untuk POST, `htmlspecialchars` saat output, validasi server-side, dan jangan menyimpan kata sandi asli.
 
 ## 9. Pedoman melanjutkan pekerjaan

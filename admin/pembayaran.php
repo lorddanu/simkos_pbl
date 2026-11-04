@@ -46,25 +46,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi_pembayaran'] ?? '') !
                 }
                 $st = $pdo->prepare(
                     'INSERT INTO sewa (id_kamar, id_penghuni, tanggal_mulai, tanggal_selesai)
-                     VALUES (?, ?, ?, ?)'
+                     VALUES (?, ?, ?, ?) RETURNING id_sewa'
                 );
                 $st->execute([
                     $pengajuanBayar['id_kamar'], $pengajuanBayar['id_penghuni'],
                     $pengajuanBayar['tanggal_mulai'], $pengajuanBayar['tanggal_selesai'],
                 ]);
+                demo_track_insert('sewa', (int) $st->fetchColumn());
+                demo_track_before_change('kamar', (int) $pengajuanBayar['id_kamar']);
                 $pdo->prepare("UPDATE kamar SET status = 'terisi' WHERE id_kamar = ?")
                     ->execute([$pengajuanBayar['id_kamar']]);
+                $akunSt = $pdo->prepare('SELECT id_akun FROM akun WHERE id_penghuni = ?');
+                $akunSt->execute([$pengajuanBayar['id_penghuni']]);
+                $idAkunCalon = (int) $akunSt->fetchColumn();
+                demo_track_before_change('akun', $idAkunCalon);
                 $pdo->prepare("UPDATE akun SET role = 'penghuni' WHERE id_penghuni = ?")
                     ->execute([$pengajuanBayar['id_penghuni']]);
+                demo_track_before_change('pengajuan_sewa', (int) $pengajuanBayar['id_pengajuan']);
                 $pdo->prepare("UPDATE pengajuan_sewa SET status = 'sewa_aktif', ditinjau_oleh = ?, ditinjau_pada = NOW(), notifikasi_dibaca = FALSE, diperbarui_pada = NOW() WHERE id_pengajuan = ?")
                     ->execute([(int) $user['id_akun'], $pengajuanBayar['id_pengajuan']]);
+                demo_track_before_change('pembayaran', $idPembayaran);
                 $pdo->prepare("UPDATE pembayaran SET status_verifikasi = 'diterima' WHERE id_pembayaran = ?")
                     ->execute([$idPembayaran]);
                 $_SESSION['flash_admin'] = 'Pembayaran diterima. Kamar dan sewa penghuni kini aktif.';
             } elseif ($aksiPembayaran === 'tolak') {
                 $alasan = trim($_POST['catatan_admin'] ?? '');
+                demo_track_before_change('pembayaran', $idPembayaran);
                 $pdo->prepare("UPDATE pembayaran SET status_verifikasi = 'ditolak' WHERE id_pembayaran = ?")
                     ->execute([$idPembayaran]);
+                demo_track_before_change('pengajuan_sewa', (int) $pengajuanBayar['id_pengajuan']);
                 $pdo->prepare("UPDATE pengajuan_sewa SET status = 'pembayaran_ditolak', catatan_admin = ?, ditinjau_oleh = ?, ditinjau_pada = NOW(), notifikasi_dibaca = FALSE, diperbarui_pada = NOW() WHERE id_pengajuan = ?")
                     ->execute([$alasan !== '' ? $alasan : null, (int) $user['id_akun'], $pengajuanBayar['id_pengajuan']]);
                 $_SESSION['flash_admin'] = 'Pembayaran ditolak. Calon penghuni dapat mengajukan pembayaran kembali.';
@@ -76,6 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi_pembayaran'] ?? '') !
                 throw new RuntimeException('Aksi pembayaran tidak dikenal.');
             }
             $statusBaru = $aksiPembayaran === 'terima' ? 'diterima' : 'ditolak';
+            demo_track_before_change('pembayaran', $idPembayaran);
             $pdo->prepare('UPDATE pembayaran SET status_verifikasi = ? WHERE id_pembayaran = ?')
                 ->execute([$statusBaru, $idPembayaran]);
             $_SESSION['flash_admin'] = 'Status pembayaran penghuni berhasil diperbarui.';

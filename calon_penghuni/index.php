@@ -71,8 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_k
         $error = 'Akun belum terhubung ke data penghuni.';
         $halaman = 'keluhan';
     } else {
-        $st = $pdo->prepare('INSERT INTO keluhan (id_penghuni, isi_keluhan) VALUES (?, ?)');
+        $st = $pdo->prepare('INSERT INTO keluhan (id_penghuni, isi_keluhan) VALUES (?, ?) RETURNING id_keluhan');
         $st->execute([(int) $user['id_penghuni'], $isiKeluhan]);
+        demo_track_insert('keluhan', (int) $st->fetchColumn());
         header('Location: index.php?halaman=keluhan_terkirim');
         exit;
     }
@@ -125,13 +126,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
             $st = $pdo->prepare(
                 "INSERT INTO pengajuan_sewa
                     (id_penghuni, id_kamar, tanggal_mulai, tanggal_selesai, jumlah_bulan, harga_bulanan, total, catatan)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id_pengajuan"
             );
             $st->execute([
                 (int) $user['id_penghuni'], $idKamar, $nilaiMulai, $nilaiSelesai,
                 $jumlahBulan, $hargaBulanan, $hargaBulanan * $jumlahBulan,
                 trim($_POST['catatan'] ?? ''),
             ]);
+            demo_track_insert('pengajuan_sewa', (int) $st->fetchColumn());
             header('Location: index.php?halaman=terkirim');
             exit;
         } catch (PDOException $e) {
@@ -220,7 +222,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
                     trim($_POST['catatan'] ?? ''),
                 ]);
                 $idPembayaranBaru = (int) $st->fetchColumn();
+                demo_track_insert('pembayaran', $idPembayaranBaru, $namaBukti ? $folderBukti . '/' . $namaBukti : null);
 
+                demo_track_before_change('pengajuan_sewa', $idPengajuanBayar);
                 $st = $pdo->prepare(
                     "UPDATE pengajuan_sewa
                         SET status = 'menunggu_verifikasi', notifikasi_dibaca = FALSE, diperbarui_pada = NOW()
@@ -279,6 +283,7 @@ if ($halaman === 'pembayaran_terkirim' && $pengajuan) {
 }
 
 if ($halaman === 'notifikasi' && $pengajuan) {
+    demo_track_before_change('pengajuan_sewa', (int) $pengajuan['id_pengajuan']);
     $st = $pdo->prepare('UPDATE pengajuan_sewa SET notifikasi_dibaca = TRUE WHERE id_pengajuan = ?');
     $st->execute([$pengajuan['id_pengajuan']]);
     $pengajuan['notifikasi_dibaca'] = true;

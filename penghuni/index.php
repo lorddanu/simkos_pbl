@@ -76,9 +76,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $ins = $pdo->prepare(
             'INSERT INTO pembayaran (id_sewa, jumlah, tanggal_bayar, file_bukti, tanggal_upload, periode)
-             VALUES (?, ?, CURRENT_DATE, ?, NOW(), ?)'   // status_verifikasi otomatis "menunggu"
+             VALUES (?, ?, CURRENT_DATE, ?, NOW(), ?) RETURNING id_pembayaran'   // status_verifikasi otomatis "menunggu"
         );
         $ins->execute([$sewa['id_sewa'], $sewa['harga_bulanan'], $nama, $periode]);
+        demo_track_insert('pembayaran', (int) $ins->fetchColumn(), $uploadDir . $nama);
         go('proof');
     }
 
@@ -88,15 +89,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!in_array($kategori, ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'], true)) {
             $kategori = 'Lainnya';
         }
-        $ins = $pdo->prepare('INSERT INTO keluhan (id_penghuni, isi_keluhan, kategori) VALUES (?, ?, ?)');
+        $ins = $pdo->prepare('INSERT INTO keluhan (id_penghuni, isi_keluhan, kategori) VALUES (?, ?, ?) RETURNING id_keluhan');
         $ins->execute([$idPenghuni, $catatan !== '' ? $catatan : '(tanpa catatan)', $kategori]);
+        demo_track_insert('keluhan', (int) $ins->fetchColumn());
         go('sent');
     }
 
     // Khusus demo: hapus bukti yang masih "menunggu" agar alur bisa diulang. Hapus blok ini di versi akhir.
     if ($aksi === 'reset' && $bayar && $bayar['status_verifikasi'] === 'menunggu') {
+        demo_track_before_change('pembayaran', (int) $bayar['id_pembayaran']);
         $pdo->prepare('DELETE FROM pembayaran WHERE id_pembayaran = ?')->execute([$bayar['id_pembayaran']]);
-        if ($bayar['file_bukti']) @unlink($uploadDir . basename($bayar['file_bukti']));
         go('dash');
     }
     go('dash');
@@ -262,5 +264,7 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H8l-4 4z"/></svg>Saran</a>
   </nav>
 </div>
+<div id="demo-reset-config" hidden data-endpoint="../reset_demo.php" data-home="index.php" data-csrf="<?= h(csrf_token()) ?>"></div>
+<script src="../assets/js/reset_demo_on_reload.js"></script>
 </body>
 </html>
