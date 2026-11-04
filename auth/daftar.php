@@ -23,7 +23,7 @@ $sukses = isset($_GET['sukses']) && $_GET['sukses'] === '1';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Penghuni - SIMKOS</title>
-    <link rel="stylesheet" href="../assets/cs/login.css">
+    <link rel="stylesheet" href="../assets/css/login.css">
 </head>
 
 <body>

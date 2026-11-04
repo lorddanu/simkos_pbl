@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - SIMKOS</title>
-    <link rel="stylesheet" href="../assets/cs/admin_dashboard.css">
+    <link rel="stylesheet" href="../assets/css/admin_dashboard.css">
 </head>
 <body>
 <header class="admin-header">
