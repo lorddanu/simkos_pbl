@@ -78,11 +78,13 @@ CREATE INDEX idx_pembayaran_status ON pembayaran(status_verifikasi);
 -- tabel akun
 CREATE TABLE akun (
     id_akun SERIAL PRIMARY KEY,
-    nama VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
+    id_penghuni INT UNIQUE REFERENCES penghuni(id_penghuni) ON DELETE CASCADE,
+    nama VARCHAR(100),
+    email VARCHAR(150) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL
-        CHECK (role IN ('admin', 'penghuni'))
+    role VARCHAR(20) NOT NULL DEFAULT 'calon_penghuni'
+        CHECK (role IN ('admin', 'penghuni', 'calon_penghuni')),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_akun_email ON akun(email);

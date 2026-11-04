@@ -46,7 +46,7 @@ function current_user(): ?array
                     ) THEN 'penghuni'
                     ELSE 'calon_penghuni'
                 END AS role,
-                a.id_penghuni, p.nama
+                a.id_penghuni, COALESCE(p.nama, a.nama) AS nama
            FROM akun a LEFT JOIN penghuni p ON p.id_penghuni = a.id_penghuni
           WHERE a.id_akun = ?"
     );

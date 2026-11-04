@@ -6,6 +6,7 @@
 <form method="post" enctype="multipart/form-data" action="index.php?halaman=pembayaran" class="upload-form payment-upload-form">
   <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
   <input type="hidden" name="aksi" value="kirim_pembayaran">
+  <input type="hidden" name="id_pengajuan" value="<?= (int) $pengajuan['id_pengajuan'] ?>">
   <section class="cost-card">
     <div class="cost-row"><span>Sewa Kamar</span><span>Rp <?= h(number_format((float) $pengajuan['total'], 2, ',', '.')) ?></span></div>
     <hr>

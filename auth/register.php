@@ -32,8 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $st->execute([$nama]);
             $idPenghuni = (int) $st->fetchColumn();
 
-            $st = $pdo->prepare("INSERT INTO akun (id_penghuni, email, password_hash, role) VALUES (?, ?, ?, 'calon_penghuni')");
-            $st->execute([$idPenghuni, $email, password_hash($password, PASSWORD_DEFAULT)]);
+            $st = $pdo->prepare("INSERT INTO akun (id_penghuni, nama, email, password_hash, role) VALUES (?, ?, ?, ?, 'calon_penghuni')");
+            $st->execute([$idPenghuni, $nama, $email, password_hash($password, PASSWORD_DEFAULT)]);
             $pdo->commit();
 
             $_SESSION['info'] = 'Akun berhasil dibuat. Silakan masuk.';

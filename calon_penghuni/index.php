@@ -18,10 +18,15 @@ $pdo = db();
 $kamarKosong = [];
 if ($halaman === 'kamar') {
     $kamarKosong = $pdo->query(
-        "SELECT id_kamar, nomor_kamar, harga_bulanan
-           FROM kamar
-          WHERE status = 'kosong'
-          ORDER BY nomor_kamar"
+        "SELECT k.id_kamar, k.nomor_kamar, k.harga_bulanan
+           FROM kamar k
+          WHERE k.status = 'kosong'
+            AND NOT EXISTS (
+                SELECT 1 FROM pengajuan_sewa ps
+                 WHERE ps.id_kamar = k.id_kamar
+                   AND ps.status IN ('menunggu_persetujuan', 'menunggu_pembayaran', 'menunggu_verifikasi', 'pembayaran_ditolak')
+            )
+          ORDER BY k.nomor_kamar"
     )->fetchAll();
 }
 
@@ -31,7 +36,12 @@ if (in_array($halaman, ['detail', 'ajukan'], true)) {
     $st = $pdo->prepare(
         "SELECT id_kamar, nomor_kamar, harga_bulanan
            FROM kamar
-          WHERE id_kamar = ? AND status = 'kosong'"
+          WHERE id_kamar = ? AND status = 'kosong'
+            AND NOT EXISTS (
+                SELECT 1 FROM pengajuan_sewa ps
+                 WHERE ps.id_kamar = kamar.id_kamar
+                   AND ps.status IN ('menunggu_persetujuan', 'menunggu_pembayaran', 'menunggu_verifikasi', 'pembayaran_ditolak')
+            )"
     );
     $st->execute([$idKamar]);
     $kamarDipilih = $st->fetch() ?: null;
@@ -106,24 +116,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
     ) {
         $error = 'Periksa kembali tanggal dan durasi sewa.';
         $halaman = 'ajukan';
+    } elseif (empty($user['id_penghuni'])) {
+        $error = 'Data calon penghuni tidak terhubung ke akun.';
+        $halaman = 'ajukan';
     } else {
-        // Metadata pengajuan masih di sesi sampai tabel pengajuan tersedia.
-        $_SESSION['pengajuan_sewa_demo'] = [
-            'id_kamar' => $idKamar,
-            'nomor_kamar' => $kamarDipilih['nomor_kamar'],
-            'tanggal_mulai' => $nilaiMulai,
-            'tanggal_selesai' => $nilaiSelesai,
-            'bulan' => $jumlahBulan,
-            'total' => (float) $kamarDipilih['harga_bulanan'] * $jumlahBulan,
-            'bukti' => null,
-            'catatan' => trim($_POST['catatan'] ?? ''),
-            'tanggal_kirim' => date('Y-m-d'),
-            'status' => 'menunggu_persetujuan',
-            'persetujuan_pada' => time() + 20,
-        ];
-        $_SESSION['notifikasi_dilihat'] = false;
-        header('Location: index.php?halaman=terkirim');
-        exit;
+        $hargaBulanan = (float) $kamarDipilih['harga_bulanan'];
+        try {
+            $st = $pdo->prepare(
+                "INSERT INTO pengajuan_sewa
+                    (id_penghuni, id_kamar, tanggal_mulai, tanggal_selesai, jumlah_bulan, harga_bulanan, total, catatan)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+            );
+            $st->execute([
+                (int) $user['id_penghuni'], $idKamar, $nilaiMulai, $nilaiSelesai,
+                $jumlahBulan, $hargaBulanan, $hargaBulanan * $jumlahBulan,
+                trim($_POST['catatan'] ?? ''),
+            ]);
+            header('Location: index.php?halaman=terkirim');
+            exit;
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23505') {
+                $error = 'Anda atau kamar ini sudah memiliki pengajuan aktif.';
+            } else {
+                throw $e;
+            }
+            $halaman = 'ajukan';
+        }
     }
 }
 
@@ -133,8 +151,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
         exit('Permintaan tidak valid.');
     }
 
-    $pengajuanPembayaran = $_SESSION['pengajuan_sewa_demo'] ?? null;
-    if (!$pengajuanPembayaran || ($pengajuanPembayaran['status'] ?? '') !== 'diterima') {
+    $idPengajuanBayar = filter_input(INPUT_POST, 'id_pengajuan', FILTER_VALIDATE_INT) ?: 0;
+    $st = $pdo->prepare(
+        "SELECT id_pengajuan, id_kamar, nomor_kamar, total, tanggal_mulai, status
+           FROM pengajuan_sewa ps JOIN kamar k USING (id_kamar)
+          WHERE id_pengajuan = ? AND id_penghuni = ?
+            AND ps.status IN ('menunggu_pembayaran', 'pembayaran_ditolak')"
+    );
+    $st->execute([$idPengajuanBayar, (int) $user['id_penghuni']]);
+    $pengajuanPembayaran = $st->fetch() ?: null;
+    if (!$pengajuanPembayaran) {
         header('Location: index.php?halaman=notifikasi');
         exit;
     }
@@ -168,65 +194,96 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
         }
 
         if ($error === '') {
-            $_SESSION['pembayaran_demo'] = [
-                'id_kamar' => $pengajuanPembayaran['id_kamar'],
-                'nomor_kamar' => $pengajuanPembayaran['nomor_kamar'],
-                'total' => $pengajuanPembayaran['total'],
-                'tanggal_kirim' => date('Y-m-d'),
-                'bukti' => $namaBukti,
-                'catatan' => trim($_POST['catatan'] ?? ''),
-                'status' => 'menunggu_verifikasi',
-            ];
-            header('Location: index.php?halaman=pembayaran_terkirim');
-            exit;
+            try {
+                $pdo->beginTransaction();
+                $st = $pdo->prepare(
+                    "SELECT status FROM pengajuan_sewa WHERE id_pengajuan = ? AND id_penghuni = ? FOR UPDATE"
+                );
+                $st->execute([$idPengajuanBayar, (int) $user['id_penghuni']]);
+                $statusSaatIni = $st->fetchColumn();
+                if (!in_array($statusSaatIni, ['menunggu_pembayaran', 'pembayaran_ditolak'], true)) {
+                    $pdo->rollBack();
+                    header('Location: index.php?halaman=notifikasi');
+                    exit;
+                }
+
+                $st = $pdo->prepare(
+                    "INSERT INTO pembayaran
+                        (id_sewa, id_pengajuan_sewa, jumlah, tanggal_bayar, file_bukti, tanggal_upload, periode, catatan)
+                     VALUES (NULL, ?, ?, CURRENT_DATE, ?, NOW(), ?, ?) RETURNING id_pembayaran"
+                );
+                $st->execute([
+                    $idPengajuanBayar,
+                    $pengajuanPembayaran['total'],
+                    $namaBukti,
+                    substr($pengajuanPembayaran['tanggal_mulai'], 0, 7),
+                    trim($_POST['catatan'] ?? ''),
+                ]);
+                $idPembayaranBaru = (int) $st->fetchColumn();
+
+                $st = $pdo->prepare(
+                    "UPDATE pengajuan_sewa
+                        SET status = 'menunggu_verifikasi', notifikasi_dibaca = FALSE, diperbarui_pada = NOW()
+                      WHERE id_pengajuan = ?"
+                );
+                $st->execute([$idPengajuanBayar]);
+                $pdo->commit();
+
+                header('Location: index.php?halaman=pembayaran_terkirim&id=' . $idPembayaranBaru);
+                exit;
+            } catch (PDOException $e) {
+                if ($pdo->inTransaction()) $pdo->rollBack();
+                throw $e;
+            }
         }
         $halaman = 'pembayaran';
     }
 }
 
-if (in_array($halaman, ['terkirim', 'notifikasi', 'pembayaran', 'metode', 'pembayaran_terkirim'], true)) {
-    $pengajuan = $_SESSION['pengajuan_sewa_demo'] ?? null;
-    if ($pengajuan && !isset($pengajuan['status'])) {
-        $pengajuan['status'] = 'menunggu_persetujuan';
-        $pengajuan['persetujuan_pada'] = time() + 20;
-        $_SESSION['pengajuan_sewa_demo'] = $pengajuan;
-    }
-    if (!$pengajuan && $halaman === 'terkirim') {
-        header('Location: index.php');
-        exit;
-    }
-    if (
-        $pengajuan &&
-        ($pengajuan['status'] ?? '') === 'menunggu_persetujuan' &&
-        time() >= (int) ($pengajuan['persetujuan_pada'] ?? PHP_INT_MAX)
-    ) {
-        $pengajuan['status'] = 'diterima';
-        $pengajuan['waktu_diterima'] = time();
-        $_SESSION['pengajuan_sewa_demo'] = $pengajuan;
-        $_SESSION['notifikasi_dilihat'] = false;
-    }
-    if (
-        in_array($halaman, ['pembayaran', 'metode'], true) &&
-        (!$pengajuan || ($pengajuan['status'] ?? '') !== 'diterima')
-    ) {
+$pengajuan = null;
+if (!empty($user['id_penghuni'])) {
+    $st = $pdo->prepare(
+        'SELECT ps.*, k.nomor_kamar
+           FROM pengajuan_sewa ps JOIN kamar k USING (id_kamar)
+          WHERE ps.id_penghuni = ?
+          ORDER BY ps.dibuat_pada DESC, ps.id_pengajuan DESC LIMIT 1'
+    );
+    $st->execute([(int) $user['id_penghuni']]);
+    $pengajuan = $st->fetch() ?: null;
+}
+
+if (in_array($halaman, ['terkirim', 'pembayaran', 'metode', 'pembayaran_terkirim'], true) && !$pengajuan) {
+    header('Location: index.php');
+    exit;
+}
+if (in_array($halaman, ['pembayaran', 'metode'], true) &&
+    !in_array($pengajuan['status'] ?? '', ['menunggu_pembayaran', 'pembayaran_ditolak'], true)) {
+    header('Location: index.php?halaman=notifikasi');
+    exit;
+}
+
+$pembayaran = null;
+if ($halaman === 'pembayaran_terkirim' && $pengajuan) {
+    $idPembayaran = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0;
+    $st = $pdo->prepare(
+        "SELECT p.*, ps.nomor_kamar, p.jumlah AS total
+           FROM pembayaran p JOIN pengajuan_sewa ps ON ps.id_pengajuan = p.id_pengajuan_sewa
+          WHERE p.id_pembayaran = ? AND ps.id_pengajuan = ? AND ps.id_penghuni = ?"
+    );
+    $st->execute([$idPembayaran, $pengajuan['id_pengajuan'], (int) $user['id_penghuni']]);
+    $pembayaran = $st->fetch() ?: null;
+    if (!$pembayaran) {
         header('Location: index.php?halaman=notifikasi');
         exit;
     }
-} else {
-    $pengajuan = null;
 }
-if ($halaman === 'pembayaran_terkirim') {
-    $pembayaran = $_SESSION['pembayaran_demo'] ?? null;
-    if (!$pembayaran) {
-        header('Location: index.php?halaman=pembayaran');
-        exit;
-    }
-} else {
-    $pembayaran = null;
+
+if ($halaman === 'notifikasi' && $pengajuan) {
+    $st = $pdo->prepare('UPDATE pengajuan_sewa SET notifikasi_dibaca = TRUE WHERE id_pengajuan = ?');
+    $st->execute([$pengajuan['id_pengajuan']]);
+    $pengajuan['notifikasi_dibaca'] = true;
 }
-if ($halaman === 'notifikasi') {
-    $_SESSION['notifikasi_dilihat'] = true;
-}
+$adaNotifikasiBaru = $pengajuan && !$pengajuan['notifikasi_dibaca'];
 
 $mainClass = match ($halaman) {
     'kamar' => 'browse',

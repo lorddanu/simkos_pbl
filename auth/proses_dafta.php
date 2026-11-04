@@ -1,13 +1,8 @@
 
 <?php
-session_start();
-
-require_once '../database/database.php';
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: daftar.php');
-    exit;
-}
+// Endpoint lama diarahkan ke satu proses registrasi bersama.
+header('Location: register.php');
+exit;
 
 $nama = trim($_POST['nama'] ?? '');
 $email = trim($_POST['email'] ?? '');

@@ -31,9 +31,10 @@
                 <?= htmlspecialchars($nama) ?>
             </div>
 
-            <a href="../auth/logout.php" class="logout-link">
-                Logout
-            </a>
+            <form action="../auth/logout.php" method="post" class="admin-logout-form">
+                <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
+                <button type="submit" class="logout-link">Logout</button>
+            </form>
         </div>
     </div>
 </header>

@@ -46,7 +46,7 @@ $sukses = isset($_GET['sukses']) && $_GET['sukses'] === '1';
                 </div>
             <?php endif; ?>
 
-            <form action="proses_daftar.php" method="POST">
+            <form action="register.php" method="POST">
 
                 <div class="field">
                     <label for="nama">Nama Lengkap</label>

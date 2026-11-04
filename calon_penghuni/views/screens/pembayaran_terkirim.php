@@ -1,6 +1,6 @@
 <?php
 $namaBulan = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-$tanggalUnggah = new DateTime($pembayaran['tanggal_kirim'] ?? 'today');
+$tanggalUnggah = new DateTime($pembayaran['tanggal_upload'] ?? 'now');
 $nominalPembayaran = 'Rp' . number_format((float) $pembayaran['total'], 2, ',', '.');
 ?>
 <section class="confirm payment-receipt">

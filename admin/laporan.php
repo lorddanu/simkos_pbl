@@ -1,18 +1,12 @@
 
 <?php
-session_start();
-
-if (!isset($_SESSION['id_akun'])) {
-    header('Location: ../auth/login.php');
-    exit;
-}
-
-if (($_SESSION['role'] ?? '') !== 'admin') {
+require __DIR__ . '/../database/helpers.php';
+$user = require_login();
+if ($user['role'] !== 'admin') {
     http_response_code(403);
     exit('Akses ditolak.');
 }
-
-$nama = $_SESSION['nama'] ?? 'Admin SIMKOS';
+$nama = $user['nama'] ?? 'Admin SIMKOS';
 
 $halamanAktif = 'laporan';
 

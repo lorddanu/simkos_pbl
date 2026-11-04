@@ -39,20 +39,8 @@ try {
 
     session_regenerate_id(true);
 
-    $_SESSION['id_akun'] = $akun['id_akun'];
-    $_SESSION['nama'] = $akun['nama'];
-    $_SESSION['role'] = $akun['role'];
-
-    if ($akun['role'] === 'admin') {
-        header('Location: ../admin/dashboard.php');
-    } elseif ($akun['role'] === 'penghuni') {
-        header('Location: ../penghuni/dashboard.php');
-    } else {
-        session_unset();
-        session_destroy();
-        header('Location: login.php');
-    }
-
+    $_SESSION['user_id'] = (int) $akun['id_akun'];
+    header('Location: ../index.php');
     exit;
 } catch (PDOException $e) {
     error_log($e->getMessage());
