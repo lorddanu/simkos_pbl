@@ -291,6 +291,7 @@ if ($halaman === 'notifikasi' && $pengajuan) {
 $adaNotifikasiBaru = $pengajuan && !$pengajuan['notifikasi_dibaca'];
 
 $mainClass = match ($halaman) {
+    'dashboard' => 'dashboard-page',
     'kamar' => 'browse',
     'detail' => 'detail-page',
     'ajukan', 'keluhan', 'notifikasi' => 'form-page',

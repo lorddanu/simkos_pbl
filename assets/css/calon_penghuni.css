@@ -19,13 +19,14 @@ html:has(.calon-body){background:#eeebf6}
 .akun-icon{width:34px;height:34px;flex:0 0 34px}
 .akun-logout{margin:0;padding:0;border:0;background:transparent;color:#fff;cursor:pointer}
 .calon-main{position:relative;gap:12px;padding:0 24px;justify-content:center}
+.calon-main.dashboard-page{padding:clamp(90px,18vh,150px) 24px 24px;justify-content:flex-start}
 .calon-main.browse{justify-content:flex-start;overflow-y:auto;padding-top:22px;padding-bottom:22px}
 .calon-main.detail-page{gap:0;padding:0;overflow-y:auto;justify-content:flex-start}
 .calon-main.form-page{justify-content:flex-start;padding-top:14px}
 .calon-main.payment-upload-page{justify-content:flex-start;padding:14px 18px 0}
-.calon-card{text-align:center;padding:64px 34px 30px;border-radius:16px;transform:translateY(-55px)}
-.calon-card h2{font-size:15px;margin:0 0 42px}
-.calon-card p{font-size:12px;line-height:1.25;margin:0 0 24px}
+.calon-card{text-align:center;padding:32px 24px 24px;border-radius:16px}
+.calon-card h2{font-size:15px;line-height:1.35;margin:0 0 22px}
+.calon-card p{font-size:12px;line-height:1.4;margin:0 0 20px}
 .calon-card .btn{background:var(--pd);font-size:14px;padding:10px;border-radius:10px}
 .kamar-card{padding:0;border-radius:14px;overflow:hidden;flex:none;color:inherit;text-decoration:none}
 .room-photo-placeholder{display:block;width:100%;height:170px;background:#f2f0ff;border-bottom:1px dashed #aaa2ef}
