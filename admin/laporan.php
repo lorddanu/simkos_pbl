@@ -16,7 +16,7 @@ $nama = $_SESSION['nama'] ?? 'Admin SIMKOS';
 
 $halamanAktif = 'laporan';
 
-include __DIR__ . '/../includes/header.php';
+include __DIR__ . '/../includes_admin/header.php';
 ?>
 
 <main class="admin-main">
@@ -56,4 +56,4 @@ include __DIR__ . '/../includes/header.php';
 
 </main>
 
-<?php include __DIR__ . '/../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes_admin/footer.php'; ?>

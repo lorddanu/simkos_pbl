@@ -20,10 +20,12 @@
             aria-expanded="false"
             aria-controls="profileDropdown"
         >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="12" cy="8" r="4"></circle>
-                <path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path>
-            </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="8" r="3.5"></circle>
+            <path d="M5.5 19a6.5 6.5 0 0 1 13 0" ></path>
+        </svg>
+
         </button>
 
         <div class="profile-dropdown" id="profileDropdown" hidden>
