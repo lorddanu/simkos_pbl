@@ -107,7 +107,7 @@ $st = $pdo->query(
     "SELECT p.id_pembayaran, p.id_sewa, p.id_pengajuan_sewa, p.jumlah, p.file_bukti, p.tanggal_upload,
             COALESCE(ps.id_penghuni, s.id_penghuni) AS id_penghuni,
             COALESCE(ps.id_kamar, s.id_kamar) AS id_kamar,
-            COALESCE(ps.nomor_kamar, k.nomor_kamar) AS nomor_kamar,
+            k.nomor_kamar AS nomor_kamar,
             COALESCE(ph.nama, a.nama, 'Penghuni') AS nama, a.email,
             p.catatan, ps.status AS status_pengajuan
        FROM pembayaran p
