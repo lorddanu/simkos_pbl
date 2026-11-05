@@ -1532,7 +1532,7 @@ html:has(body.admin-dashboard) {
 }
 
 body.admin-dashboard {
-    width: min(100%, 500px);
+    width: min(100%, 390px);
     min-height: 100vh;
     border-radius: 28px;
     background: #fff;
@@ -1628,7 +1628,7 @@ body.admin-dashboard {
 }
 
 .admin-dashboard .bottom-nav {
-    width: min(100%, 500px);
+    width: min(100%, 390px);
     min-height: 82px;
     padding: 8px 9px max(8px, env(safe-area-inset-bottom));
     border-radius: 22px 22px 0 0;
@@ -1665,7 +1665,7 @@ html:has(body.admin-app) {
 }
 
 body.admin-app {
-    width: min(100%, 500px);
+    width: min(100%, 390px);
     min-height: 100vh;
     margin: 0 auto;
     background: #fff;
@@ -2053,7 +2053,7 @@ body.admin-app {
 
 .admin-app .bottom-nav {
     left: 50%;
-    width: min(100%, 500px);
+    width: min(100%, 390px);
     min-height: 82px;
     padding: 8px 9px max(8px, env(safe-area-inset-bottom));
     border-radius: 22px 22px 0 0;
