@@ -6,7 +6,7 @@
 <title>SIMKOS - Calon Penghuni</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
-<link rel="stylesheet" href="../assets/css/calon_penghuni.css?v=4">
+<link rel="stylesheet" href="../assets/css/calon_penghuni.css?v=5">
 </head>
 <body class="calon-body">
 <div class="phone">

@@ -1,6 +1,7 @@
-.calon-body{background:#fff;padding:0;min-height:100vh;align-items:stretch}
-.calon-body .phone{width:100%;max-width:440px;height:min(100vh,956px);height:min(100dvh,956px);max-height:none;min-height:0;border-radius:0;box-shadow:none}
-.calon-header{height:112px;min-height:112px;padding:58px 16px 4px 24px;border-radius:0 0 12px 12px}
+html:has(.calon-body){background:#eeebf6}
+.calon-body{width:min(100%,390px);margin:0 auto;background:#fff;padding:0;min-height:100vh;min-height:100dvh;align-items:stretch;box-shadow:0 12px 34px rgba(53,44,111,.16)}
+.calon-body .phone{width:100%;max-width:none;height:100vh;height:100dvh;max-height:none;min-height:100vh;min-height:100dvh;border-radius:0;box-shadow:none}
+.calon-header{height:86px;min-height:86px;padding:0 24px;border-radius:26px 26px 20px 20px}
 .calon-header.payment-compact-header{height:40px;min-height:40px;padding:0 18px;border-radius:0 0 6px 6px}
 .calon-header.payment-compact-header h1{font-size:20px}
 .calon-header.method-compact-header{height:74px;min-height:74px;padding:25px 18px 6px;border-radius:0 0 6px 6px}
