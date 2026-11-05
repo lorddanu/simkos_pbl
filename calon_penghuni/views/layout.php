@@ -6,7 +6,7 @@
 <title>SIMKOS - Calon Penghuni</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
-<link rel="stylesheet" href="../assets/css/calon_penghuni.css?v=6">
+<link rel="stylesheet" href="../assets/css/calon_penghuni.css?v=7">
 </head>
 <body class="calon-body">
 <div class="phone">
@@ -35,10 +35,10 @@
   <main class="calon-main <?= h($mainClass) ?>">
     <?php require __DIR__ . '/screens/' . $halaman . '.php'; ?>
   </main>
-  <?php if (in_array($halaman, ['ajukan', 'pembayaran', 'keluhan', 'keluhan_terkirim'], true)): ?>
+  <?php if (in_array($halaman, ['dashboard', 'ajukan', 'pembayaran', 'keluhan', 'keluhan_terkirim'], true)): ?>
   <nav class="calon-nav" aria-label="Menu calon penghuni">
-    <a href="index.php"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8v10H3z"/></svg>Dashboard</a>
-    <a href="<?= h($urlNavigasi) ?>" <?= in_array($halaman, ['ajukan', 'pembayaran'], true) ? 'aria-current="page"' : '' ?>><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="12" cy="12" r="3"/></svg><?= $halaman === 'ajukan' ? 'Pengajuan' : 'Unggah' ?></a>
+    <a href="index.php" <?= $halaman === 'dashboard' ? 'aria-current="page"' : '' ?>><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8v10H3z"/></svg>Dashboard</a>
+    <a href="<?= $halaman === 'dashboard' ? 'index.php?halaman=kamar' : h($urlNavigasi) ?>" <?= in_array($halaman, ['ajukan', 'pembayaran'], true) ? 'aria-current="page"' : '' ?>><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="12" cy="12" r="3"/></svg><?= $halaman === 'dashboard' ? 'Kamar' : ($halaman === 'ajukan' ? 'Pengajuan' : 'Unggah') ?></a>
     <a href="index.php?halaman=keluhan" <?= in_array($halaman, ['keluhan', 'keluhan_terkirim'], true) ? 'aria-current="page"' : '' ?>><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H8l-4 4z"/></svg>Keluhan</a>
   </nav>
   <?php endif; ?>
