@@ -91,7 +91,7 @@ include __DIR__ . '/../includes/header.php';
         </div>
 
         <div class="dashboard-columns">
-            <section class="panel">
+            <section class="panel activity-panel <?= $aktivitas ? '' : 'is-empty' ?>">
                 <h2 class="section-title">Aktivitas Terbaru</h2>
                 <?php if (!$aktivitas): ?><p class="item-description">Belum ada aktivitas pembayaran.</p><?php endif; ?>
                 <?php foreach ($aktivitas as $item): ?>

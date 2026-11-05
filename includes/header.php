@@ -21,8 +21,9 @@
             aria-controls="profileDropdown"
         >
             <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
                 <circle cx="12" cy="8" r="4"></circle>
-                <path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path>
+                <path d="M5 20a7 7 0 0 1 14 0"></path>
             </svg>
         </button>
 

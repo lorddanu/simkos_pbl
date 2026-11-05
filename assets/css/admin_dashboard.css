@@ -1416,3 +1416,112 @@ body.admin-dashboard {
     font-size: 19px;
     line-height: 20px;
 }
+
+/* Polesan jarak, keadaan kosong, dan ikon navigasi dashboard. */
+.admin-dashboard .stats-grid {
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.admin-dashboard .stat-card {
+    padding-right: 13px;
+    padding-left: 13px;
+}
+
+.admin-dashboard .dashboard-columns .panel {
+    padding: 12px 14px;
+    margin-bottom: 8px;
+}
+
+.admin-dashboard .activity-panel {
+    min-height: 122px;
+}
+
+.admin-dashboard .activity-panel.is-empty {
+    min-height: 88px;
+}
+
+.admin-dashboard .activity-panel.is-empty .item-description {
+    margin-top: 2px;
+    line-height: 1.45;
+}
+
+.admin-dashboard .dashboard-columns .panel:last-child {
+    min-height: 96px;
+}
+
+.admin-dashboard .activity-item,
+.admin-dashboard .attention-item {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.admin-dashboard .activity-copy strong,
+.admin-dashboard .item-description {
+    font-size: 10px;
+}
+
+.admin-dashboard .activity-copy small,
+.admin-dashboard .status {
+    font-size: 9px;
+}
+
+.admin-dashboard .nav-link .nav-icon {
+    position: relative;
+    display: block;
+    width: 20px;
+}
+
+.admin-dashboard .nav-link .nav-icon::before,
+.admin-dashboard .nav-link .nav-icon::after {
+    content: '' !important;
+    position: absolute;
+    display: block;
+    box-sizing: border-box;
+    color: #fff;
+    font-size: 0;
+}
+
+.admin-dashboard .nav-link:nth-child(1) .nav-icon::before {
+    content: "\2302" !important;
+    position: static;
+    font: 22px/20px Arial, sans-serif;
+}
+
+.admin-dashboard .nav-link:nth-child(2) .nav-icon::before {
+    left: 2px;
+    top: 4px;
+    width: 16px;
+    height: 11px;
+    border: 1.5px solid #fff;
+    border-radius: 2px;
+}
+
+.admin-dashboard .nav-link:nth-child(2) .nav-icon::after {
+    left: 8px;
+    top: 7px;
+    width: 5px;
+    height: 5px;
+    border: 1px solid #fff;
+    border-radius: 50%;
+}
+
+.admin-dashboard .nav-link:nth-child(3) .nav-icon::before {
+    left: 3px;
+    top: 3px;
+    width: 14px;
+    height: 13px;
+    border: 1.5px solid #fff;
+    border-radius: 50% / 22%;
+    background: linear-gradient(to bottom, transparent 28%, #fff 29% 34%, transparent 35% 63%, #fff 64% 69%, transparent 70%);
+}
+
+.admin-dashboard .nav-link:nth-child(4) .nav-icon::before {
+    left: 3px;
+    top: 2px;
+    width: 13px;
+    height: 15px;
+    border: 1.5px solid #fff;
+    border-radius: 1px;
+    background: repeating-linear-gradient(to bottom, transparent 0 3px, #fff 3px 4px);
+}
