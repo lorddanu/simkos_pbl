@@ -30,17 +30,46 @@ $jumlahTerlambat = (int) $pdo->query(
         )"
 )->fetchColumn();
 $aktivitas = $pdo->query(
-    "SELECT ps.status, ps.diperbarui_pada, p.nama, k.nomor_kamar
-       FROM pengajuan_sewa ps JOIN penghuni p USING (id_penghuni) JOIN kamar k USING (id_kamar)
-      ORDER BY ps.diperbarui_pada DESC LIMIT 5"
+    "SELECT COALESCE(ph.nama, a.nama, 'Penghuni') AS nama,
+            p.status_verifikasi AS status,
+            COALESCE(p.tanggal_upload, p.tanggal_bayar::timestamp) AS waktu
+       FROM pembayaran p
+       LEFT JOIN sewa s ON s.id_sewa = p.id_sewa
+       LEFT JOIN pengajuan_sewa ps ON ps.id_pengajuan = p.id_pengajuan_sewa
+       LEFT JOIN penghuni ph ON ph.id_penghuni = COALESCE(s.id_penghuni, ps.id_penghuni)
+       LEFT JOIN akun a ON a.id_penghuni = ph.id_penghuni
+      ORDER BY COALESCE(p.tanggal_upload, p.tanggal_bayar::timestamp) DESC, p.id_pembayaran DESC
+      LIMIT 3"
 )->fetchAll();
-$kamarPerhatian = $pdo->query("SELECT nomor_kamar, status FROM kamar WHERE status = 'tidak tersedia' ORDER BY nomor_kamar")->fetchAll();
+$kamarKosongPerhatian = $pdo->query(
+    "SELECT k.nomor_kamar FROM kamar k
+      WHERE k.status = 'kosong'
+        AND NOT EXISTS (
+            SELECT 1 FROM pengajuan_sewa ps WHERE ps.id_kamar = k.id_kamar
+              AND ps.status IN ('menunggu_persetujuan', 'menunggu_pembayaran', 'menunggu_verifikasi', 'pembayaran_ditolak')
+        )
+      ORDER BY k.nomor_kamar LIMIT 2"
+)->fetchAll();
+$penghuniTerlambat = $pdo->query(
+    "SELECT k.nomor_kamar, COALESCE(p.nama, a.nama, 'Penghuni') AS nama
+       FROM sewa s JOIN kamar k USING (id_kamar)
+       JOIN penghuni p USING (id_penghuni)
+       LEFT JOIN akun a USING (id_penghuni)
+      WHERE s.tanggal_mulai <= CURRENT_DATE
+        AND (s.tanggal_selesai IS NULL OR s.tanggal_selesai >= CURRENT_DATE)
+        AND NOT EXISTS (
+            SELECT 1 FROM pembayaran pb WHERE pb.id_sewa = s.id_sewa
+              AND pb.periode = to_char(CURRENT_DATE, 'YYYY-MM')
+              AND pb.status_verifikasi IN ('menunggu', 'diterima')
+        )
+      ORDER BY s.tanggal_mulai LIMIT 3"
+)->fetchAll();
 $halamanAktif = 'dashboard';
 
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<main class="admin-main">
+<main class="admin-main admin-dashboard-main">
     <section id="dashboard" class="page-section active">
         <div class="stats-grid">
             <article class="stat-card">
@@ -64,15 +93,50 @@ include __DIR__ . '/../includes/header.php';
         <div class="dashboard-columns">
             <section class="panel">
                 <h2 class="section-title">Aktivitas Terbaru</h2>
-                <?php if (!$aktivitas): ?><p class="item-description">Belum ada aktivitas.</p><?php endif; ?>
+                <?php if (!$aktivitas): ?><p class="item-description">Belum ada aktivitas pembayaran.</p><?php endif; ?>
                 <?php foreach ($aktivitas as $item): ?>
-                    <p class="item-description"><?= h($item['nama']) ?> · Kamar <?= h($item['nomor_kamar']) ?> · <?= h(str_replace('_', ' ', ucfirst($item['status']))) ?></p>
+                    <?php
+                    $labelAktivitas = match ($item['status']) {
+                        'diterima' => 'Lunas',
+                        'ditolak' => 'Ditolak',
+                        default => 'Menunggu verifikasi',
+                    };
+                    $kelasAktivitas = match ($item['status']) {
+                        'diterima' => 'paid',
+                        'ditolak' => 'late',
+                        default => 'pending',
+                    };
+                    $waktu = new DateTimeImmutable($item['waktu']);
+                    $hariIni = new DateTimeImmutable('today');
+                    $hariAktivitas = $waktu->setTime(0, 0);
+                    $labelWaktu = $hariAktivitas == $hariIni
+                        ? $waktu->format('H:i')
+                        : ($hariAktivitas == $hariIni->modify('-1 day') ? 'Kemarin' : $waktu->format('d M'));
+                    ?>
+                    <article class="activity-item">
+                        <div class="activity-copy">
+                            <strong><?= h($item['nama']) ?> <?= $item['status'] === 'diterima' ? 'pembayaran diterima' : 'unggah bukti' ?></strong>
+                            <small><?= h($labelWaktu) ?></small>
+                        </div>
+                        <span class="status <?= h($kelasAktivitas) ?>"><?= h($labelAktivitas) ?></span>
+                    </article>
                 <?php endforeach; ?>
             </section>
             <section class="panel">
                 <h2 class="section-title">Kamar Butuh Perhatian</h2>
-                <?php if (!$kamarPerhatian): ?><p class="item-description">Belum ada kamar yang perlu diperhatikan.</p><?php endif; ?>
-                <?php foreach ($kamarPerhatian as $kamar): ?><p class="item-description">Kamar <?= h($kamar['nomor_kamar']) ?> · <?= h($kamar['status']) ?></p><?php endforeach; ?>
+                <?php if (!$kamarKosongPerhatian && !$penghuniTerlambat): ?><p class="item-description">Belum ada kamar yang perlu diperhatikan.</p><?php endif; ?>
+                <?php foreach ($kamarKosongPerhatian as $kamar): ?>
+                    <article class="attention-item">
+                        <div class="activity-copy"><strong>Kamar <?= h($kamar['nomor_kamar']) ?></strong><small>Perlu dipasarkan</small></div>
+                        <span class="status empty">Kosong</span>
+                    </article>
+                <?php endforeach; ?>
+                <?php foreach ($penghuniTerlambat as $penghuni): ?>
+                    <article class="attention-item">
+                        <div class="activity-copy"><strong>Kamar <?= h($penghuni['nomor_kamar']) ?></strong><small><?= h($penghuni['nama']) ?> belum ada bukti transfer</small></div>
+                        <span class="status late">Terlambat</span>
+                    </article>
+                <?php endforeach; ?>
             </section>
         </div>
     </section>

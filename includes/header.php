@@ -7,7 +7,7 @@
     <title>Dashboard Admin - SIMKOS</title>
     <link rel="stylesheet" href="../assets/css/admin_dashboard.css">
 </head>
-<body>
+<body class="<?= ($halamanAktif ?? '') === 'dashboard' ? 'admin-dashboard' : '' ?>">
 <header class="admin-header">
     <div class="brand">SIMKOS</div>
 

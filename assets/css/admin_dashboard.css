@@ -1277,3 +1277,142 @@ button {
     background: #2563eb;
     color: white;
 }
+
+/* Dashboard admin mengikuti kanvas ponsel pada desain SIMKOS. */
+body.admin-dashboard {
+    width: min(100%, 342px);
+    min-height: 100vh;
+    margin: 0 auto;
+    background: #fff;
+    color: #272443;
+}
+
+.admin-dashboard .admin-header {
+    height: 88px;
+    padding: 20px 22px 8px;
+    border-radius: 0 0 8px 8px;
+    align-items: flex-end;
+}
+
+.admin-dashboard .brand {
+    font-size: 25px;
+    line-height: 1;
+}
+
+.admin-dashboard .profile-button {
+    width: 32px;
+    height: 32px;
+    padding: 2px;
+}
+
+.admin-dashboard .profile-button svg {
+    width: 28px;
+    height: 28px;
+}
+
+.admin-dashboard .admin-main {
+    width: 100%;
+    margin: 0;
+    padding: 13px 18px 82px;
+}
+
+.admin-dashboard .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px;
+    margin-bottom: 12px;
+}
+
+.admin-dashboard .stat-card {
+    min-height: 65px;
+    padding: 10px 14px;
+    border-radius: 14px;
+}
+
+.admin-dashboard .stat-number {
+    margin-bottom: 3px;
+    font-size: 20px;
+}
+
+.admin-dashboard .stat-label {
+    font-size: 11px;
+}
+
+.admin-dashboard .dashboard-columns {
+    display: block;
+}
+
+.admin-dashboard .dashboard-columns .panel {
+    height: auto;
+    padding: 13px 14px;
+    margin-bottom: 6px;
+    border-radius: 14px;
+}
+
+.admin-dashboard .section-title {
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.admin-dashboard .activity-item,
+.admin-dashboard .attention-item {
+    gap: 6px;
+    padding: 4px 0;
+    border-bottom: 0;
+    font-size: 9px;
+}
+
+.admin-dashboard .activity-copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.admin-dashboard .activity-copy strong {
+    overflow-wrap: anywhere;
+    font-size: 9px;
+    font-weight: 500;
+}
+
+.admin-dashboard .activity-copy small {
+    font-size: 8px;
+    opacity: .8;
+}
+
+.admin-dashboard .status {
+    font-size: 8px;
+}
+
+.admin-dashboard .item-description {
+    font-size: 9px;
+}
+
+.admin-dashboard .bottom-nav {
+    width: min(100%, 342px);
+    min-height: 69px;
+    padding: 4px 5px max(4px, env(safe-area-inset-bottom));
+    border-radius: 8px 8px 0 0;
+}
+
+.admin-dashboard .nav-link {
+    gap: 3px;
+    padding: 5px 2px;
+    font-size: 9px;
+}
+
+.admin-dashboard .nav-link .nav-icon {
+    height: 20px;
+    font-size: 0;
+}
+
+.admin-dashboard .nav-link:nth-child(1) .nav-icon::before { content: '⌂'; }
+.admin-dashboard .nav-link:nth-child(2) .nav-icon::before { content: '▣'; }
+.admin-dashboard .nav-link:nth-child(3) .nav-icon::before { content: '⛁'; }
+.admin-dashboard .nav-link:nth-child(4) .nav-icon::before { content: '▤'; }
+
+.admin-dashboard .nav-link .nav-icon::before {
+    display: block;
+    color: #fff;
+    font-size: 19px;
+    line-height: 20px;
+}
