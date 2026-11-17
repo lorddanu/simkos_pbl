@@ -120,14 +120,14 @@ Akun demo yang dicantumkan di `sql/akun_demo.sql`:
 | Akun | Kata sandi demo | Hasil login |
 | --- | --- | --- |
 | `penghuni@simkos.test` | `penghuni123` | Penghuni dengan sewa aktif (Kamar A). |
-| `calon@simkos.test` | `penghuni123` | Calon penghuni tanpa sewa aktif; dapat melihat kamar B/C. |
+| `calon@simkos.test` | `penghuni123` | Calon penghuni tanpa sewa aktif; dapat melihat kamar B, C, dan D. |
 
 Gunakan akun demo hanya untuk lingkungan lokal/presentasi.
 
 ### Langkah singkat untuk demo calon penghuni
 
 1. Masuk dengan akun calon penghuni.
-2. Buka **Lihat Kamar Kosong**, pilih kamar B atau C, lalu pilih **Ajukan Sewa Kamar**.
+2. Buka **Lihat Kamar Kosong**, pilih kamar B, C, atau D, lalu pilih **Ajukan Sewa Kamar**.
 3. Isi tanggal mulai dan akhir, pilih lama sewa, lalu kirim. Bukti pembayaran tidak diperlukan pada tahap pengajuan ini.
 4. Login sebagai admin di browser yang sama, buka daftar pengajuan, lalu setujui atau tolak pengajuan.
 5. Jika disetujui, login kembali sebagai calon dan ajukan pembayaran. Bukti boleh dikosongkan untuk simulasi.
