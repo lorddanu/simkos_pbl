@@ -6,11 +6,11 @@
 <title>SIMKOS - Calon Penghuni</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css?v=date-picker-1">
-<link rel="stylesheet" href="../assets/css/calon_penghuni.css?v=11">
+<link rel="stylesheet" href="../assets/css/calon_penghuni.css?v=12">
 </head>
 <body class="calon-body">
 <div class="phone">
-  <header class="calon-header <?= $halaman === 'pembayaran' ? 'payment-compact-header' : ($halaman === 'metode' ? 'method-compact-header' : ($halaman === 'pembayaran_terkirim' ? 'receipt-compact-header' : '')) ?>">
+  <header class="calon-header <?= $halaman === 'pembayaran' ? '' : ($halaman === 'metode' ? 'method-compact-header' : ($halaman === 'pembayaran_terkirim' ? 'receipt-compact-header' : '')) ?>">
     <a class="icon back-button" href="<?= h($urlKembali ?? 'index.php') ?>" aria-label="Kembali">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m13 8-4 4 4 4"/></svg>
     </a>
