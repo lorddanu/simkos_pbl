@@ -1,4 +1,4 @@
--- Batas 30 menit untuk pembayaran setelah pengajuan sewa disetujui.
+-- Batas 1 hari untuk pembayaran setelah pengajuan sewa disetujui.
 -- Jalankan setelah migrasi_alur_pengajuan.sql. Aman dijalankan berulang.
 BEGIN;
 ALTER TABLE pengajuan_sewa ADD COLUMN IF NOT EXISTS batas_pembayaran TIMESTAMPTZ;
@@ -11,6 +11,6 @@ ALTER TABLE pengajuan_sewa ADD CONSTRAINT pengajuan_sewa_status_check
 CREATE INDEX IF NOT EXISTS idx_pengajuan_batas_pembayaran
     ON pengajuan_sewa(batas_pembayaran) WHERE status = 'menunggu_pembayaran';
 UPDATE pengajuan_sewa
-   SET batas_pembayaran = COALESCE(ditinjau_pada, NOW()) + INTERVAL '30 minutes'
+   SET batas_pembayaran = COALESCE(ditinjau_pada, NOW()) + INTERVAL '1 day'
  WHERE status = 'menunggu_pembayaran' AND batas_pembayaran IS NULL;
 COMMIT;

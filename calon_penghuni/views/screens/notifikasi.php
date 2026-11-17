@@ -34,7 +34,7 @@
       <div><h3>Pembayaran menunggu verifikasi</h3><p>Pembayaran Kamar <?= h($pengajuan['nomor_kamar']) ?> sedang diperiksa admin.</p><strong>Menunggu Verifikasi</strong></div>
     </article>
   <?php elseif ($pengajuan && $pengajuan['status'] === 'kedaluwarsa'): ?>
-    <article class="notification-card notification-expired"><div><h3>Waktu Pengajuan Habis</h3><p>Batas 30 menit untuk mengajukan pembayaran telah berakhir. Pengajuan sewa dibatalkan dan kamar tersedia kembali.</p><strong>Kedaluwarsa</strong></div></article>
+    <article class="notification-card notification-expired"><div><h3>Waktu Pengajuan Habis</h3><p>Batas 1 hari untuk mengajukan pembayaran telah berakhir. Pengajuan sewa dibatalkan dan kamar tersedia kembali.</p><strong>Kedaluwarsa</strong></div></article>
   <?php elseif ($pengajuan && $pengajuan['status'] === 'ditolak'): ?>
     <article class="notification-card"><div><h3>Pengajuan Ditolak</h3><p><?= h($pengajuan['catatan_admin'] ?: 'Pengajuan sewa Kamar ' . $pengajuan['nomor_kamar'] . ' belum disetujui. Silakan hubungi admin untuk informasi lebih lanjut.') ?></p></div></article>
   <?php elseif ($pengajuan && $pengajuan['status'] === 'sewa_aktif'): ?>
@@ -45,3 +45,4 @@
 </section>
 
 <script src="../assets/js/payment_deadline.js?v=1"></script>
+

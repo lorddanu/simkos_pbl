@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_pengajuan'])) {
             $st = $pdo->prepare(
                 "UPDATE pengajuan_sewa
                     SET status = 'menunggu_pembayaran', ditinjau_oleh = ?, ditinjau_pada = NOW(),
-                        batas_pembayaran = NOW() + INTERVAL '30 minutes',
+                        batas_pembayaran = NOW() + INTERVAL '1 day',
                         catatan_admin = NULL, notifikasi_dibaca = FALSE, diperbarui_pada = NOW()
                   WHERE id_pengajuan = ?"
             );
@@ -175,8 +175,8 @@ include __DIR__ . '/../includes/header.php';
             <?php if (!$pengajuanMasuk): ?><p>Belum ada pengajuan sewa masuk.</p><?php endif; ?>
             <?php foreach ($pengajuanMasuk as $pengajuan): ?>
                 <article class="admin-application-card">
-                    <div><strong><?= h($pengajuan['nama']) ?> · Kamar <?= h($pengajuan['nomor_kamar']) ?></strong><small><?= h($pengajuan['email']) ?></small></div>
-                    <p><?= h($pengajuan['tanggal_mulai']) ?> sampai <?= h($pengajuan['tanggal_selesai']) ?> · <?= (int) $pengajuan['jumlah_bulan'] ?> bulan</p>
+                    <div><strong><?= h($pengajuan['nama']) ?> Â· Kamar <?= h($pengajuan['nomor_kamar']) ?></strong><small><?= h($pengajuan['email']) ?></small></div>
+                    <p><?= h($pengajuan['tanggal_mulai']) ?> sampai <?= h($pengajuan['tanggal_selesai']) ?> Â· <?= (int) $pengajuan['jumlah_bulan'] ?> bulan</p>
                     <p>Total: Rp <?= h(number_format((float) $pengajuan['total'], 0, ',', '.')) ?></p>
                     <?php if (!empty($pengajuan['catatan'])): ?><p><?= h($pengajuan['catatan']) ?></p><?php endif; ?>
                     <form method="post" class="admin-application-actions">
@@ -194,7 +194,7 @@ include __DIR__ . '/../includes/header.php';
 
             <h2 class="section-title">Penghuni Aktif</h2>
             <?php if (!$penghuniAktif): ?><p>Belum ada penghuni aktif.</p><?php endif; ?>
-            <?php foreach ($penghuniAktif as $aktif): ?><article class="admin-application-card"><strong><?= h($aktif['nama']) ?> · Kamar <?= h($aktif['nomor_kamar']) ?></strong><small><?= h($aktif['email']) ?> · Mulai <?= h($aktif['tanggal_mulai']) ?></small></article><?php endforeach; ?>
+            <?php foreach ($penghuniAktif as $aktif): ?><article class="admin-application-card"><strong><?= h($aktif['nama']) ?> Â· Kamar <?= h($aktif['nomor_kamar']) ?></strong><small><?= h($aktif['email']) ?> Â· Mulai <?= h($aktif['tanggal_mulai']) ?></small></article><?php endforeach; ?>
 
         </div>
 
@@ -625,3 +625,4 @@ include __DIR__ . '/../includes/header.php';
 </main>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
+
