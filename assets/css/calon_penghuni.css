@@ -156,3 +156,14 @@ html:has(.calon-body){background:#eeebf6}
 .date-picker input[type=hidden]{display:none}
 
 .complaint-form .btn{width:calc(100% + 24px);margin-top:auto;margin-right:-12px;margin-bottom:16px;margin-left:-12px}
+
+.payment-deadline{display:flex;align-items:flex-start;gap:10px;width:100%;padding:10px 12px;border:1px solid #c7c0f4;border-radius:10px;background:#f2f0ff;color:#3f377f;font-size:11px;line-height:1.4}
+.payment-deadline-icon{width:30px;height:30px;display:grid;place-items:center;flex:none;border-radius:50%;background:var(--p);color:#fff}
+.payment-deadline-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.payment-deadline strong{display:block;color:var(--p);font-size:12px}
+.payment-deadline p{margin:2px 0;font-size:11px}
+.payment-deadline p b{font-size:15px;font-variant-numeric:tabular-nums;color:#42378f}
+.payment-deadline small{display:block;font-size:9px;color:#655da0}
+.payment-deadline .payment-deadline-message{margin-top:3px;color:#a52f42;font-weight:600}
+.payment-deadline.is-expired{border-color:#e2a2a9;background:#fff0f1}
+.notification-approved .payment-deadline{margin:12px 0 0;text-align:left}

@@ -39,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_pengajuan'])) {
             $st = $pdo->prepare(
                 "UPDATE pengajuan_sewa
                     SET status = 'menunggu_pembayaran', ditinjau_oleh = ?, ditinjau_pada = NOW(),
+                        batas_pembayaran = NOW() + INTERVAL '30 minutes',
                         catatan_admin = NULL, notifikasi_dibaca = FALSE, diperbarui_pada = NOW()
                   WHERE id_pengajuan = ?"
             );
@@ -50,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_pengajuan'])) {
             $st = $pdo->prepare(
                 "UPDATE pengajuan_sewa
                     SET status = 'ditolak', ditinjau_oleh = ?, ditinjau_pada = NOW(),
-                        catatan_admin = ?, notifikasi_dibaca = FALSE, diperbarui_pada = NOW()
+                        batas_pembayaran = NULL, catatan_admin = ?, notifikasi_dibaca = FALSE, diperbarui_pada = NOW()
                   WHERE id_pengajuan = ?"
             );
             $st->execute([(int) $user['id_akun'], $alasan !== '' ? $alasan : null, $idPengajuan]);

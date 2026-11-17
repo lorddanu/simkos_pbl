@@ -15,6 +15,59 @@ if (!in_array($halaman, $halamanValid, true)) {
 }
 
 $pdo = db();
+// Endpoint timer mengubah pengajuan menjadi kedaluwarsa secara aman.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'expire_pengajuan') {
+    header('Content-Type: application/json; charset=utf-8');
+    if (!csrf_ok()) {
+        http_response_code(400);
+        echo json_encode(['ok' => false]);
+        exit;
+    }
+    $idExpire = filter_input(INPUT_POST, 'id_pengajuan', FILTER_VALIDATE_INT) ?: 0;
+    try {
+        $pdo->beginTransaction();
+        $st = $pdo->prepare(
+            "SELECT status, (batas_pembayaran IS NOT NULL AND batas_pembayaran <= NOW()) AS waktu_habis
+               FROM pengajuan_sewa
+              WHERE id_pengajuan = ? AND id_penghuni = ? FOR UPDATE"
+        );
+        $st->execute([$idExpire, (int) $user['id_penghuni']]);
+        $expireRow = $st->fetch();
+        $alreadyExpired = $expireRow && $expireRow['status'] === 'kedaluwarsa';
+        $sudahSelesai = $expireRow && $expireRow['status'] !== 'menunggu_pembayaran';
+        $expired = $alreadyExpired || $sudahSelesai || ($expireRow && $expireRow['status'] === 'menunggu_pembayaran' && in_array($expireRow['waktu_habis'], [true, 1, '1', 't'], true));
+        if ($expired && !$alreadyExpired && !$sudahSelesai) {
+            demo_track_before_change('pengajuan_sewa', $idExpire);
+            $st = $pdo->prepare("UPDATE pengajuan_sewa SET status = 'kedaluwarsa', diperbarui_pada = NOW() WHERE id_pengajuan = ?");
+            $st->execute([$idExpire]);
+        }
+        $pdo->commit();
+        echo json_encode(['ok' => true, 'expired' => (bool) $expired]);
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        error_log('Gagal memproses batas pembayaran: ' . $e->getMessage());
+        http_response_code(500);
+        echo json_encode(['ok' => false]);
+    }
+    exit;
+}
+
+// Request berikutnya juga memberlakukan kedaluwarsa jika halaman sebelumnya ditinggalkan.
+$stExpire = $pdo->prepare(
+    "SELECT id_pengajuan FROM pengajuan_sewa
+      WHERE id_penghuni = ? AND status = 'menunggu_pembayaran'
+        AND batas_pembayaran IS NOT NULL AND batas_pembayaran <= NOW()"
+);
+$stExpire->execute([(int) ($user['id_penghuni'] ?? 0)]);
+foreach ($stExpire->fetchAll(PDO::FETCH_COLUMN) as $expiredId) {
+    demo_track_before_change('pengajuan_sewa', (int) $expiredId);
+}
+$stExpire = $pdo->prepare(
+    "UPDATE pengajuan_sewa SET status = 'kedaluwarsa', diperbarui_pada = NOW()
+      WHERE id_penghuni = ? AND status = 'menunggu_pembayaran'
+        AND batas_pembayaran IS NOT NULL AND batas_pembayaran <= NOW()"
+);
+$stExpire->execute([(int) ($user['id_penghuni'] ?? 0)]);
 $kamarKosong = [];
 if ($halaman === 'kamar') {
     $kamarKosong = $pdo->query(
@@ -155,7 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
 
     $idPengajuanBayar = filter_input(INPUT_POST, 'id_pengajuan', FILTER_VALIDATE_INT) ?: 0;
     $st = $pdo->prepare(
-        "SELECT ps.id_pengajuan, ps.id_kamar, k.nomor_kamar, ps.total, ps.tanggal_mulai, ps.status
+        "SELECT ps.id_pengajuan, ps.id_kamar, k.nomor_kamar, ps.total, ps.tanggal_mulai, ps.status, ps.batas_pembayaran
            FROM pengajuan_sewa ps JOIN kamar k USING (id_kamar)
           WHERE id_pengajuan = ? AND id_penghuni = ?
             AND ps.status IN ('menunggu_pembayaran', 'pembayaran_ditolak')"
@@ -199,10 +252,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
             try {
                 $pdo->beginTransaction();
                 $st = $pdo->prepare(
-                    "SELECT status FROM pengajuan_sewa WHERE id_pengajuan = ? AND id_penghuni = ? FOR UPDATE"
+                    "SELECT status, (status = 'menunggu_pembayaran' AND batas_pembayaran IS NOT NULL AND batas_pembayaran <= NOW()) AS waktu_habis FROM pengajuan_sewa WHERE id_pengajuan = ? AND id_penghuni = ? FOR UPDATE"
                 );
                 $st->execute([$idPengajuanBayar, (int) $user['id_penghuni']]);
-                $statusSaatIni = $st->fetchColumn();
+                $barisStatus = $st->fetch();
+                $statusSaatIni = $barisStatus['status'] ?? null;
+                if ($statusSaatIni === 'menunggu_pembayaran' && in_array($barisStatus['waktu_habis'] ?? false, [true, 1, '1', 't'], true)) {
+                    demo_track_before_change('pengajuan_sewa', $idPengajuanBayar);
+                    $st = $pdo->prepare("UPDATE pengajuan_sewa SET status = 'kedaluwarsa', diperbarui_pada = NOW() WHERE id_pengajuan = ?");
+                    $st->execute([$idPengajuanBayar]);
+                    $pdo->commit();
+                    header('Location: index.php?halaman=notifikasi');
+                    exit;
+                }
                 if (!in_array($statusSaatIni, ['menunggu_pembayaran', 'pembayaran_ditolak'], true)) {
                     $pdo->rollBack();
                     header('Location: index.php?halaman=notifikasi');
@@ -227,7 +289,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
                 demo_track_before_change('pengajuan_sewa', $idPengajuanBayar);
                 $st = $pdo->prepare(
                     "UPDATE pengajuan_sewa
-                        SET status = 'menunggu_verifikasi', notifikasi_dibaca = FALSE, diperbarui_pada = NOW()
+                        SET status = 'menunggu_verifikasi', batas_pembayaran = NULL, notifikasi_dibaca = FALSE, diperbarui_pada = NOW()
                       WHERE id_pengajuan = ?"
                 );
                 $st->execute([$idPengajuanBayar]);
@@ -247,13 +309,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
 $pengajuan = null;
 if (!empty($user['id_penghuni'])) {
     $st = $pdo->prepare(
-        'SELECT ps.*, k.nomor_kamar
+        'SELECT ps.*, k.nomor_kamar, (EXTRACT(EPOCH FROM ps.batas_pembayaran) * 1000)::BIGINT AS batas_pembayaran_ms, (EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT AS db_now_ms
            FROM pengajuan_sewa ps JOIN kamar k USING (id_kamar)
           WHERE ps.id_penghuni = ?
           ORDER BY ps.dibuat_pada DESC, ps.id_pengajuan DESC LIMIT 1'
     );
     $st->execute([(int) $user['id_penghuni']]);
     $pengajuan = $st->fetch() ?: null;
+}
+
+$batasPembayaranMs = (int) ($pengajuan['batas_pembayaran_ms'] ?? 0);
+$waktuServerMs = (int) ($pengajuan['db_now_ms'] ?? 0);
+$batasPembayaranLabel = '';
+if ($batasPembayaranMs > 0) {
+    $tanggalBatas = (new DateTimeImmutable('@' . (int) floor($batasPembayaranMs / 1000)))->setTimezone(new DateTimeZone('Asia/Jakarta'));
+    $batasPembayaranLabel = $tanggalBatas->format('d M Y, H:i') . ' WIB';
 }
 
 if (in_array($halaman, ['terkirim', 'pembayaran', 'metode', 'pembayaran_terkirim'], true) && !$pengajuan) {
