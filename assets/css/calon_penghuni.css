@@ -154,3 +154,5 @@ html:has(.calon-body){background:#eeebf6}
 @media(max-width:360px){.calendar-popover{width:calc(100vw - 24px);padding:13px 8px}.calendar-day{width:30px;height:30px}}
 
 .date-picker input[type=hidden]{display:none}
+
+.complaint-form .btn{width:calc(100% + 24px);margin-top:auto;margin-right:-12px;margin-bottom:16px;margin-left:-12px}
