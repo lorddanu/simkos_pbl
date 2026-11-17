@@ -2149,3 +2149,8 @@ body.admin-app {
     .admin-app .admin-application-actions .btn-primary { grid-row: 2; }
     .admin-app .admin-application-actions .btn-secondary { grid-row: 3; }
 }
+
+/* Ikon dan menu profil admin diselaraskan dengan role lain. */
+.profile-button svg{stroke:none}
+.profile-dropdown .logout-link{display:inline-block;width:auto;padding:8px 12px;border:1px solid #aaa;border-radius:7px;background:#f8f7ff;color:#7165d1;font:400 13px Arial,sans-serif;cursor:pointer;text-decoration:none}
+.profile-dropdown .logout-link:hover{background:#f0effb}

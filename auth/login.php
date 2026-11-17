@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <label for="password">Kata Sandi</label>
     <input type="password" id="password" name="password" placeholder="Masukkan kata sandi" autocomplete="current-password" required>
 
-    <a class="lupa" href="#">Lupa Kata Sandi?</a>
+    <a class="lupa" href="lupa_password.php">Lupa Kata Sandi?</a>
     <button class="btn" type="submit">Masuk</button>
   </form>
   <p class="auth-foot">Belum punya akun? <a href="register.php">Daftar di Sini</a></p>

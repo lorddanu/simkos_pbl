@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SIMKOS - Calon Penghuni</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/style.css?v=profile-menu-1">
 <link rel="stylesheet" href="../assets/css/calon_penghuni.css?v=8">
 </head>
 <body class="calon-body">
@@ -24,12 +24,18 @@
         <?php if (!empty($adaNotifikasiBaru)): ?><span class="notification-dot" aria-label="Ada notifikasi baru"></span><?php endif; ?>
       </a>
       <?php endif; ?>
-      <form method="post" action="../auth/logout.php">
-        <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
-        <button class="icon akun-icon akun-logout" type="submit" aria-label="Keluar dari akun" title="Keluar">
-          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="9" r="3"/><path d="M5.7 19c.8-3 3.2-4.5 6.3-4.5 3.1 0 5.5 1.5 6.3 4.5"/></svg>
+<div class="profile-menu" data-profile-menu>
+        <button class="icon profile-button akun-icon" type="button" data-profile-button aria-label="Menu profil" aria-expanded="false" aria-controls="profileDropdown">
+          <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="none"><circle cx="12" cy="12" r="11" fill="#fff"/><circle cx="12" cy="8.5" r="3.2" fill="var(--p)"/><path d="M5.5 19c.7-3 3-4.7 6.5-4.7s5.8 1.7 6.5 4.7" fill="var(--p)"/></svg>
         </button>
-      </form>
+        <div class="profile-dropdown" id="profileDropdown" data-profile-dropdown hidden>
+          <div class="profile-name">Calon Penghuni SIMKOS</div>
+          <form method="post" action="../auth/logout.php" class="profile-logout-form">
+            <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
+            <button class="logout-link" type="submit">Logout</button>
+          </form>
+        </div>
+      </div>
     </div>
   </header>
   <main class="calon-main <?= h($mainClass) ?>">
@@ -45,5 +51,6 @@
 </div>
 <div id="demo-reset-config" hidden data-endpoint="../reset_demo.php" data-home="index.php" data-csrf="<?= h(csrf_token()) ?>"></div>
 <script src="../assets/js/reset_demo_on_reload.js"></script>
+<script src="../assets/js/profile_menu.js"></script>
 </body>
 </html>

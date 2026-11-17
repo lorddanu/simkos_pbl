@@ -122,7 +122,7 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SIMKOS - Penghuni</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/style.css?v=category-picker-1">
 </head>
 <body>
 <div class="phone">
@@ -133,9 +133,18 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
       </a>
     <?php endif; ?>
     <h1>SIMKOS</h1>
-    <span class="icon" aria-label="Akun">
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 4a3 3 0 110 6 3 3 0 010-6zm0 13.2a7.2 7.2 0 01-5.6-2.7C6.5 14.8 10 14 12 14s5.5.8 5.6 2.5A7.2 7.2 0 0112 19.2z"/></svg>
-    </span>
+<div class="profile-menu" data-profile-menu>
+      <button type="button" class="icon profile-button" data-profile-button aria-label="Menu profil" aria-expanded="false" aria-controls="profileDropdown">
+        <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="none"><circle cx="12" cy="12" r="11" fill="#fff"/><circle cx="12" cy="8.5" r="3.2" fill="var(--p)"/><path d="M5.5 19c.7-3 3-4.7 6.5-4.7s5.8 1.7 6.5 4.7" fill="var(--p)"/></svg>
+      </button>
+      <div class="profile-dropdown" id="profileDropdown" data-profile-dropdown hidden>
+        <div class="profile-name">Penghuni SIMKOS</div>
+        <form method="post" action="../auth/logout.php" class="profile-logout-form">
+          <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
+          <button class="logout-link" type="submit">Logout</button>
+        </form>
+      </div>
+    </div>
   </header>
 
   <main>
@@ -149,12 +158,7 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
     <?php if ($idPenghuni): ?>
       <a class="btn" href="index.php?page=feedback">Kirim Saran dan Kritik</a>
     <?php endif; ?>
-    <form method="post" action="../auth/logout.php">
-      <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
-      <button class="btn alt" type="submit">Log out</button>
-    </form>
-
-  <?php elseif ($page === 'dash'): ?>
+<?php elseif ($page === 'dash'): ?>
     <div class="card">
       <h2 class="big">Kamar Saya</h2>
       <div class="kamar"><span>Kamar <?= h($sewa['nomor_kamar']) ?></span><span class="aktif">Aktif</span></div>
@@ -187,12 +191,7 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
       <a class="btn inv" href="index.php?page=feedback">Ketik Saran dan Kritik</a>
     </div>
 
-    <form method="post" action="../auth/logout.php">
-      <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
-      <button class="btn alt" type="submit">Log out (<?= h($user['nama'] ?? $user['email']) ?>)</button>
-    </form>
-
-  <?php elseif ($page === 'upload'): ?>
+<?php elseif ($page === 'upload'): ?>
     <h2 class="t">Unggah bukti pembayaran</h2>
     <p class="s">Pembayaran <?= h($bulanIni) ?> - <?= rupiah((int) $sewa['harga_bulanan']) ?></p>
     <form method="post" enctype="multipart/form-data" class="form">
@@ -232,10 +231,19 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
     <form method="post" class="form">
       <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
       <input type="hidden" name="aksi" value="saran">
-      <label for="kat">Kategori</label>
-      <select id="kat" name="kategori">
-        <?php foreach ($kategoriList as $k): ?><option><?= h($k) ?></option><?php endforeach; ?>
-      </select>
+      <label id="kat-label">Kategori</label>
+      <div class="category-picker" data-category-picker>
+        <input type="hidden" id="kat" name="kategori" value="<?= h($kategoriList[0] ?? 'Lainnya') ?>">
+        <button type="button" class="category-trigger" data-category-trigger aria-labelledby="kat-label" aria-haspopup="listbox" aria-expanded="false" aria-controls="categoryOptions">
+          <span data-category-label><?= h($kategoriList[0] ?? 'Pilih kategori') ?></span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="category-options" id="categoryOptions" data-category-options role="listbox" aria-labelledby="kat-label" hidden>
+          <?php foreach ($kategoriList as $i => $k): ?>
+          <button type="button" class="category-option" role="option" aria-selected="<?= $i === 0 ? 'true' : 'false' ?>" data-value="<?= h($k) ?>"><?= h($k) ?></button>
+          <?php endforeach; ?>
+        </div>
+      </div>
       <label for="cat">Catatan (opsional)</label>
       <textarea id="cat" name="catatan" placeholder="Tulis saran atau kritikmu di sini..."></textarea>
       <div class="spacer"></div>
@@ -266,5 +274,7 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
 </div>
 <div id="demo-reset-config" hidden data-endpoint="../reset_demo.php" data-home="index.php" data-csrf="<?= h(csrf_token()) ?>"></div>
 <script src="../assets/js/reset_demo_on_reload.js"></script>
+<script src="../assets/js/profile_menu.js"></script>
+<script src="../assets/js/category_picker.js"></script>
 </body>
 </html>

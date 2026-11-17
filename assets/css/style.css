@@ -53,3 +53,48 @@ body.auth{background:var(--p);min-height:100vh;align-items:center}
 .auth-card .err{background:#fdeaea;border-radius:8px;padding:8px}
 .auth-foot{text-align:center;color:#fff;font-size:13px;margin-top:14px}
 .auth-foot a{color:#fff;font-weight:700}
+/* ---------- Pemulihan kata sandi ---------- */
+body.recovery-auth{width:min(100%,390px);min-height:100vh;min-height:100dvh;margin:0 auto;padding:0;background:var(--p);align-items:stretch}
+.recovery-wrap{width:100%;min-height:100vh;min-height:100dvh;margin:auto;display:flex;flex-direction:column;justify-content:center;padding:28px 26px}
+.recovery-card{width:100%;gap:12px;padding:26px 22px;border-radius:14px;background:#fff;box-shadow:0 0 16px rgba(255,255,255,.72),0 8px 24px rgba(35,28,83,.2)}
+.recovery-card h1{font-size:21px;margin:0;text-align:center}
+.recovery-description{margin:0 0 8px;text-align:center;color:#3d4350;font-size:11px;line-height:1.5}
+.recovery-form{display:flex;flex-direction:column;gap:9px}
+.recovery-form label{color:#4c5361;font-size:11px;font-weight:600}
+.recovery-form input[type=email],.recovery-form input[type=password]{width:100%;margin:0;padding:10px 11px;border:1px solid #c9c9ce;border-radius:9px;color:#241f45;background:#fff;font:400 12px Poppins,sans-serif}
+.recovery-card .btn{margin-top:8px;padding:13px 12px;border-radius:14px;background:var(--p);font-size:11px}
+.recovery-link{align-self:center;color:#fff;text-decoration:none;font-size:11px;font-weight:600;margin-top:2px}
+.recovery-demo-code{margin:0;padding:9px 10px;border-radius:8px;background:#f1efff;color:#5548a9;text-align:center;font-size:11px}
+.recovery-demo-code strong{display:block;font-size:21px;letter-spacing:5px}
+.recovery-demo-code small{display:block;margin-top:3px;color:#655e81;font-size:9px;letter-spacing:0}
+.otp-inputs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.otp-inputs input{width:100%;height:42px;padding:0;border:1px solid #c9c9ce;border-radius:8px;background:#fff;text-align:center;color:#241f45;font:600 17px Poppins,sans-serif}
+.otp-inputs input:focus{border-color:var(--p);outline:2px solid rgba(115,103,204,.2)}
+.recovery-resend{display:flex;justify-content:center;align-items:center;gap:3px;color:#424956;font-size:10px}
+.recovery-resend form,.recovery-change-email{margin:0}
+.text-button{border:0;padding:2px;background:transparent;color:var(--p);font:600 10px Poppins,sans-serif;cursor:pointer}
+.recovery-footer-form{align-self:center;margin:10px 0 0}
+.recovery-hint{color:#767984;font-size:9px;margin-top:-6px}
+.recovery-card .ok,.recovery-card .err{font-size:10px}
+@media(max-width:360px){.recovery-wrap{padding:20px 16px}.recovery-card{padding:22px 16px}.otp-inputs{gap:4px}.otp-inputs input{height:38px}}
+
+/* Menu profil bersama untuk penghuni dan calon penghuni */
+.profile-menu{position:relative;z-index:40;display:flex;align-items:center;flex:none}
+.profile-button{width:40px;height:40px;display:grid;place-items:center;padding:2px;border:0;border-radius:50%;background:transparent;color:var(--p);cursor:pointer}
+.profile-button svg{display:block;width:36px;height:36px}
+.profile-button:hover{background:rgba(255,255,255,.14)}
+.profile-dropdown{position:absolute;top:calc(100% + 8px);right:0;z-index:100;width:min(210px,calc(100vw - 32px));padding:8px;border-radius:10px;background:#fff;color:#272443;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.profile-dropdown[hidden]{display:none}
+.profile-name{padding:10px;font-size:13px;font-weight:600;overflow-wrap:anywhere}
+.profile-logout-form{margin:0}
+.profile-dropdown .logout-link{display:inline-block;width:auto;margin:0;padding:8px 12px;border:1px solid #aaa;border-radius:7px;background:#f8f7ff;color:var(--p);font:400 13px Poppins,sans-serif;cursor:pointer}
+.profile-dropdown .logout-link:hover{background:#f0effb}
+/* Pilihan kategori Saran & Kritik dengan daftar berbaris seperti desain. */
+.category-picker{position:relative;width:100%}
+.category-trigger{width:100%;min-height:42px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;border:1px solid var(--p);border-radius:10px;background:#fff;color:#241f45;text-align:left;font:400 13px Poppins,sans-serif;cursor:pointer}
+.category-trigger svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.category-options{position:absolute;top:calc(100% + 1px);left:0;right:0;z-index:60;overflow:hidden;border:1px solid #a69df0;border-radius:0;background:#f4f2ff;box-shadow:0 3px 8px rgba(36,31,69,.08)}
+.category-options[hidden]{display:none}
+.category-option{display:block;width:100%;min-height:32px;padding:6px 11px;border:0;border-bottom:1px solid #a69df0;background:transparent;color:#7770d1;text-align:left;font:400 10px Poppins,sans-serif;cursor:pointer}
+.category-option:last-child{border-bottom:0}
+.category-option:hover,.category-option:focus-visible{background:#ebe8ff;color:#5a4fb0;outline:none}

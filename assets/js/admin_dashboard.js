@@ -114,27 +114,6 @@
             });
         });
 
-        // Menu profil dan logout
-        const profileButton = document.getElementById('profileButton');
-        const profileDropdown = document.getElementById('profileDropdown');
-
-        if (profileButton && profileDropdown) {
-            profileButton.addEventListener('click', event => {
-                event.stopPropagation();
-
-                const isOpening = profileDropdown.hidden;
-                profileDropdown.hidden = !isOpening;
-
-                profileButton.setAttribute('aria-expanded', String(isOpening));
-            });
-
-            document.addEventListener('click', event => {
-                if (!event.target.closest('.profile-menu')) {
-                    profileDropdown.hidden = true;
-                    profileButton.setAttribute('aria-expanded', 'false');
-                }
-            });
-        }
     });
 
     // Tab Kamar dan Penghuni

@@ -28,6 +28,7 @@ Role `admin` dikenali oleh helper autentikasi dan diarahkan ke `admin/dashboard.
 | --- | --- |
 | `index.php` | Pintu masuk setelah login; mengarahkan akun ke dashboard sesuai role efektif. |
 | `auth/login.php` | Form login, pemeriksaan password hash, dan pembuatan sesi login. |
+| `auth/lupa_password.php` | Alur simulasi pemulihan kata sandi dengan OTP, verifikasi, dan penyimpanan password baru. |
 | `auth/register.php` | Registrasi akun calon penghuni dan data nama penghuni. |
 | `auth/logout.php` | Mengakhiri sesi login. |
 | `database/database.php` | Konfigurasi koneksi PDO ke PostgreSQL. |
@@ -51,6 +52,8 @@ Role `admin` dikenali oleh helper autentikasi dan diarahkan ke `admin/dashboard.
 4. `database/helpers.php::current_user()` memuat akun dan memeriksa tabel `sewa`.
 5. Jika akun adalah admin, role efektifnya `admin`. Jika ada sewa yang belum berakhir, role efektifnya `penghuni`. Jika tidak, role efektifnya `calon_penghuni`.
 6. `index.php` mengarahkan pengguna ke folder role yang sesuai. Halaman role juga memanggil `require_login()` dan memeriksa role.
+
+Tautan **Lupa Kata Sandi** membuka `auth/lupa_password.php`: pengguna memasukkan email, memverifikasi OTP enam digit, lalu menetapkan kata sandi baru. Untuk simulasi lokal, OTP ditampilkan di layar dan tidak dikirim melalui email.
 
 Registrasi publik membuat akun ber-role `calon_penghuni`. Role penghuni efektif didapat dari adanya sewa aktif, bukan semata-mata nilai role tersimpan di tabel `akun`.
 
