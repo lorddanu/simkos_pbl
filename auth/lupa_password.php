@@ -207,7 +207,7 @@ $emailTampil = is_array($reset) ? (string) ($reset['email'] ?? '') : $email;
   <form method="post" class="recovery-footer-form">
     <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="aksi" value="ganti_email">
-    <button type="submit" class="recovery-link">Mulai ulang!!</button>
+    <button type="submit" class="recovery-link">Mulai ulang</button>
   </form>
   <?php else: ?>
   <a class="recovery-link" href="login.php">Kembali ke Masuk</a>
