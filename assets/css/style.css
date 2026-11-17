@@ -54,8 +54,9 @@ body.auth{background:var(--p);min-height:100vh;align-items:center}
 .auth-foot{text-align:center;color:#fff;font-size:13px;margin-top:14px}
 .auth-foot a{color:#fff;font-weight:700}
 /* ---------- Pemulihan kata sandi ---------- */
-body.recovery-auth{width:min(100%,390px);min-height:100vh;min-height:100dvh;margin:0 auto;padding:0;background:var(--p);align-items:stretch}
-.recovery-wrap{width:100%;min-height:100vh;min-height:100dvh;margin:auto;display:flex;flex-direction:column;justify-content:center;padding:28px 26px}
+html:has(body.recovery-auth){background:var(--p)}
+body.auth.recovery-auth{width:min(100%,390px);min-height:100vh;min-height:100dvh;margin:0 auto;padding:0;background:var(--p);align-items:stretch;overflow-x:hidden}
+.recovery-wrap{width:100%;max-width:390px;min-height:100vh;min-height:100dvh;margin:auto;display:flex;flex-direction:column;justify-content:center;padding:28px 26px}
 .recovery-card{width:100%;gap:12px;padding:26px 22px;border-radius:14px;background:#fff;box-shadow:0 0 16px rgba(255,255,255,.72),0 8px 24px rgba(35,28,83,.2)}
 .recovery-card h1{font-size:21px;margin:0;text-align:center}
 .recovery-description{margin:0 0 8px;text-align:center;color:#3d4350;font-size:11px;line-height:1.5}
@@ -67,16 +68,16 @@ body.recovery-auth{width:min(100%,390px);min-height:100vh;min-height:100dvh;marg
 .recovery-demo-code{margin:0;padding:9px 10px;border-radius:8px;background:#f1efff;color:#5548a9;text-align:center;font-size:11px}
 .recovery-demo-code strong{display:block;font-size:21px;letter-spacing:5px}
 .recovery-demo-code small{display:block;margin-top:3px;color:#655e81;font-size:9px;letter-spacing:0}
-.otp-inputs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
-.otp-inputs input{width:100%;height:42px;padding:0;border:1px solid #c9c9ce;border-radius:8px;background:#fff;text-align:center;color:#241f45;font:600 17px Poppins,sans-serif}
+.otp-inputs{display:flex;justify-content:center;gap:6px}
+.otp-inputs input{width:34px;max-width:34px;flex:0 1 34px;height:38px;padding:0;border:1px solid #c9c9ce;border-radius:8px;background:#fff;text-align:center;color:#241f45;font:600 17px Poppins,sans-serif}
 .otp-inputs input:focus{border-color:var(--p);outline:2px solid rgba(115,103,204,.2)}
 .recovery-resend{display:flex;justify-content:center;align-items:center;gap:3px;color:#424956;font-size:10px}
 .recovery-resend form,.recovery-change-email{margin:0}
 .text-button{border:0;padding:2px;background:transparent;color:var(--p);font:600 10px Poppins,sans-serif;cursor:pointer}
-.recovery-footer-form{align-self:center;margin:10px 0 0}
+.recovery-footer-form{align-self:center;margin:10px 0 0}.recovery-footer-form .recovery-link{border:0;padding:0;background:transparent;cursor:pointer}
 .recovery-hint{color:#767984;font-size:9px;margin-top:-6px}
-.recovery-card .ok,.recovery-card .err{font-size:10px}
-@media(max-width:360px){.recovery-wrap{padding:20px 16px}.recovery-card{padding:22px 16px}.otp-inputs{gap:4px}.otp-inputs input{height:38px}}
+.recovery-card .ok,.recovery-card .err{font-size:10px}.recovery-card :focus-visible{outline-color:var(--p);outline-offset:2px}
+@media(max-width:360px){.recovery-wrap{padding:20px 16px}.recovery-card{padding:22px 16px}.otp-inputs{gap:4px}.otp-inputs input{width:32px;max-width:32px;flex-basis:32px;height:38px}}
 
 /* Menu profil bersama untuk penghuni dan calon penghuni */
 .profile-menu{position:relative;z-index:40;display:flex;align-items:center;flex:none}
