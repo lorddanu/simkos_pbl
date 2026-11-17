@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - SIMKOS</title>
-    <link rel="stylesheet" href="../assets/css/admin_dashboard.css?v=admin-profile-1">
+    <link rel="stylesheet" href="../assets/css/admin_dashboard.css?v=admin-profile-2">
 </head>
 <body class="admin-app <?= ($halamanAktif ?? '') === 'dashboard' ? 'admin-dashboard' : '' ?>">
 <header class="admin-header">
@@ -18,20 +18,12 @@
         <a class="admin-notification-button" href="pembayaran.php" aria-label="Notifikasi pembayaran" title="Notifikasi pembayaran">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m4 7 8 6 8-6"></path></svg>
         </a>
-    <div class="profile-menu" data-profile-menu>
-        <button
-            type="button"
-            class="profile-button"
-            id="profileButton"
-            data-profile-button
-            aria-label="Menu profil"
-            aria-expanded="false"
-            aria-controls="profileDropdown"
-        >
+    <details class="profile-menu">
+        <summary class="profile-button" aria-label="Menu profil">
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="none"><circle cx="12" cy="12" r="11" fill="#fff"></circle><circle cx="12" cy="8.5" r="3.2" fill="#7165d1"></circle><path d="M5.5 19c.7-3 3-4.7 6.5-4.7s5.8 1.7 6.5 4.7" fill="#7165d1"></path></svg>
-        </button>
+        </summary>
 
-        <div class="profile-dropdown" id="profileDropdown" data-profile-dropdown hidden>
+        <div class="profile-dropdown" id="profileDropdown">
             <div class="profile-name">
                 Admin SIMKOS
             </div>
@@ -41,6 +33,6 @@
                 <button type="submit" class="logout-link">Logout</button>
             </form>
         </div>
-    </div>
+    </details>
     </div>
 </header>

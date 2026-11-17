@@ -2163,3 +2163,11 @@ body.admin-app {
 .admin-header-actions{position:relative;z-index:40}
 .admin-header-actions .profile-menu{z-index:41}
 .admin-header-actions .profile-dropdown{z-index:100;top:calc(100% + 8px);right:0}
+
+.admin-header-actions .profile-menu{display:block}
+.admin-header-actions .profile-button{list-style:none}
+.admin-header-actions .profile-button::-webkit-details-marker{display:none}
+.admin-header-actions .profile-menu:not([open]) .profile-dropdown{display:none}
+.admin-header-actions .profile-menu[open] .profile-dropdown{display:block}
+
+.admin-header-actions .profile-button::marker{content:''}
