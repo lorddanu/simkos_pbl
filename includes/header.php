@@ -15,7 +15,7 @@
     <div class="brand">SIMKOS</div>
 
     <div class="admin-header-actions">
-        <a class="admin-notification-button" href="pembayaran.php" aria-label="Notifikasi pembayaran" title="Notifikasi pembayaran">
+        <a class="admin-notification-button" href="kamar.php?tab=penghuni#pengajuan-masuk" aria-label="Notifikasi pengajuan sewa" title="Notifikasi pengajuan sewa">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m4 7 8 6 8-6"></path></svg>
         </a>
     <details class="profile-menu">

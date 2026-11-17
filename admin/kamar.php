@@ -96,6 +96,7 @@ $penghuniAktif = $pdo->query(
 )->fetchAll();
 
 $halamanAktif = 'data';
+$tabPenghuniAktif = ($_GET['tab'] ?? '') === 'penghuni';
 
 include __DIR__ . '/../includes/header.php';
 ?>
@@ -109,7 +110,7 @@ include __DIR__ . '/../includes/header.php';
         <div class="data-tabs">
             <button
                 type="button"
-                class="data-tab active"
+                class="data-tab <?= $tabPenghuniAktif ? '' : 'active' ?>"
                 data-data-tab="kamar"
             >
                 Kamar
@@ -117,7 +118,7 @@ include __DIR__ . '/../includes/header.php';
 
             <button
                 type="button"
-                class="data-tab"
+                class="data-tab <?= $tabPenghuniAktif ? 'active' : '' ?>"
                 data-data-tab="penghuni"
             >
                 Penghuni
@@ -125,7 +126,7 @@ include __DIR__ . '/../includes/header.php';
         </div>
 
         <!-- TAB KAMAR -->
-        <div id="tab-kamar" class="data-tab-content">
+        <div id="tab-kamar" class="data-tab-content" <?= $tabPenghuniAktif ? 'hidden' : '' ?>>
 
             <!-- RINGKASAN -->
             <div class="kamar-stats">
@@ -166,10 +167,10 @@ include __DIR__ . '/../includes/header.php';
         </div>
 
         <!-- TAB PENGHUNI -->
-        <div id="tab-penghuni" class="data-tab-content" hidden>
+        <div id="tab-penghuni" class="data-tab-content" <?= $tabPenghuniAktif ? '' : 'hidden' ?>>>
 
             <?php if ($pesanAdmin): ?><p class="admin-feedback" role="status"><?= h($pesanAdmin) ?></p><?php endif; ?>
-            <h2 class="section-title">Pengajuan Sewa Masuk</h2>
+            <h2 class="section-title" id="pengajuan-masuk">Pengajuan Sewa Masuk</h2>
             <?php if (!$pengajuanMasuk): ?><p>Belum ada pengajuan sewa masuk.</p><?php endif; ?>
             <?php foreach ($pengajuanMasuk as $pengajuan): ?>
                 <article class="admin-application-card">
