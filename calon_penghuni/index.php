@@ -270,8 +270,9 @@ $pembayaran = null;
 if ($halaman === 'pembayaran_terkirim' && $pengajuan) {
     $idPembayaran = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0;
     $st = $pdo->prepare(
-        "SELECT p.*, ps.nomor_kamar, p.jumlah AS total
+        "SELECT p.*, k.nomor_kamar, p.jumlah AS total
            FROM pembayaran p JOIN pengajuan_sewa ps ON ps.id_pengajuan = p.id_pengajuan_sewa
+           JOIN kamar k ON k.id_kamar = ps.id_kamar
           WHERE p.id_pembayaran = ? AND ps.id_pengajuan = ? AND ps.id_penghuni = ?"
     );
     $st->execute([$idPembayaran, $pengajuan['id_pengajuan'], (int) $user['id_penghuni']]);
