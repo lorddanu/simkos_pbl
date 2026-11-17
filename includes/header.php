@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - SIMKOS</title>
-    <link rel="stylesheet" href="../assets/css/admin_dashboard.css?v=admin-mobile-5">
+    <link rel="stylesheet" href="../assets/css/admin_dashboard.css?v=admin-profile-1">
 </head>
 <body class="admin-app <?= ($halamanAktif ?? '') === 'dashboard' ? 'admin-dashboard' : '' ?>">
 <header class="admin-header">

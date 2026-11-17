@@ -2159,3 +2159,7 @@ body.admin-app {
 .admin-header-actions{display:flex;align-items:center;gap:14px;margin-left:auto;flex:none}
 .admin-notification-button{width:28px;height:34px;display:grid;place-items:center;color:#fff;text-decoration:none;flex:none}
 .admin-notification-button svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* Pastikan dropdown profil admin tampil di atas konten dan bisa diklik. */
+.admin-header-actions{position:relative;z-index:40}
+.admin-header-actions .profile-menu{z-index:41}
+.admin-header-actions .profile-dropdown{z-index:100;top:calc(100% + 8px);right:0}

@@ -29,7 +29,7 @@
 
 <div id="demo-reset-config" hidden data-endpoint="../reset_demo.php" data-home="dashboard.php" data-csrf="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>"></div>
 <script src="../assets/js/reset_demo_on_reload.js"></script>
-<script src="../assets/js/profile_menu.js"></script>
+<script src="../assets/js/profile_menu.js?v=profile-menu-2"></script>
 <script src="../assets/js/admin_dashboard.js"></script>
 
 </body>
