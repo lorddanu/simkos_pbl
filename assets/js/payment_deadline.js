@@ -56,7 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const hours = Math.floor(totalSeconds / 3600);
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const seconds = totalSeconds % 60;
-      if (counter) counter.textContent = `${hours} jam ${minutes} menit ${seconds} detik`;
+      const hoursLabel = String(hours).padStart(2, '0');
+      const minutesLabel = String(minutes).padStart(2, '0');
+      const secondsLabel = String(seconds).padStart(2, '0');
+      if (counter) counter.textContent = `${hoursLabel}:${minutesLabel}:${secondsLabel}`;
       if (totalSeconds === 0) {
         window.clearInterval(interval);
         expireOnServer();
