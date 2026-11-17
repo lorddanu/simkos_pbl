@@ -9,7 +9,7 @@
 <?php if (($pengajuan['status'] ?? '') === 'menunggu_pembayaran' && $batasPembayaranMs > 0): ?>
 <section class="payment-deadline" data-payment-deadline data-deadline-ms="<?= $batasPembayaranMs ?>" data-server-now-ms="<?= $waktuServerMs ?>" data-application-id="<?= (int) $pengajuan['id_pengajuan'] ?>" data-csrf="<?= h(csrf_token()) ?>" data-expire-url="index.php?halaman=pembayaran" data-notification-url="index.php?halaman=notifikasi">
   <span class="payment-deadline-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 1.5M9 2h6M12 2v3"></path></svg></span>
-  <div><strong>Batas waktu pembayaran</strong><p>Sisa waktu: <b data-countdown>30:00</b></p><small>Ajukan sebelum <?= h($batasPembayaranLabel) ?>. Jika waktu habis, pengajuan dibatalkan.</small><small class="payment-deadline-message" data-deadline-message hidden>Waktu habis. Pengajuan sewa telah dibatalkan.</small></div>
+  <div><strong>Batas waktu pembayaran</strong><p>Sisa waktu: <b data-countdown>-- jam -- menit -- detik</b></p><small>Ajukan sebelum <?= h($batasPembayaranLabel) ?>. Jika waktu habis, pengajuan dibatalkan.</small><small class="payment-deadline-message" data-deadline-message hidden>Waktu habis. Pengajuan sewa telah dibatalkan.</small></div>
 </section>
 <?php endif; ?>
       <div class="notification-actions">
@@ -44,5 +44,5 @@
   <?php endif; ?>
 </section>
 
-<script src="../assets/js/payment_deadline.js?v=1"></script>
+<script src="../assets/js/payment_deadline.js?v=2"></script>
 
