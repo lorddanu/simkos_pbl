@@ -122,17 +122,18 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SIMKOS - Penghuni</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=category-picker-1">
+<link rel="stylesheet" href="../assets/css/style.css?v=notification-1">
 </head>
 <body>
 <div class="phone">
   <header>
-    <?php if ($page !== 'dash'): ?>
-      <a class="icon" href="index.php?page=dash" aria-label="Kembali">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M13 8l-4 4 4 4"/></svg>
-      </a>
-    <?php endif; ?>
+<a class="icon back-button" href="<?= $page === 'dash' ? '../index.php' : 'index.php?page=dash' ?>" aria-label="Kembali">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m13 8-4 4 4 4"></path></svg>
+    </a>
     <h1>SIMKOS</h1>
+    <a class="notification-button" href="index.php?page=dash#notifikasi" aria-label="Notifikasi pembayaran" title="Notifikasi pembayaran">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m4 7 8 6 8-6"></path></svg>
+    </a>
 <div class="profile-menu" data-profile-menu>
       <button type="button" class="icon profile-button" data-profile-button aria-label="Menu profil" aria-expanded="false" aria-controls="profileDropdown">
         <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="none"><circle cx="12" cy="12" r="11" fill="#fff"/><circle cx="12" cy="8.5" r="3.2" fill="var(--p)"/><path d="M5.5 19c.7-3 3-4.7 6.5-4.7s5.8 1.7 6.5 4.7" fill="var(--p)"/></svg>
@@ -171,7 +172,7 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
     </div>
     <?php endif; ?>
 
-    <div class="card">
+    <div id="notifikasi" class="card">
       <h2>Status pembayaran bulan ini</h2>
       <div class="row">
         <span><b><?= h($bulanIni) ?></b><br><?= rupiah((int) $sewa['harga_bulanan']) ?></span>

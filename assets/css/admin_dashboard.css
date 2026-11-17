@@ -2154,3 +2154,8 @@ body.admin-app {
 .profile-button svg{stroke:none}
 .profile-dropdown .logout-link{display:inline-block;width:auto;padding:8px 12px;border:1px solid #aaa;border-radius:7px;background:#f8f7ff;color:#7165d1;font:400 13px Arial,sans-serif;cursor:pointer;text-decoration:none}
 .profile-dropdown .logout-link:hover{background:#f0effb}
+.admin-back-button{width:32px;height:32px;flex:none;display:grid;place-items:center;color:#fff;text-decoration:none}
+.admin-back-button svg{display:block;width:28px;height:28px}
+.admin-header-actions{display:flex;align-items:center;gap:14px;margin-left:auto;flex:none}
+.admin-notification-button{width:28px;height:34px;display:grid;place-items:center;color:#fff;text-decoration:none;flex:none}
+.admin-notification-button svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}

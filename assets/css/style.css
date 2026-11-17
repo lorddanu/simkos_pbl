@@ -99,3 +99,9 @@ body.auth.recovery-auth{width:min(100%,390px);min-height:100vh;min-height:100dvh
 .category-option{display:block;width:100%;min-height:32px;padding:6px 11px;border:0;border-bottom:1px solid #a69df0;background:transparent;color:#7770d1;text-align:left;font:400 10px Poppins,sans-serif;cursor:pointer}
 .category-option:last-child{border-bottom:0}
 .category-option:hover,.category-option:focus-visible{background:#ebe8ff;color:#5a4fb0;outline:none}
+/* Tombol kembali pada header role penghuni. */
+.back-button{width:32px;height:32px;flex:none;display:grid;place-items:center;color:#fff;text-decoration:none}
+.back-button svg{display:block;width:28px;height:28px}
+/* Ikon pesan pada header penghuni. */
+.notification-button{width:28px;height:34px;flex:none;display:grid;place-items:center;color:#fff;text-decoration:none}
+.notification-button svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}

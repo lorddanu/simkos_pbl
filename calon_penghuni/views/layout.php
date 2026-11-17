@@ -5,17 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SIMKOS - Calon Penghuni</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=profile-menu-1">
+<link rel="stylesheet" href="../assets/css/style.css?v=notification-1">
 <link rel="stylesheet" href="../assets/css/calon_penghuni.css?v=8">
 </head>
 <body class="calon-body">
 <div class="phone">
   <header class="calon-header <?= $halaman === 'pembayaran' ? 'payment-compact-header' : ($halaman === 'metode' ? 'method-compact-header' : ($halaman === 'pembayaran_terkirim' ? 'receipt-compact-header' : '')) ?>">
-    <?php if ($urlKembali !== null): ?>
-      <a class="icon" href="<?= h($urlKembali) ?>" aria-label="Kembali">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M13 8l-4 4 4 4"/></svg>
-      </a>
-    <?php endif; ?>
+    <a class="icon back-button" href="<?= h($urlKembali ?? 'index.php') ?>" aria-label="Kembali">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m13 8-4 4 4 4"/></svg>
+    </a>
     <h1>SIMKOS</h1>
     <div class="header-actions" style="display:flex;align-items:center;gap:14px;margin-left:auto;flex:0 0 auto">
       <?php if ($halaman !== 'pembayaran_terkirim'): ?>

@@ -5,12 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - SIMKOS</title>
-    <link rel="stylesheet" href="../assets/css/admin_dashboard.css?v=admin-mobile-3">
+    <link rel="stylesheet" href="../assets/css/admin_dashboard.css?v=admin-mobile-5">
 </head>
 <body class="admin-app <?= ($halamanAktif ?? '') === 'dashboard' ? 'admin-dashboard' : '' ?>">
 <header class="admin-header">
+    <a class="admin-back-button" href="<?= ($halamanAktif ?? '') === 'dashboard' ? '../index.php' : 'dashboard.php' ?>" aria-label="Kembali">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m13 8-4 4 4 4"></path></svg>
+</a>
     <div class="brand">SIMKOS</div>
 
+    <div class="admin-header-actions">
+        <a class="admin-notification-button" href="pembayaran.php" aria-label="Notifikasi pembayaran" title="Notifikasi pembayaran">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m4 7 8 6 8-6"></path></svg>
+        </a>
     <div class="profile-menu" data-profile-menu>
         <button
             type="button"
@@ -34,5 +41,6 @@
                 <button type="submit" class="logout-link">Logout</button>
             </form>
         </div>
+    </div>
     </div>
 </header>
