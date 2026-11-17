@@ -6,7 +6,7 @@
 <title>SIMKOS - Calon Penghuni</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css?v=date-picker-1">
-<link rel="stylesheet" href="../assets/css/calon_penghuni.css?v=9">
+<link rel="stylesheet" href="../assets/css/calon_penghuni.css?v=10">
 </head>
 <body class="calon-body">
 <div class="phone">
@@ -15,9 +15,9 @@
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m13 8-4 4 4 4"/></svg>
     </a>
     <h1>SIMKOS</h1>
-    <div class="header-actions" style="display:flex;align-items:center;gap:14px;margin-left:auto;flex:0 0 auto">
+    <div class="header-actions">
       <?php if ($halaman !== 'pembayaran_terkirim'): ?>
-      <a class="header-action" href="index.php?halaman=notifikasi" aria-label="Notifikasi" title="Notifikasi" style="display:grid;place-items:center;width:28px;height:34px;flex:none;color:#fff;text-decoration:none">
+      <a class="header-action" href="index.php?halaman=notifikasi" aria-label="Notifikasi" title="Notifikasi">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
         <?php if (!empty($adaNotifikasiBaru)): ?><span class="notification-dot" aria-label="Ada notifikasi baru"></span><?php endif; ?>
       </a>
