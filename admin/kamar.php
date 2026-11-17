@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_pengajuan'])) {
             $st = $pdo->prepare(
                 "UPDATE pengajuan_sewa
                     SET status = 'menunggu_pembayaran', ditinjau_oleh = ?, ditinjau_pada = NOW(),
-                        batas_pembayaran = NOW() + INTERVAL '1 day',
+                        batas_pembayaran = NOW() + INTERVAL '20 seconds',
                         catatan_admin = NULL, notifikasi_dibaca = FALSE, diperbarui_pada = NOW()
                   WHERE id_pengajuan = ?"
             );

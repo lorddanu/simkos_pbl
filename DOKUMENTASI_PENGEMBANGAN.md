@@ -42,7 +42,7 @@ Role `admin` dikenali oleh helper autentikasi dan diarahkan ke `admin/dashboard.
 | `sql/schema_simkoa.sql` | Tabel inti kamar, penghuni, sewa, pembayaran, dan keluhan. |
 | `sql/tambahan_penghuni.sql` | Tabel akun/migrasi role dan tambahan kolom aplikasi. |
 | `sql/migrasi_alur_pengajuan.sql` | Tabel pengajuan sewa dan relasi pembayaran untuk alur admin. |
-| `sql/migrasi_batas_pembayaran.sql` | Tenggat pembayaran 1 hari sejak pengajuan disetujui admin. |
+| `sql/migrasi_batas_pembayaran.sql` | Tenggat pembayaran 20 detik sejak pengajuan disetujui admin. |
 | `scripts/expire_approved_applications.php` | Job CLI untuk membatalkan pengajuan yang melewati tenggat. |
 | `sql/akun_demo.sql` | Data kamar dan akun demo untuk presentasi. |
 
@@ -101,7 +101,7 @@ flowchart TD
 ## 5. Alur admin dan reset simulasi
 
 1. Calon penghuni mengirim pengajuan sewa. Status tersimpan sebagai `menunggu_persetujuan`.
-2. Admin memilih setujui atau tolak dari halaman data penghuni. Jika disetujui, sistem memulai tenggat pembayaran 1 hari dan menampilkannya di Notifikasi serta di bawah catatan pada halaman pembayaran.
+2. Admin memilih setujui atau tolak dari halaman data penghuni. Jika disetujui, sistem memulai tenggat pembayaran 20 detik dan menampilkannya di Notifikasi serta di bawah catatan pada halaman pembayaran.
 3. Jika pembayaran belum diajukan sampai tenggat berakhir, status menjadi `kedaluwarsa` dan kamar tersedia kembali. Pembayaran yang diajukan tepat waktu masuk ke daftar verifikasi admin; bukti unggahan opsional untuk simulasi.
 4. Jika admin menolak pembayaran, calon dapat mengirim pembayaran lagi. Jika admin menerima, sistem membuat sewa, menandai kamar terisi, dan role efektif akun menjadi penghuni.
 5. Perubahan transaksi selama alur dicatat per sesi PHP. Saat browser mendeteksi refresh, `assets/js/reset_demo_on_reload.js` mengirim reset ke `reset_demo.php`; helper menghapus baris yang dibuat simulasi dan memulihkan baris yang diubah. Data dasar akun/kamar tetap ada.
@@ -114,7 +114,7 @@ Reset ini berlaku untuk alur yang dilakukan dalam browser/sesi yang sama. Jangan
 2. Jalankan `sql/schema_simkoa.sql` untuk tabel inti.
 3. Jalankan `sql/tambahan_penghuni.sql` untuk tabel akun/migrasi dan kolom tambahan.
 4. Jalankan `sql/migrasi_alur_pengajuan.sql` untuk tabel dan status alur persetujuan/pembayaran.
-5. Jalankan `sql/migrasi_batas_pembayaran.sql` untuk tenggat pembayaran 1 hari dan status kedaluwarsa.
+5. Jalankan `sql/migrasi_batas_pembayaran.sql` untuk tenggat pembayaran 20 detik dan status kedaluwarsa.
 6. Jalankan `sql/akun_demo.sql` untuk data presentasi.
 7. Sesuaikan koneksi pada `database/database.php` dengan server lokal. Jangan menaruh kredensial produksi di repository.
 
