@@ -21,8 +21,8 @@
             <div class="calendar-heading">
               <select class="calendar-month" aria-label="Pilih bulan"></select>
               <select class="calendar-year" aria-label="Pilih tahun"></select>
-              <button type="button" class="calendar-nav calendar-prev" aria-label="Bulan sebelumnya">‹</button>
-              <button type="button" class="calendar-nav calendar-next" aria-label="Bulan berikutnya">›</button>
+              <button type="button" class="calendar-nav calendar-prev" aria-label="Bulan sebelumnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button>
+              <button type="button" class="calendar-nav calendar-next" aria-label="Bulan berikutnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></button>
             </div>
             <div class="calendar-weekdays" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
             <div class="calendar-days" data-calendar-days></div>
@@ -40,8 +40,8 @@
             <div class="calendar-heading">
               <select class="calendar-month" aria-label="Pilih bulan"></select>
               <select class="calendar-year" aria-label="Pilih tahun"></select>
-              <button type="button" class="calendar-nav calendar-prev" aria-label="Bulan sebelumnya">‹</button>
-              <button type="button" class="calendar-nav calendar-next" aria-label="Bulan berikutnya">›</button>
+              <button type="button" class="calendar-nav calendar-prev" aria-label="Bulan sebelumnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button>
+              <button type="button" class="calendar-nav calendar-next" aria-label="Bulan berikutnya"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></button>
             </div>
             <div class="calendar-weekdays" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
             <div class="calendar-days" data-calendar-days></div>

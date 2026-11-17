@@ -143,7 +143,7 @@ html:has(.calon-body){background:#eeebf6}
 .calendar-popover[hidden]{display:none}
 .calendar-heading{display:grid;grid-template-columns:minmax(0,1fr) minmax(45px,auto) 28px 28px;align-items:center;gap:3px;margin-bottom:12px}
 .calendar-heading select{min-width:0;padding:2px 0;border:0;background:transparent;color:#222;font:600 13px Arial,sans-serif}
-.calendar-nav{width:26px;height:26px;padding:0;border:0;border-radius:50%;background:transparent;color:#666;font:24px/1 Arial,sans-serif;cursor:pointer}
+.calendar-nav{width:26px;height:26px;padding:0;border:0;border-radius:50%;background:transparent;color:#666;display:grid;place-items:center;cursor:pointer}.calendar-nav svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .calendar-nav:hover{background:#f1f1f1}
 .calendar-weekdays,.calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));justify-items:center;align-items:center}
 .calendar-weekdays{margin-bottom:8px;color:#777;font-size:10px}
