@@ -132,3 +132,28 @@ html:has(.calon-body){background:#eeebf6}
 .complaint-form label{color:var(--p);font-size:12px}
 .complaint-form textarea{width:100%;min-height:150px;border:1px solid #a69df0;border-radius:8px;padding:10px;font:400 12px Poppins,sans-serif}
 .complaint-form .btn{margin-top:auto}
+
+/* Kalender sewa mengikuti tampilan kalender putih dengan tanggal aktif biru. */
+.date-picker{position:relative;display:block;margin-top:4px}
+.date-picker-display{display:block;width:100%;height:36px;margin:0!important;padding:0 30px 0 9px!important;border:0!important;border-radius:8px!important;background:#fff!important;color:#211d3a!important;font:400 12px Arial,sans-serif!important;cursor:pointer}
+.date-picker-display::placeholder{color:#211d3a;opacity:1}
+.date-picker-trigger{position:absolute;top:0;right:0;width:34px;height:36px;display:grid;place-items:center;padding:0;border:0;background:transparent;color:#201c38;cursor:pointer}
+.date-picker-trigger svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.calendar-popover{position:fixed;z-index:10000;width:min(288px,calc(100vw - 24px));padding:15px 12px 14px;border:0;border-radius:17px;background:#fff;color:#171717;box-shadow:0 8px 24px rgba(0,0,0,.14);font:12px Arial,sans-serif}
+.calendar-popover[hidden]{display:none}
+.calendar-heading{display:grid;grid-template-columns:minmax(0,1fr) minmax(45px,auto) 28px 28px;align-items:center;gap:3px;margin-bottom:12px}
+.calendar-heading select{min-width:0;padding:2px 0;border:0;background:transparent;color:#222;font:600 13px Arial,sans-serif}
+.calendar-nav{width:26px;height:26px;padding:0;border:0;border-radius:50%;background:transparent;color:#666;font:24px/1 Arial,sans-serif;cursor:pointer}
+.calendar-nav:hover{background:#f1f1f1}
+.calendar-weekdays,.calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));justify-items:center;align-items:center}
+.calendar-weekdays{margin-bottom:8px;color:#777;font-size:10px}
+.calendar-weekdays span{height:24px;display:grid;place-items:center}
+.calendar-days{row-gap:4px}
+.calendar-day{width:32px;height:32px;padding:0;border:0;border-radius:50%;background:transparent;color:#1b1b1b;font:400 12px Arial,sans-serif;cursor:pointer}
+.calendar-day:hover:not(:disabled){background:#e9f2ff}
+.calendar-day.is-selected{background:#0878df;color:#fff}
+.calendar-day:disabled{color:#c7c7c7;cursor:default}
+.date-row label{min-width:0}
+@media(max-width:360px){.calendar-popover{width:calc(100vw - 24px);padding:13px 8px}.calendar-day{width:30px;height:30px}}
+
+.date-picker input[type=hidden]{display:none}

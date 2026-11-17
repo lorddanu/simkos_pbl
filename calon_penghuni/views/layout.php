@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SIMKOS - Calon Penghuni</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=notification-1">
-<link rel="stylesheet" href="../assets/css/calon_penghuni.css?v=8">
+<link rel="stylesheet" href="../assets/css/style.css?v=date-picker-1">
+<link rel="stylesheet" href="../assets/css/calon_penghuni.css?v=9">
 </head>
 <body class="calon-body">
 <div class="phone">
