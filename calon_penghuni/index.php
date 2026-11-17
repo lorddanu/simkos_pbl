@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
 
     $idPengajuanBayar = filter_input(INPUT_POST, 'id_pengajuan', FILTER_VALIDATE_INT) ?: 0;
     $st = $pdo->prepare(
-        "SELECT id_pengajuan, id_kamar, nomor_kamar, total, tanggal_mulai, status
+        "SELECT ps.id_pengajuan, ps.id_kamar, k.nomor_kamar, ps.total, ps.tanggal_mulai, ps.status
            FROM pengajuan_sewa ps JOIN kamar k USING (id_kamar)
           WHERE id_pengajuan = ? AND id_penghuni = ?
             AND ps.status IN ('menunggu_pembayaran', 'pembayaran_ditolak')"
