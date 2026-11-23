@@ -45,11 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi_pembayaran'] ?? '') !
                     throw new RuntimeException('Kamar tidak lagi tersedia; pembayaran belum dapat diterima.');
                 }
                 $st = $pdo->prepare(
-                    'INSERT INTO sewa (id_kamar, id_penghuni, tanggal_mulai, tanggal_selesai)
-                     VALUES (?, ?, ?, ?) RETURNING id_sewa'
+                    'INSERT INTO sewa (id_kamar, id_penghuni, id_pengajuan, tanggal_mulai, tanggal_selesai)
+                     VALUES (?, ?, ?, ?, ?) RETURNING id_sewa'
                 );
                 $st->execute([
-                    $pengajuanBayar['id_kamar'], $pengajuanBayar['id_penghuni'],
+                    $pengajuanBayar['id_kamar'], $pengajuanBayar['id_penghuni'], $pengajuanBayar['id_pengajuan'],
                     $pengajuanBayar['tanggal_mulai'], $pengajuanBayar['tanggal_selesai'],
                 ]);
                 demo_track_insert('sewa', (int) $st->fetchColumn());
