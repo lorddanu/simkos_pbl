@@ -28,8 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'expire_
         $pdo->beginTransaction();
         $st = $pdo->prepare(
             "SELECT status,
-                    (status = 'menunggu_pembayaran' AND batas_pembayaran IS NOT NULL AND batas_pembayaran <= NOW()) AS waktu_habis,
-                    (status = 'pembayaran_ditolak' AND batas_upload_ulang IS NOT NULL AND batas_upload_ulang <= NOW()) AS unggah_ulang_habis
+                    (status = 'menunggu_pembayaran' AND (batas_pembayaran IS NULL OR batas_pembayaran <= NOW())) AS waktu_habis,
+                    (status = 'pembayaran_ditolak' AND (batas_upload_ulang IS NULL OR batas_upload_ulang <= NOW())) AS unggah_ulang_habis
                FROM pengajuan_sewa
               WHERE id_pengajuan = ? AND id_penghuni = ? FOR UPDATE"
         );
@@ -62,8 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'expire_
 $stExpire = $pdo->prepare(
     "SELECT id_pengajuan FROM pengajuan_sewa
       WHERE id_penghuni = ? AND (
-        (status = 'menunggu_pembayaran' AND batas_pembayaran IS NOT NULL AND batas_pembayaran <= NOW())
-        OR (status = 'pembayaran_ditolak' AND batas_upload_ulang IS NOT NULL AND batas_upload_ulang <= NOW())
+        (status = 'menunggu_pembayaran' AND (batas_pembayaran IS NULL OR batas_pembayaran <= NOW()))
+        OR (status = 'pembayaran_ditolak' AND (batas_upload_ulang IS NULL OR batas_upload_ulang <= NOW()))
       )"
 );
 $stExpire->execute([(int) ($user['id_penghuni'] ?? 0)]);
