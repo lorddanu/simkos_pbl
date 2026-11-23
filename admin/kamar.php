@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_pengajuan'])) {
                     SET status = 'menunggu_pembayaran', ditinjau_oleh = ?, ditinjau_pada = NOW(),
                         batas_pembayaran = NOW() + INTERVAL '24 hours', batas_upload_ulang = NULL,
                         catatan_admin = NULL, notifikasi_dibaca = FALSE, diperbarui_pada = NOW()
-                  WHERE id_pengajuan = ?"
+                WHERE id_pengajuan = ?"
             );
             $st->execute([(int) $user['id_akun'], $idPengajuan]);
             $_SESSION['flash_admin'] = 'Pengajuan disetujui. Calon penghuni dapat mengajukan pembayaran.';

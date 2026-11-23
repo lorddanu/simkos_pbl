@@ -36,17 +36,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'expire_
         $st->execute([$idExpire, (int) $user['id_penghuni']]);
         $expireRow = $st->fetch();
         $alreadyExpired = $expireRow && $expireRow['status'] === 'kedaluwarsa';
-        $statusBerlaku = $expireRow && in_array($expireRow['status'], ['menunggu_pembayaran', 'pembayaran_ditolak'], true);
-        $waktuHabis = $expireRow && (
-            ($expireRow['status'] === 'menunggu_pembayaran' && in_array($expireRow['waktu_habis'], [true, 1, '1', 't'], true)) ||
-            ($expireRow['status'] === 'pembayaran_ditolak' && in_array($expireRow['unggah_ulang_habis'], [true, 1, '1', 't'], true))
+        $statusBerlaku = $expireRow && in_array(
+            $expireRow['status'],
+            ['menunggu_pembayaran', 'pembayaran_ditolak'],
+            true
         );
+
+        $waktuHabis = $expireRow && (
+            ($expireRow['status'] === 'menunggu_pembayaran'
+                && in_array($expireRow['waktu_habis'], [true, 1, '1', 't'], true)) ||
+            ($expireRow['status'] === 'pembayaran_ditolak'
+                && in_array($expireRow['unggah_ulang_habis'], [true, 1, '1', 't'], true))
+        );
+
         $expired = $alreadyExpired || ($statusBerlaku && $waktuHabis);
+
         if ($statusBerlaku && $waktuHabis) {
             demo_track_before_change('pengajuan_sewa', $idExpire);
-            $st = $pdo->prepare("UPDATE pengajuan_sewa SET status = 'kedaluwarsa', diperbarui_pada = NOW() WHERE id_pengajuan = ?");
+
+            $st = $pdo->prepare(
+                "UPDATE pengajuan_sewa
+                    SET status = 'kedaluwarsa', diperbarui_pada = NOW()
+                WHERE id_pengajuan = ?"
+            );
+
             $st->execute([$idExpire]);
         }
+
+        $expired = $alreadyExpired || $deadlinePassed;
         $pdo->commit();
         echo json_encode(['ok' => true, 'expired' => (bool) $expired]);
     } catch (Throwable $e) {
