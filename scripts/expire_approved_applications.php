@@ -12,9 +12,15 @@ try {
     $st = $pdo->query(
         "UPDATE pengajuan_sewa
             SET status = 'kedaluwarsa', diperbarui_pada = NOW()
-          WHERE status = 'menunggu_pembayaran'
-            AND batas_pembayaran IS NOT NULL
-            AND batas_pembayaran <= NOW()
+          WHERE (
+                status = 'menunggu_pembayaran'
+                AND batas_pembayaran IS NOT NULL
+                AND batas_pembayaran <= NOW()
+            ) OR (
+                status = 'pembayaran_ditolak'
+                AND batas_upload_ulang IS NOT NULL
+                AND batas_upload_ulang <= NOW()
+            )
         RETURNING id_pengajuan"
     );
     $ids = $st->fetchAll(PDO::FETCH_COLUMN);
