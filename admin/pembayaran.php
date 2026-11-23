@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi_pembayaran'] ?? '') !
                 $pdo->prepare("UPDATE akun SET role = 'penghuni' WHERE id_penghuni = ?")
                     ->execute([$pengajuanBayar['id_penghuni']]);
                 demo_track_before_change('pengajuan_sewa', (int) $pengajuanBayar['id_pengajuan']);
-                $pdo->prepare("UPDATE pengajuan_sewa SET status = 'sewa_aktif', ditinjau_oleh = ?, ditinjau_pada = NOW(), notifikasi_dibaca = FALSE, diperbarui_pada = NOW() WHERE id_pengajuan = ?")
+                $pdo->prepare("UPDATE pengajuan_sewa SET status = 'sewa_aktif', batas_upload_ulang = NULL, ditinjau_oleh = ?, ditinjau_pada = NOW(), notifikasi_dibaca = FALSE, diperbarui_pada = NOW() WHERE id_pengajuan = ?")
                     ->execute([(int) $user['id_akun'], $pengajuanBayar['id_pengajuan']]);
                 demo_track_before_change('pembayaran', $idPembayaran);
                 $pdo->prepare("UPDATE pembayaran SET status_verifikasi = 'diterima' WHERE id_pembayaran = ?")
@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi_pembayaran'] ?? '') !
                 $pdo->prepare("UPDATE pembayaran SET status_verifikasi = 'ditolak' WHERE id_pembayaran = ?")
                     ->execute([$idPembayaran]);
                 demo_track_before_change('pengajuan_sewa', (int) $pengajuanBayar['id_pengajuan']);
-                $pdo->prepare("UPDATE pengajuan_sewa SET status = 'pembayaran_ditolak', catatan_admin = ?, ditinjau_oleh = ?, ditinjau_pada = NOW(), notifikasi_dibaca = FALSE, diperbarui_pada = NOW() WHERE id_pengajuan = ?")
+                $pdo->prepare("UPDATE pengajuan_sewa SET status = 'pembayaran_ditolak', batas_upload_ulang = NOW() + INTERVAL '30 minutes', catatan_admin = ?, ditinjau_oleh = ?, ditinjau_pada = NOW(), notifikasi_dibaca = FALSE, diperbarui_pada = NOW() WHERE id_pengajuan = ?")
                     ->execute([$alasan !== '' ? $alasan : null, (int) $user['id_akun'], $pengajuanBayar['id_pengajuan']]);
                 $_SESSION['flash_admin'] = 'Pembayaran ditolak. Calon penghuni dapat mengajukan pembayaran kembali.';
             } else {
