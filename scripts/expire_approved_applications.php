@@ -14,12 +14,10 @@ try {
             SET status = 'kedaluwarsa', diperbarui_pada = NOW()
           WHERE (
                 status = 'menunggu_pembayaran'
-                AND batas_pembayaran IS NOT NULL
-                AND batas_pembayaran <= NOW()
+                AND (batas_pembayaran IS NULL OR batas_pembayaran <= NOW())
             ) OR (
                 status = 'pembayaran_ditolak'
-                AND batas_upload_ulang IS NOT NULL
-                AND batas_upload_ulang <= NOW()
+                AND (batas_upload_ulang IS NULL OR batas_upload_ulang <= NOW())
             )
         RETURNING id_pengajuan"
     );
