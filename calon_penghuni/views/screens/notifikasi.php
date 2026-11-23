@@ -4,12 +4,12 @@
     <section class="notification-approved">
       <svg viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#78b83f"/><path d="M18 33l9 9 19-20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <h2><?= $pengajuan['status'] === 'menunggu_pembayaran' ? 'Pengajuan Diterima' : 'Pembayaran Perlu Diajukan Ulang' ?></h2>
-      <p><?= $pengajuan['status'] === 'menunggu_pembayaran' ? 'Admin menyetujui pengajuan sewa Anda. Silakan ajukan pembayaran.' : 'Pembayaran sebelumnya ditolak admin. Silakan periksa kembali dan kirim ulang.' ?></p>
+      <p><?= $pengajuan['status'] === 'menunggu_pembayaran' ? 'Admin menyetujui pengajuan sewa Anda. Silakan ajukan pembayaran dalam 24 jam.' : 'Pembayaran sebelumnya ditolak admin. ' . ($pengajuan['catatan_admin'] ? 'Catatan admin: ' . $pengajuan['catatan_admin'] . '. ' : '') . 'Silakan perbaiki bukti dan unggah ulang dalam 30 menit.' ?></p>
       <small>Kamar <?= h($pengajuan['nomor_kamar']) ?></small>
-<?php if (($pengajuan['status'] ?? '') === 'menunggu_pembayaran' && $batasPembayaranMs > 0): ?>
-<section class="payment-deadline" data-payment-deadline data-deadline-ms="<?= $batasPembayaranMs ?>" data-server-now-ms="<?= $waktuServerMs ?>" data-application-id="<?= (int) $pengajuan['id_pengajuan'] ?>" data-csrf="<?= h(csrf_token()) ?>" data-expire-url="index.php?halaman=pembayaran" data-notification-url="index.php?halaman=notifikasi">
+<?php if (in_array(($pengajuan['status'] ?? ''), ['menunggu_pembayaran', 'pembayaran_ditolak'], true) && $batasAktifMs > 0): ?>
+<section class="payment-deadline" data-payment-deadline data-deadline-ms="<?= $batasAktifMs ?>" data-server-now-ms="<?= $waktuServerMs ?>" data-application-id="<?= (int) $pengajuan['id_pengajuan'] ?>" data-csrf="<?= h(csrf_token()) ?>" data-expire-url="index.php?halaman=pembayaran" data-notification-url="index.php?halaman=notifikasi">
   <span class="payment-deadline-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 1.5M9 2h6M12 2v3"></path></svg></span>
-  <div><strong>Batas waktu pembayaran</strong><p>Sisa waktu: <b data-countdown>--:--:--</b></p><small>Ajukan sebelum <?= h($batasPembayaranLabel) ?>. Jika waktu habis, pengajuan dibatalkan.</small><small class="payment-deadline-message" data-deadline-message hidden>Waktu habis. Pengajuan sewa telah dibatalkan.</small></div>
+  <div><strong><?= $pengajuan['status'] === 'menunggu_pembayaran' ? 'Batas waktu pembayaran' : 'Batas unggah ulang bukti' ?></strong><p>Sisa waktu: <b data-countdown>--:--:--</b></p><small>Kirim sebelum <?= h($batasAktifLabel) ?>. Jika waktu habis, pengajuan dibatalkan.</small><small class="payment-deadline-message" data-deadline-message hidden>Waktu habis. Pengajuan sewa telah dibatalkan.</small></div>
 </section>
 <?php endif; ?>
       <div class="notification-actions">
@@ -34,7 +34,7 @@
       <div><h3>Pembayaran menunggu verifikasi</h3><p>Pembayaran Kamar <?= h($pengajuan['nomor_kamar']) ?> sedang diperiksa admin.</p><strong>Menunggu Verifikasi</strong></div>
     </article>
   <?php elseif ($pengajuan && $pengajuan['status'] === 'kedaluwarsa'): ?>
-    <article class="notification-card notification-expired"><div><h3>Waktu Pengajuan Habis</h3><p>Batas 20 detik untuk mengajukan pembayaran telah berakhir. Pengajuan sewa dibatalkan dan kamar tersedia kembali.</p><strong>Kedaluwarsa</strong></div></article>
+    <article class="notification-card notification-expired"><div><h3>Waktu Pengajuan Habis</h3><p>Batas waktu pembayaran atau unggah ulang telah berakhir. Pengajuan sewa dibatalkan dan kamar tersedia kembali.</p><strong>Kedaluwarsa</strong></div></article>
   <?php elseif ($pengajuan && $pengajuan['status'] === 'ditolak'): ?>
     <article class="notification-card"><div><h3>Pengajuan Ditolak</h3><p><?= h($pengajuan['catatan_admin'] ?: 'Pengajuan sewa Kamar ' . $pengajuan['nomor_kamar'] . ' belum disetujui. Silakan hubungi admin untuk informasi lebih lanjut.') ?></p></div></article>
   <?php elseif ($pengajuan && $pengajuan['status'] === 'sewa_aktif'): ?>
