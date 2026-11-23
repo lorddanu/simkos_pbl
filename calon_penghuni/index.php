@@ -250,38 +250,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
         $halaman = 'pembayaran';
     } else {
         $namaBukti = null;
-        if ($adaBukti) {
-            $folderBukti = __DIR__ . '/uploads';
-            if (!is_dir($folderBukti) && !mkdir($folderBukti, 0755, true) && !is_dir($folderBukti)) {
-                $error = 'Folder penyimpanan bukti tidak dapat dibuat.';
-            } else {
-                $namaBukti = bin2hex(random_bytes(12)) . '.' . $ekstensiBukti;
-                if (!move_uploaded_file($fileBukti['tmp_name'], $folderBukti . '/' . $namaBukti)) {
-                    $error = 'Bukti pembayaran gagal disimpan.';
-                }
-            }
-        }
+        $folderBukti = __DIR__ . '/uploads';
 
         if ($error === '') {
             try {
                 $pdo->beginTransaction();
                 $st = $pdo->prepare(
                     "SELECT status,
-                            (status = 'menunggu_pembayaran' AND batas_pembayaran IS NOT NULL AND batas_pembayaran <= NOW()) AS waktu_habis,
-                            (status = 'pembayaran_ditolak' AND batas_upload_ulang IS NOT NULL AND batas_upload_ulang <= NOW()) AS unggah_ulang_habis
+                            (status = 'menunggu_pembayaran' AND (batas_pembayaran IS NULL OR batas_pembayaran <= NOW())) AS waktu_habis,
+                            (status = 'pembayaran_ditolak' AND (batas_upload_ulang IS NULL OR batas_upload_ulang <= NOW())) AS unggah_ulang_habis
                        FROM pengajuan_sewa WHERE id_pengajuan = ? AND id_penghuni = ? FOR UPDATE"
                 );
                 $st->execute([$idPengajuanBayar, (int) $user['id_penghuni']]);
                 $barisStatus = $st->fetch();
                 $statusSaatIni = $barisStatus['status'] ?? null;
-                if ($statusSaatIni === 'menunggu_pembayaran' && in_array($barisStatus['waktu_habis'] ?? false, [true, 1, '1', 't'], true)) {
-                    demo_track_before_change('pengajuan_sewa', $idPengajuanBayar);
-                    $st = $pdo->prepare("UPDATE pengajuan_sewa SET status = 'kedaluwarsa', diperbarui_pada = NOW() WHERE id_pengajuan = ?");
-                    $st->execute([$idPengajuanBayar]);
-                    $pdo->commit();
-                    header('Location: index.php?halaman=notifikasi');
-                    exit;
-                }
                 if (!in_array($statusSaatIni, ['menunggu_pembayaran', 'pembayaran_ditolak'], true)) {
                     $pdo->rollBack();
                     header('Location: index.php?halaman=notifikasi');
@@ -296,6 +278,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
                     $pdo->commit();
                     header('Location: index.php?halaman=notifikasi');
                     exit;
+                }
+
+                if (!is_dir($folderBukti) && !mkdir($folderBukti, 0755, true) && !is_dir($folderBukti)) {
+                    throw new RuntimeException('Folder penyimpanan bukti tidak dapat dibuat.');
+                }
+                $namaBukti = bin2hex(random_bytes(12)) . '.' . $ekstensiBukti;
+                if (!move_uploaded_file($fileBukti['tmp_name'], $folderBukti . '/' . $namaBukti)) {
+                    throw new RuntimeException('Bukti pembayaran gagal disimpan.');
                 }
 
                 $st = $pdo->prepare(
@@ -324,8 +314,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
 
                 header('Location: index.php?halaman=pembayaran_terkirim&id=' . $idPembayaranBaru);
                 exit;
-            } catch (PDOException $e) {
+            } catch (Throwable $e) {
                 if ($pdo->inTransaction()) $pdo->rollBack();
+                if ($namaBukti !== null && is_file($folderBukti . '/' . $namaBukti)) {
+                    @unlink($folderBukti . '/' . $namaBukti);
+                }
                 throw $e;
             }
         }
