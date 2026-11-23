@@ -14,15 +14,15 @@
     <small>Transfer sesuai Total Tagihan agar verifikasi lebih cepat diproses admin.</small>
   </section>
   <a class="btn payment-link" href="index.php?halaman=metode">Metode Pembayaran yang Tersedia <span aria-hidden="true">&rsaquo;</span></a>
-  <label class="field-label" for="bukti">Bukti Verifikasi (opsional untuk simulasi)</label>
-  <label class="proof-picker" for="bukti"><strong id="proof-label">Ketuk untuk unggah foto</strong><small>Boleh dilewati &middot; JPG, PNG, WebP maksimal 5 MB</small></label>
-  <input class="proof-input" type="file" id="bukti" name="bukti" accept="image/jpeg,image/png,image/webp">
+  <label class="field-label" for="bukti">Bukti Transfer (wajib)</label>
+  <label class="proof-picker" for="bukti"><strong id="proof-label">Ketuk untuk unggah foto</strong><small>Wajib &middot; JPG, PNG, WebP maksimal 5 MB</small></label>
+  <input class="proof-input" type="file" id="bukti" name="bukti" required accept="image/jpeg,image/png,image/webp">
   <label class="field-label" for="catatan-bayar">Catatan (opsional)</label>
   <textarea class="note-input" id="catatan-bayar" name="catatan" placeholder="Transfer dari rekening an. orang tua, dll."></textarea>
-<?php if (($pengajuan['status'] ?? '') === 'menunggu_pembayaran' && $batasPembayaranMs > 0): ?>
-<section class="payment-deadline" data-payment-deadline data-deadline-ms="<?= $batasPembayaranMs ?>" data-server-now-ms="<?= $waktuServerMs ?>" data-application-id="<?= (int) $pengajuan['id_pengajuan'] ?>" data-csrf="<?= h(csrf_token()) ?>" data-expire-url="index.php?halaman=pembayaran" data-notification-url="index.php?halaman=notifikasi">
+<?php if (in_array(($pengajuan['status'] ?? ''), ['menunggu_pembayaran', 'pembayaran_ditolak'], true) && $batasAktifMs > 0): ?>
+<section class="payment-deadline" data-payment-deadline data-deadline-ms="<?= $batasAktifMs ?>" data-server-now-ms="<?= $waktuServerMs ?>" data-application-id="<?= (int) $pengajuan['id_pengajuan'] ?>" data-csrf="<?= h(csrf_token()) ?>" data-expire-url="index.php?halaman=pembayaran" data-notification-url="index.php?halaman=notifikasi">
   <span class="payment-deadline-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 1.5M9 2h6M12 2v3"></path></svg></span>
-  <div><strong>Batas waktu pembayaran</strong><p>Sisa waktu: <b data-countdown>--:--:--</b></p><small>Ajukan sebelum <?= h($batasPembayaranLabel) ?>. Jika waktu habis, pengajuan dibatalkan.</small><small class="payment-deadline-message" data-deadline-message hidden>Waktu habis. Pengajuan sewa telah dibatalkan.</small></div>
+  <div><strong>Batas waktu pengiriman bukti</strong><p>Sisa waktu: <b data-countdown>--:--:--</b></p><small>Ajukan sebelum <?= h($batasAktifLabel) ?>. Jika waktu habis, pengajuan dibatalkan.</small><small class="payment-deadline-message" data-deadline-message hidden>Waktu habis. Pengajuan sewa telah dibatalkan.</small></div>
 </section>
 <?php endif; ?>
     <div class="bottom-action"><button class="btn" type="submit" data-payment-action>Kirim untuk Diverifikasi</button></div>
