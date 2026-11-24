@@ -486,7 +486,9 @@ include __DIR__ . '/../includes/header.php';
                 </div>
             </div>
 
-            <form id="formUbahStatus" method="post" action="kamar.php">\n                <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">\n                <input type="hidden" name="aksi_ubah_status_kamar" value="1">
+            <form id="formUbahStatus" method="post" action="kamar.php">
+                <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
+                <input type="hidden" name="aksi_ubah_status_kamar" value="1">
 
                 <input
                     type="hidden"
