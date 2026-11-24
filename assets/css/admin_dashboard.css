@@ -2214,3 +2214,36 @@ body.admin-app {
     border-radius: 12px;
     object-fit: cover;
 }
+
+/* Tombol hapus kamar ditempatkan pada form ubah data dan hanya tampil untuk kamar kosong. */
+.admin-app .btn-hapus-kamar {
+    width: 100%;
+    min-height: 44px;
+    margin: 8px 0 4px;
+    border: 0;
+    border-radius: 12px;
+    background: #cf666b;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.admin-app .btn-hapus-kamar[hidden],
+.admin-app [data-riwayat-room][hidden],
+.admin-app #riwayatKamarKosong[hidden] {
+    display: none !important;
+}
+.admin-app .riwayat-item {
+    padding: 13px;
+    margin-bottom: 9px;
+    border: 1px solid #ddd8f8;
+    border-radius: 13px;
+    background: #f7f6fc;
+}
+.admin-app .riwayat-item strong {
+    color: var(--purple-dark);
+}
+.admin-app .riwayat-item p {
+    margin: 5px 0 0;
+    font-size: 12px;
+}
