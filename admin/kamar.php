@@ -227,11 +227,19 @@ $st = $pdo->query(
 );
 $pengajuanMasuk = $st->fetchAll();
 $calonPenghuni = $pdo->query(
-    "SELECT p.nama, a.email, a.created_at
-       FROM akun a JOIN penghuni p USING (id_penghuni)
-      WHERE a.role = 'calon_penghuni'
-      ORDER BY a.created_at DESC"
+    "SELECT ps.id_pengajuan, ps.id_kamar, ps.status, ps.total, ps.tanggal_mulai,
+            ps.tanggal_selesai, p.nama, a.email, k.nomor_kamar
+       FROM pengajuan_sewa ps
+       JOIN penghuni p USING (id_penghuni)
+       JOIN akun a USING (id_penghuni)
+       JOIN kamar k USING (id_kamar)
+      WHERE ps.status IN ('menunggu_pembayaran', 'menunggu_verifikasi', 'pembayaran_ditolak')
+      ORDER BY ps.dibuat_pada DESC"
 )->fetchAll();
+$calonPerKamar = [];
+foreach ($calonPenghuni as $calon) {
+    $calonPerKamar[(int) $calon['id_kamar']] = $calon;
+}
 $penghuniAktif = $pdo->query(
     "SELECT p.id_penghuni, p.nama, a.email, k.nomor_kamar, s.tanggal_mulai
        FROM sewa s JOIN penghuni p USING (id_penghuni)
@@ -305,9 +313,22 @@ include __DIR__ . '/../includes/header.php';
                         <?php if (!empty($kamar['foto_kamar'])): ?><img class="kamar-card-photo" src="../<?= h($kamar['foto_kamar']) ?>" alt="Foto kamar <?= h($kamar['nomor_kamar']) ?>"><?php endif; ?>
                         <div class="kamar-card-header">
                             <div><h3><?= h($kamar['nomor_kamar']) ?></h3><p>Rp <?= h(number_format((float) $kamar['harga_bulanan'], 0, ',', '.')) ?>/bulan</p></div>
-                            <strong class="kamar-status <?= h($kamar['status']) ?>"><?= h(ucfirst($kamar['status'])) ?></strong>
+                            <strong class="kamar-status <?= h(str_replace(' ', '-', $kamar['status'])) ?>"><?= h(ucfirst($kamar['status'])) ?></strong>
                         </div>
-                        <div class="kamar-card-actions"><button type="button" class="btn-kamar" data-ubah-kamar>Ubah</button><button type="button" class="btn-kamar" data-hapus-kamar>Hapus</button><button type="button" class="btn-kamar" data-ubah-status>Ubah Status</button><button type="button" class="btn-kamar" data-riwayat-kamar>Riwayat</button></div>
+                        <?php if (!empty($kamar['deskripsi'])): ?><p class="kamar-description"><?= h($kamar['deskripsi']) ?></p><?php endif; ?>
+                        <?php if (isset($calonPerKamar[(int) $kamar['id_kamar']])): ?>
+                            <small class="kamar-occupant"><?= h($calonPerKamar[(int) $kamar['id_kamar']]['nama']) ?> (calon penghuni)</small>
+                        <?php elseif ($kamar['status'] === 'terisi'): ?>
+                            <?php
+                            $namaPenghuniKamar = array_values(array_filter($penghuniAktif, static fn($p) => $p['nomor_kamar'] === $kamar['nomor_kamar']));
+                            ?>
+                            <?php if ($namaPenghuniKamar): ?><small class="kamar-occupant"><?= h($namaPenghuniKamar[0]['nama']) ?></small><?php endif; ?>
+                        <?php endif; ?>
+                        <div class="kamar-card-actions">
+                            <button type="button" class="btn-kamar" data-ubah-kamar>Ubah</button>
+                            <?php if ($kamar['status'] !== 'terisi'): ?><button type="button" class="btn-kamar" data-ubah-status>Ubah Status</button><?php endif; ?>
+                            <?php if (isset($calonPerKamar[(int) $kamar['id_kamar']])): ?><a class="btn-kamar" href="pembayaran.php">Lihat Pembayaran</a><?php elseif ($kamar['status'] === 'terisi'): ?><button type="button" class="btn-kamar" data-riwayat-kamar>Riwayat Penghuni</button><?php else: ?><button type="button" class="btn-kamar" data-hapus-kamar>Hapus</button><?php endif; ?>
+                        </div>
                     </article>
                 <?php endforeach; ?>
             </div>
@@ -336,11 +357,30 @@ include __DIR__ . '/../includes/header.php';
             <?php endforeach; ?>
 
             <h2 class="section-title">Calon Penghuni</h2>
-            <p>Belum ada calon penghuni.</p>
+            <?php if (!$calonPenghuni): ?><p>Belum ada calon penghuni yang menunggu pembayaran atau verifikasi.</p><?php endif; ?>
+            <?php foreach ($calonPenghuni as $calon): ?>
+                <article class="admin-application-card">
+                    <div><strong><?= h($calon['nama']) ?></strong><span>Kamar <?= h($calon['nomor_kamar']) ?></span></div>
+                    <small><?= h($calon['email']) ?></small>
+                    <p>Status: <?= h(str_replace('_', ' ', ucfirst($calon['status']))) ?></p>
+                    <p>Periode: <?= h($calon['tanggal_mulai']) ?> – <?= h($calon['tanggal_selesai']) ?></p>
+                    <p>Total: Rp <?= h(number_format((float) $calon['total'], 0, ',', '.')) ?></p>
+                    <a class="btn-kamar" href="pembayaran.php">Lihat Pembayaran</a>
+                </article>
+            <?php endforeach; ?>
 
             <h2 class="section-title">Penghuni Aktif</h2>
             <?php if (!$penghuniAktif): ?><p>Belum ada penghuni aktif.</p><?php endif; ?>
-            <?php foreach ($penghuniAktif as $aktif): ?><article class="admin-application-card"><strong><?= h($aktif['nama']) ?> Â· Kamar <?= h($aktif['nomor_kamar']) ?></strong><small><?= h($aktif['email']) ?> Â· Mulai <?= h($aktif['tanggal_mulai']) ?></small></article><?php endforeach; ?>
+            <?php foreach ($penghuniAktif as $aktif): ?>
+                <article class="admin-application-card">
+                    <div><strong><?= h($aktif['nama']) ?></strong><span>Kamar <?= h($aktif['nomor_kamar']) ?></span></div>
+                    <small><?= h($aktif['email']) ?> · Mulai <?= h($aktif['tanggal_mulai']) ?></small>
+                    <div class="kamar-card-actions">
+                        <a class="btn-kamar" href="penghuni.php">Ubah Data</a>
+                        <button type="button" class="btn-kamar" data-riwayat-penghuni>Riwayat Penghuni</button>
+                    </div>
+                </article>
+            <?php endforeach; ?>
 
         </div>
 
