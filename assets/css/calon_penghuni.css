@@ -184,3 +184,11 @@ html:has(.calon-body){background:#eeebf6}
     justify-content: center;
     background: #eee;
 }
+
+.detail-room-photo {
+    display: block;
+    width: 100%;
+    height: min(54vw, 240px);
+    min-height: 176px;
+    object-fit: cover;
+}
