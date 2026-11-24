@@ -114,7 +114,7 @@ $idKamar = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0;
 $kamarDipilih = null;
 if (in_array($halaman, ['detail', 'ajukan'], true)) {
     $st = $pdo->prepare(
-        "SELECT id_kamar, nomor_kamar, harga_bulanan
+        "SELECT id_kamar, nomor_kamar, harga_bulanan, foto_kamar
            FROM kamar
           WHERE id_kamar = ? AND status = 'kosong'
             AND NOT EXISTS (
