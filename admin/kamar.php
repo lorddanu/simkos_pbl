@@ -7,7 +7,6 @@ if ($user['role'] !== 'admin') {
 }
 $nama = $user['nama'] ?? 'Admin SIMKOS';
 $pdo = db();
-<?php
 // Upload foto kamar: simpan hanya nama file acak di folder uploads/kamar.
 function validasiFotoKamar(?array $file): ?string {
     if (!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) return null;
