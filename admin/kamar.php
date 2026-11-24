@@ -10,6 +10,42 @@ $pdo = db();
 $pesanAdmin = $_SESSION['flash_admin'] ?? '';
 unset($_SESSION['flash_admin']);
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_tambah_kamar'])) {
+    if (!csrf_ok()) {
+        http_response_code(400);
+        exit('Permintaan tidak valid.');
+    }
+
+    $nomorKamar = trim($_POST['nomor_kamar'] ?? '');
+    $hargaBulanan = filter_var($_POST['harga_bulanan'] ?? null, FILTER_VALIDATE_INT);
+
+    if ($nomorKamar === '' || mb_strlen($nomorKamar) > 10 || $hargaBulanan === false || $hargaBulanan < 1) {
+        $_SESSION['flash_admin'] = 'Nomor kamar wajib diisi (maksimal 10 karakter) dan harga harus lebih dari 0.';
+    } else {
+        try {
+            $st = $pdo->prepare(
+                "INSERT INTO kamar (nomor_kamar, status, harga_bulanan)
+                 VALUES (:nomor_kamar, 'kosong', :harga_bulanan)"
+            );
+            $st->execute([
+                ':nomor_kamar' => $nomorKamar,
+                ':harga_bulanan' => $hargaBulanan,
+            ]);
+            $_SESSION['flash_admin'] = 'Kamar berhasil ditambahkan.';
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23505') {
+                $_SESSION['flash_admin'] = 'Nomor kamar tersebut sudah digunakan.';
+            } else {
+                error_log($e->getMessage());
+                $_SESSION['flash_admin'] = 'Kamar gagal disimpan. Periksa struktur tabel dan koneksi database.';
+            }
+        }
+    }
+
+    header('Location: kamar.php?tab=kamar');
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_pengajuan'])) {
     if (!csrf_ok()) {
         http_response_code(400);
@@ -107,6 +143,8 @@ include __DIR__ . '/../includes/header.php';
     <!-- DATA SIMKOS -->
     <section id="data" class="page-section active">
 
+        <?php if ($pesanAdmin): ?><p class="admin-feedback" role="status"><?= h($pesanAdmin) ?></p><?php endif; ?>
+
         <!-- TAB DATA -->
         <div class="data-tabs">
             <button
@@ -170,7 +208,6 @@ include __DIR__ . '/../includes/header.php';
         <!-- TAB PENGHUNI -->
         <div id="tab-penghuni" class="data-tab-content" <?= $tabPenghuniAktif ? '' : 'hidden' ?>>>
 
-            <?php if ($pesanAdmin): ?><p class="admin-feedback" role="status"><?= h($pesanAdmin) ?></p><?php endif; ?>
             <h2 class="section-title" id="pengajuan-masuk">Pengajuan Sewa Masuk</h2>
             <?php if (!$pengajuanMasuk): ?><p>Belum ada pengajuan sewa masuk.</p><?php endif; ?>
             <?php foreach ($pengajuanMasuk as $pengajuan): ?>
@@ -205,7 +242,9 @@ include __DIR__ . '/../includes/header.php';
         <div class="kamar-form-content">
             <h2>Tambah Kamar Baru</h2>
 
-            <form id="formTambahKamar">
+            <form id="formTambahKamar" method="post" action="kamar.php">
+                <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
+                <input type="hidden" name="aksi_tambah_kamar" value="1">
 
                 <label for="tambahNomor">Nomor / Nama Kamar</label>
                 <input
@@ -226,20 +265,7 @@ include __DIR__ . '/../includes/header.php';
                     required
                 >
 
-                <label for="tambahDeskripsi">Deskripsi Kamar</label>
-                <textarea
-                    id="tambahDeskripsi"
-                    name="deskripsi"
-                    placeholder="Tuliskan deskripsi kamar"
-                ></textarea>
-
-                <label for="tambahFoto">Foto Kamar</label>
-                <input
-                    type="file"
-                    id="tambahFoto"
-                    name="foto"
-                    accept=".jpg,.jpeg,.png"
-                >
+                <small class="form-hint">Untuk saat ini, data yang disimpan adalah nomor kamar dan harga bulanan.</small>
 
                 <button type="submit" class="btn-primary">
                     Simpan Kamar
