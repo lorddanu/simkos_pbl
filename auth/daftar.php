@@ -1,6 +1,6 @@
 
 <?php
-session_start();
+require_once __DIR__ . '/../database/helpers.php';
 
 if (isset($_SESSION['id_akun'])) {
     if (($_SESSION['role'] ?? '') === 'admin') {
@@ -47,6 +47,7 @@ $sukses = isset($_GET['sukses']) && $_GET['sukses'] === '1';
             <?php endif; ?>
 
             <form action="register.php" method="POST">
+                <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
 
                 <div class="field">
                     <label for="nama">Nama Lengkap</label>
