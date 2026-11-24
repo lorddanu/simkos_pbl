@@ -167,3 +167,20 @@ html:has(.calon-body){background:#eeebf6}
 .payment-deadline .payment-deadline-message{margin-top:3px;color:#a52f42;font-weight:600}
 .payment-deadline.is-expired{border-color:#e2a2a9;background:#fff0f1}
 .notification-approved .payment-deadline{margin:12px 0 0;text-align:left}
+
+.room-photo {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+    border-radius: 10px 10px 0 0;
+}
+
+.room-photo-placeholder {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eee;
+}

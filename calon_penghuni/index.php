@@ -98,7 +98,7 @@ $stExpire->execute([(int) ($user['id_penghuni'] ?? 0)]);
 $kamarKosong = [];
 if ($halaman === 'kamar') {
     $kamarKosong = $pdo->query(
-        "SELECT k.id_kamar, k.nomor_kamar, k.harga_bulanan
+        "SELECT k.id_kamar, k.nomor_kamar, k.harga_bulanan, k.foto_kamar
            FROM kamar k
           WHERE k.status = 'kosong'
             AND NOT EXISTS (
