@@ -350,6 +350,8 @@ document.querySelectorAll('[data-kembali-riwayat]').forEach(button => {
         document.getElementById('ubahId').value = id;
         document.getElementById('ubahNomor').value = nomor;
         document.getElementById('ubahHarga').value = harga;
+        document.getElementById('ubahDeskripsi').value = kartu.dataset.deskripsi || '';
+        document.getElementById('ubahFoto').value = '';
         tampilkanSectionKamar('ubah-kamar');
     });
 });
