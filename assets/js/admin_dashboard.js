@@ -323,6 +323,25 @@ document.querySelectorAll('[data-riwayat-kamar]').forEach(button => {
 // Tombol Riwayat Penghuni
 document.querySelectorAll('[data-riwayat-penghuni]').forEach(button => {
     button.addEventListener('click', () => {
+        const idPenghuni = button.dataset.idPenghuni;
+        const daftar = document.getElementById('daftarRiwayatPenghuni');
+        let ditemukan = false;
+
+        daftar.querySelectorAll('[data-riwayat-penghuni-id]').forEach(item => {
+            const cocok = item.dataset.riwayatPenghuniId === idPenghuni;
+            item.hidden = !cocok;
+            if (cocok) ditemukan = true;
+        });
+
+        const judul = document.querySelector('#riwayat-penghuni h2');
+        const nama = button.closest('.admin-application-card')
+            ?.querySelector('strong')?.textContent.trim() || 'Penghuni';
+        judul.textContent = 'Riwayat Penghuni - ' + nama;
+
+        if (!ditemukan) {
+            daftar.innerHTML = '<p>Data riwayat penghuni tidak ditemukan.</p>';
+        }
+
         tampilkanRiwayat('riwayat-penghuni');
     });
 });

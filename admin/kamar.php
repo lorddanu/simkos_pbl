@@ -266,6 +266,37 @@ $penghuniAktif = $pdo->query(
       ORDER BY p.nama"
 )->fetchAll();
 
+// Ambil seluruh riwayat sewa dan pembayaran untuk penghuni yang sedang aktif.
+$riwayatSewaPenghuni = $pdo->query(
+    "SELECT s.id_penghuni, k.nomor_kamar, s.tanggal_mulai, s.tanggal_selesai
+       FROM sewa s
+       JOIN kamar k USING (id_kamar)
+      ORDER BY s.tanggal_mulai DESC"
+)->fetchAll();
+
+$riwayatBayarPenghuni = $pdo->query(
+    "SELECT COALESCE(ps.id_penghuni, s.id_penghuni) AS id_penghuni,
+            p.id_pembayaran, p.jumlah, p.tanggal_bayar, p.tanggal_upload,
+            p.periode, p.file_bukti
+       FROM pembayaran p
+       LEFT JOIN pengajuan_sewa ps ON ps.id_pengajuan = p.id_pengajuan_sewa
+       LEFT JOIN sewa s ON s.id_sewa = p.id_sewa
+      WHERE p.status_verifikasi = 'diterima'
+        AND COALESCE(ps.id_penghuni, s.id_penghuni) IS NOT NULL
+      ORDER BY COALESCE(p.tanggal_bayar, p.tanggal_upload::date) DESC,
+               p.id_pembayaran DESC"
+)->fetchAll();
+
+$sewaPerPenghuni = [];
+foreach ($riwayatSewaPenghuni as $item) {
+    $sewaPerPenghuni[(int) $item['id_penghuni']][] = $item;
+}
+$bayarPerPenghuni = [];
+foreach ($riwayatBayarPenghuni as $item) {
+    $bayarPerPenghuni[(int) $item['id_penghuni']][] = $item;
+}
+
+
 $halamanAktif = 'data';
 $tabPenghuniAktif = ($_GET['tab'] ?? '') === 'penghuni';
 
@@ -395,7 +426,7 @@ include __DIR__ . '/../includes/header.php';
                     <small><?= h($aktif['email']) ?> · Mulai <?= h($aktif['tanggal_mulai']) ?></small>
                     <div class="kamar-card-actions">
                         <a class="btn-kamar" href="penghuni.php">Ubah Data</a>
-                        <button type="button" class="btn-kamar" data-riwayat-penghuni>Riwayat Penghuni</button>
+                        <button type="button" class="btn-kamar" data-riwayat-penghuni data-id-penghuni="<?= (int) $aktif['id_penghuni'] ?>">Riwayat Penghuni</button>
                     </div>
                 </article>
             <?php endforeach; ?>
@@ -769,20 +800,43 @@ include __DIR__ . '/../includes/header.php';
                 Riwayat kamar yang ditempati dan riwayat pembayaran
             </small>
 
-            <!-- RIWAYAT KAMAR -->
-            <div class="riwayat-pembungkus">
+            <div class="riwayat-list" id="daftarRiwayatPenghuni">
+                <?php foreach ($penghuniAktif as $aktif): ?>
+                    <?php $idRiwayat = (int) $aktif['id_penghuni']; ?>
+                    <article class="riwayat-pembungkus" data-riwayat-penghuni-id="<?= $idRiwayat ?>" hidden>
+                        <h3>Riwayat Kamar</h3>
+                        <?php if (empty($sewaPerPenghuni[$idRiwayat])): ?>
+                            <p>Belum ada riwayat kamar.</p>
+                        <?php else: ?>
+                            <?php foreach ($sewaPerPenghuni[$idRiwayat] as $riwayat): ?>
+                                <div class="riwayat-item">
+                                    <strong>Kamar <?= h($riwayat['nomor_kamar']) ?></strong>
+                                    <p>Mulai: <?= h($riwayat['tanggal_mulai']) ?></p>
+                                    <p>Selesai: <?= h($riwayat['tanggal_selesai'] ?? 'Masih ditempati') ?></p>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
 
-                <h3>Riwayat Kamar</h3>
-
-                <p>Belum ada riwayat kamar.</p>
-
-                <div class="garis-riwayat"></div>
-
-                <!-- RIWAYAT PEMBAYARAN -->
-                <h3>Riwayat Pembayaran</h3>
-
-                <p>Belum ada riwayat pembayaran.</p>
-
+                        <div class="garis-riwayat"></div>
+                        <h3>Riwayat Pembayaran</h3>
+                        <?php if (empty($bayarPerPenghuni[$idRiwayat])): ?>
+                            <p>Belum ada riwayat pembayaran yang diterima.</p>
+                        <?php else: ?>
+                            <?php foreach ($bayarPerPenghuni[$idRiwayat] as $pembayaran): ?>
+                                <div class="riwayat-item">
+                                    <strong>Rp <?= h(number_format((float) $pembayaran['jumlah'], 0, ',', '.')) ?></strong>
+                                    <p>Periode: <?= h($pembayaran['periode'] ?: '-') ?></p>
+                                    <p>Tanggal bayar: <?= h($pembayaran['tanggal_bayar'] ?? $pembayaran['tanggal_upload'] ?? '-') ?></p>
+                                    <p>Status: Diterima</p>
+                                    <?php if (!empty($pembayaran['file_bukti'])): ?>
+                                        <a href="../calon_penghuni/uploads/<?= rawurlencode(basename($pembayaran['file_bukti'])) ?>" target="_blank" rel="noopener">Lihat bukti pembayaran</a>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </article>
+                <?php endforeach; ?>
+                <?php if (!$penghuniAktif): ?><p>Belum ada penghuni aktif.</p><?php endif; ?>
             </div>
 
             <button
