@@ -1,5 +1,15 @@
 <section class="card room-detail">
-  <div class="room-photo-placeholder detail-photo-placeholder" aria-label="Tempat foto Kamar <?= h($kamarDipilih['nomor_kamar']) ?>"></div>
+  <?php if (!empty($kamarDipilih['foto_kamar'])): ?>
+    <img
+      src="../<?= h($kamarDipilih['foto_kamar']) ?>"
+      alt="Foto Kamar <?= h($kamarDipilih['nomor_kamar']) ?>"
+      class="detail-room-photo"
+    >
+  <?php else: ?>
+    <div class="room-photo-placeholder detail-photo-placeholder" aria-label="Foto Kamar <?= h($kamarDipilih['nomor_kamar']) ?> belum tersedia">
+      Foto belum tersedia
+    </div>
+  <?php endif; ?>
   <div class="detail-content">
     <h2>Kamar <?= h($kamarDipilih['nomor_kamar']) ?></h2>
     <p class="price">Rp <?= h(number_format((float) $kamarDipilih['harga_bulanan'], 0, ',', '.')) ?>/bulan</p>
