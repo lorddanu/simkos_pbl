@@ -362,24 +362,18 @@ document.querySelectorAll('[data-kembali-riwayat]').forEach(button => {
     });
 });
 
-// Membuka halaman ubah data kamar
-document.querySelectorAll('[data-ubah-kamar]').forEach(button => {
+// Membuka halaman ubah data kamar dengan data dari database
+ document.querySelectorAll('[data-ubah-kamar]').forEach(button => {
     button.addEventListener('click', () => {
-
         const kartu = button.closest('.kamar-card');
-
         const id = kartu.dataset.id;
         const nomor = kartu.querySelector('h3').textContent.trim();
+        const harga = kartu.querySelector('.kamar-card-header p').textContent.replace(/[^\\d]/g, '');
 
+        document.getElementById('formUbahKamar').reset();
         document.getElementById('ubahId').value = id;
         document.getElementById('ubahNomor').value = nomor;
-        document.getElementById('ubahHarga').value = 650000;
-
-        document.getElementById('ubahDeskripsi').value =
-            'Dekat kampus, 10 menit jalan kaki. Parkir motor tersedia.';
-
-        document.getElementById('ubahFoto').value = '';
-
+        document.getElementById('ubahHarga').value = harga;
         tampilkanSectionKamar('ubah-kamar');
     });
 });
