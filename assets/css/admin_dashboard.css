@@ -2171,3 +2171,21 @@ body.admin-app {
 .admin-header-actions .profile-menu[open] .profile-dropdown{display:block}
 
 .admin-header-actions .profile-button::marker{content:''}
+
+
+/* Foto utama kamar pada kartu admin */
+.admin-app .kamar-card-photo {
+    display: block;
+    width: 100%;
+    height: 155px;
+    margin: 0 0 12px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #e9e6f8;
+}
+.admin-app .kamar-photo-empty {
+    display: grid;
+    place-items: center;
+    color: #8174c9;
+    font-size: 12px;
+}
