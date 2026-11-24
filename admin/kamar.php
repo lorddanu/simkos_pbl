@@ -135,11 +135,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_hapus_kamar'])) 
         $_SESSION['flash_admin'] = 'Kamar tidak valid.';
     } else {
         try {
-            $st = $pdo->prepare('DELETE FROM kamar WHERE id_kamar = :id_kamar');
-            $st->execute([':id_kamar' => $idKamar]);
-            $_SESSION['flash_admin'] = $st->rowCount() > 0
-                ? 'Kamar berhasil dihapus.'
-                : 'Kamar tidak ditemukan.';
+            $cek = $pdo->prepare("SELECT status, foto_kamar FROM kamar WHERE id_kamar = :id FOR UPDATE");
+            $cek->execute([':id' => $idKamar]);
+            $dataKamarHapus = $cek->fetch(PDO::FETCH_ASSOC);
+            if (!$dataKamarHapus) {
+                $_SESSION['flash_admin'] = 'Kamar tidak ditemukan.';
+            } elseif ($dataKamarHapus['status'] !== 'kosong') {
+                $_SESSION['flash_admin'] = 'Hanya kamar berstatus kosong yang dapat dihapus.';
+            } else {
+                $st = $pdo->prepare('DELETE FROM kamar WHERE id_kamar = :id_kamar');
+                $st->execute([':id_kamar' => $idKamar]);
+                if ($st->rowCount() > 0) {
+                    hapusFotoKamar($dataKamarHapus['foto_kamar']);
+                    $_SESSION['flash_admin'] = 'Kamar berhasil dihapus.';
+                } else {
+                    $_SESSION['flash_admin'] = 'Kamar tidak ditemukan.';
+                }
+            }
         } catch (PDOException $e) {
             if ($e->getCode() === '23503') {
                 $_SESSION['flash_admin'] = 'Kamar tidak dapat dihapus karena sudah terhubung dengan pengajuan atau riwayat sewa.';
@@ -240,6 +252,12 @@ $calonPerKamar = [];
 foreach ($calonPenghuni as $calon) {
     $calonPerKamar[(int) $calon['id_kamar']] = $calon;
 }
+$riwayatKamar = $pdo->query(
+    "SELECT s.id_kamar, p.nama, s.tanggal_mulai, s.tanggal_selesai
+       FROM sewa s JOIN penghuni p USING (id_penghuni)
+      WHERE s.tanggal_selesai IS NOT NULL AND s.tanggal_selesai < CURRENT_DATE
+      ORDER BY s.tanggal_selesai DESC"
+)->fetchAll();
 $penghuniAktif = $pdo->query(
     "SELECT p.id_penghuni, p.nama, a.email, k.nomor_kamar, s.tanggal_mulai
        FROM sewa s JOIN penghuni p USING (id_penghuni)
@@ -309,7 +327,7 @@ include __DIR__ . '/../includes/header.php';
             <div class="daftar-kamar">
                 <?php if (!$kamarList): ?><p>Belum ada data kamar.</p><?php endif; ?>
                 <?php foreach ($kamarList as $kamar): ?>
-                    <article class="kamar-card" data-id="<?= (int) $kamar['id_kamar'] ?>" data-deskripsi="<?= h($kamar['deskripsi'] ?? '') ?>">
+                    <article class="kamar-card" data-id="<?= (int) $kamar['id_kamar'] ?>" data-deskripsi="<?= h($kamar['deskripsi'] ?? '') ?>" data-status="<?= h($kamar['status']) ?>">
                         <?php if (!empty($kamar['foto_kamar'])): ?><img class="kamar-card-photo" src="../<?= h($kamar['foto_kamar']) ?>" alt="Foto kamar <?= h($kamar['nomor_kamar']) ?>"><?php endif; ?>
                         <div class="kamar-card-header">
                             <div><h3><?= h($kamar['nomor_kamar']) ?></h3><p>Rp <?= h(number_format((float) $kamar['harga_bulanan'], 0, ',', '.')) ?>/bulan</p></div>
@@ -327,7 +345,7 @@ include __DIR__ . '/../includes/header.php';
                         <div class="kamar-card-actions">
                             <button type="button" class="btn-kamar" data-ubah-kamar>Ubah</button>
                             <?php if ($kamar['status'] !== 'terisi'): ?><button type="button" class="btn-kamar" data-ubah-status>Ubah Status</button><?php endif; ?>
-                            <?php if (isset($calonPerKamar[(int) $kamar['id_kamar']])): ?><a class="btn-kamar" href="pembayaran.php">Lihat Pembayaran</a><?php elseif ($kamar['status'] === 'terisi'): ?><button type="button" class="btn-kamar" data-riwayat-kamar>Riwayat Penghuni</button><?php else: ?><button type="button" class="btn-kamar" data-hapus-kamar>Hapus</button><?php endif; ?>
+                            <?php if (isset($calonPerKamar[(int) $kamar['id_kamar']])): ?><a class="btn-kamar" href="pembayaran.php">Lihat Pembayaran</a><?php elseif ($kamar['status'] === 'terisi'): ?><button type="button" class="btn-kamar" data-riwayat-kamar>Riwayat Penghuni</button><?php endif; ?>
                         </div>
                     </article>
                 <?php endforeach; ?>
@@ -474,6 +492,8 @@ include __DIR__ . '/../includes/header.php';
                 <small class="form-hint">Pilih foto baru jika ingin mengganti foto lama.</small>
 
 
+                <button type="submit" class="btn-hapus-kamar" id="btnHapusDariEdit" form="formHapusKamar" hidden>Hapus Kamar</button>
+
                 <button type="submit" class="btn-primary">
                     Simpan Perubahan
                 </button>
@@ -486,6 +506,11 @@ include __DIR__ . '/../includes/header.php';
                     Batal
                 </button>
 
+            </form>
+            <form id="formHapusKamar" method="post" action="kamar.php" onsubmit="return confirm('Yakin ingin menghapus kamar kosong ini?')">
+                <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
+                <input type="hidden" name="aksi_hapus_kamar" value="1">
+                <input type="hidden" name="id_kamar" id="hapusIdDariEdit">
             </form>
         </div>
     </section>
@@ -717,8 +742,15 @@ include __DIR__ . '/../includes/header.php';
 
             <h2>Riwayat Huni Kamar</h2>
 
-            <div class="riwayat-list">
-                <p>Belum ada riwayat huni kamar.</p>
+            <div class="riwayat-list" id="daftarRiwayatKamar">
+                <?php foreach ($riwayatKamar as $riwayat): ?>
+                    <article class="riwayat-item" data-riwayat-room="<?= (int) $riwayat['id_kamar'] ?>" hidden>
+                        <strong><?= h($riwayat['nama']) ?></strong>
+                        <p>Mulai: <?= h($riwayat['tanggal_mulai']) ?></p>
+                        <p>Selesai: <?= h($riwayat['tanggal_selesai']) ?></p>
+                    </article>
+                <?php endforeach; ?>
+                <p id="riwayatKamarKosong">Belum ada mantan penghuni untuk kamar ini.</p>
             </div>
 
             <button
