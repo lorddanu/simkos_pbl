@@ -30,9 +30,8 @@
 
         if (downloadReport) {
             downloadReport.addEventListener('click', () => {
-
                 const report = document.querySelector(
-                    '#laporan-pembayaran .panel'
+                    '#laporan-pembayaran .payment-report-table'
                 );
 
                 if (!report) {
@@ -44,33 +43,29 @@
                     [
                         'Nama Penghuni',
                         'Kamar',
-                        'Periode',
-                        'Nominal',
-                        'Status'
+                        'Status Pembayaran',
+                        'Uang Masuk'
                     ]
                 ];
 
-                // Ambil setiap riwayat pembayaran
-                report.querySelectorAll('.activity-item').forEach(item => {
+                report.querySelectorAll('tbody tr').forEach(row => {
+                    const cells = Array.from(row.querySelectorAll('td'));
+                    if (cells.length !== 4) return;
+                    if (cells[0].classList.contains('payment-report-empty')) return;
 
-                    const nama =
-                        item.querySelector('strong')?.textContent.trim() ?? '';
-
-                    const detail = Array.from(
-                        item.querySelectorAll('.item-description')
-                    ).map(el => el.textContent.trim());
-
-                    const status =
-                        item.querySelector('.status')?.textContent.trim() ?? '';
-
-                    rows.push([
-                        nama,
-                        detail[0]?.split(' · ')[0] ?? '',
-                        detail[0]?.split(' · ')[1] ?? '',
-                        detail[1] ?? '',
-                        status
-                    ]);
+                    rows.push(cells.map(cell => cell.textContent.trim()));
                 });
+
+                const totalRow = report.querySelector('tfoot tr');
+                if (totalRow) {
+                    const totalCells = Array.from(totalRow.querySelectorAll('td'));
+                    rows.push([
+                        'Total Pendapatan',
+                        '',
+                        '',
+                        totalCells[1]?.textContent.trim() ?? ''
+                    ]);
+                }
 
                 // Ubah data menjadi format CSV
                 const csv = rows.map(row =>
@@ -99,6 +94,18 @@
             });
         }
 
+        const monthSelector = document.getElementById('bulanLaporan');
+
+        if (monthSelector) {
+            monthSelector.addEventListener('change', () => {
+                if (monthSelector.value) {
+                    window.location.href =
+                        '?bulan=' + encodeURIComponent(monthSelector.value) +
+                        '#laporan-pembayaran';
+                }
+            });
+        }
+
         // Tab pembayaran
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', () => {
@@ -113,6 +120,17 @@
                 });
             });
         });
+
+        // Buka tab sesuai hash URL setelah halaman dimuat
+        if (window.location.hash === '#laporan-pembayaran') {
+            const tombolLaporan = document.querySelector(
+                '.tab-button[data-tab="laporan-pembayaran"]'
+            );
+
+            if (tombolLaporan) {
+                tombolLaporan.click();
+            }
+        }
 
         // Menu profil dan logout
         const profileButton = document.getElementById('profileButton');

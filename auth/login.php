@@ -1,6 +1,7 @@
-
 <?php
 session_start();
+
+require_once __DIR__ . '/../database/database.php';
 
 if (isset($_SESSION['id_akun'])) {
     if (($_SESSION['role'] ?? '') === 'admin') {
@@ -25,11 +26,8 @@ unset($_SESSION['error_login']);
 </head>
 
 <body>
-
     <main class="auth-wrapper">
-
         <div class="auth-card">
-
             <h1>Login SIMKOS</h1>
 
             <?php if ($error !== ''): ?>
@@ -39,7 +37,6 @@ unset($_SESSION['error_login']);
             <?php endif; ?>
 
             <form action="proses_login.php" method="POST">
-
                 <div class="field">
                     <label for="email">Email</label>
                     <input
@@ -67,9 +64,7 @@ unset($_SESSION['error_login']);
                 <button type="submit" class="btn-auth">
                     Login
                 </button>
-
             </form>
-
         </div>
 
         <div class="auth-footer">
@@ -78,8 +73,6 @@ unset($_SESSION['error_login']);
                 Daftar sebagai penghuni
             </a>
         </div>
-
     </main>
-
 </body>
 </html>
