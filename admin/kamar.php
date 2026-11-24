@@ -7,82 +7,87 @@ if ($user['role'] !== 'admin') {
 }
 $nama = $user['nama'] ?? 'Admin SIMKOS';
 $pdo = db();
+
+function validasiFotoKamar(?array $file): ?string {
+    if (!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) return null;
+    if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) return 'Foto gagal diunggah.';
+    if (($file['size'] ?? 0) > 5 * 1024 * 1024) return 'Ukuran foto maksimal 5 MB.';
+    if (empty($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) return 'File foto tidak valid.';
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+    if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true) || @getimagesize($file['tmp_name']) === false) return 'Foto harus JPG, PNG, atau WebP yang valid.';
+    return null;
+}
+function simpanFotoKamar(array $file): string {
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+    $ext = ['image/jpeg'=>'jpg', 'image/png'=>'png', 'image/webp'=>'webp'][$mime];
+    $dir = __DIR__ . '/../uploads/kamar';
+    if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) throw new RuntimeException('Folder upload tidak dapat dibuat.');
+    $nama = bin2hex(random_bytes(16)) . '.' . $ext;
+    if (!move_uploaded_file($file['tmp_name'], $dir . '/' . $nama)) throw new RuntimeException('Foto gagal disimpan.');
+    return 'uploads/kamar/' . $nama;
+}
+function hapusFotoKamar(?string $path): void {
+    if (!$path || !preg_match('~^uploads/kamar/[a-f0-9]{32}\.(jpg|png|webp)$~', $path)) return;
+    $target = __DIR__ . '/../' . $path;
+    if (is_file($target)) @unlink($target);
+}
+
 $pesanAdmin = $_SESSION['flash_admin'] ?? '';
 unset($_SESSION['flash_admin']);
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_tambah_kamar'])) {
-    if (!csrf_ok()) {
-        http_response_code(400);
-        exit('Permintaan tidak valid.');
-    }
-
-    $nomorKamar = trim($_POST['nomor_kamar'] ?? '');
-    $hargaBulanan = filter_var($_POST['harga_bulanan'] ?? null, FILTER_VALIDATE_INT);
-
-    if ($nomorKamar === '' || mb_strlen($nomorKamar) > 10 || $hargaBulanan === false || $hargaBulanan < 1) {
-        $_SESSION['flash_admin'] = 'Nomor kamar wajib diisi (maksimal 10 karakter) dan harga harus lebih dari 0.';
+    if (!csrf_ok()) { http_response_code(400); exit('Permintaan tidak valid.'); }
+    $nomor = trim($_POST['nomor_kamar'] ?? '');
+    $harga = filter_var($_POST['harga_bulanan'] ?? null, FILTER_VALIDATE_INT);
+    $deskripsi = trim($_POST['deskripsi'] ?? '');
+    $errFoto = validasiFotoKamar($_FILES['foto_kamar'] ?? null);
+    if ($nomor === '' || mb_strlen($nomor) > 10 || $harga === false || $harga < 1 || mb_strlen($deskripsi) > 2000 || $errFoto) {
+        $_SESSION['flash_admin'] = $errFoto ?: 'Periksa nomor kamar, harga, dan deskripsi (maksimal 2.000 karakter).';
     } else {
+        $foto = null;
         try {
-            $st = $pdo->prepare(
-                "INSERT INTO kamar (nomor_kamar, status, harga_bulanan)
-                 VALUES (:nomor_kamar, 'kosong', :harga_bulanan)"
-            );
-            $st->execute([
-                ':nomor_kamar' => $nomorKamar,
-                ':harga_bulanan' => $hargaBulanan,
-            ]);
+            if (!empty($_FILES['foto_kamar']['name'])) $foto = simpanFotoKamar($_FILES['foto_kamar']);
+            $st = $pdo->prepare("INSERT INTO kamar (nomor_kamar,status,harga_bulanan,deskripsi,foto_kamar) VALUES (:n,'kosong',:h,:d,:f)");
+            $st->execute([':n'=>$nomor, ':h'=>$harga, ':d'=>$deskripsi ?: null, ':f'=>$foto]);
             $_SESSION['flash_admin'] = 'Kamar berhasil ditambahkan.';
-        } catch (PDOException $e) {
-            if ($e->getCode() === '23505') {
-                $_SESSION['flash_admin'] = 'Nomor kamar tersebut sudah digunakan.';
-            } else {
-                error_log($e->getMessage());
-                $_SESSION['flash_admin'] = 'Kamar gagal disimpan. Periksa struktur tabel dan koneksi database.';
-            }
+        } catch (Throwable $e) {
+            hapusFotoKamar($foto);
+            if ($e instanceof PDOException && $e->getCode() === '23505') $_SESSION['flash_admin'] = 'Nomor kamar tersebut sudah digunakan.';
+            else { error_log($e->getMessage()); $_SESSION['flash_admin'] = 'Kamar gagal disimpan. Jalankan migrasi SQL dan periksa folder upload.'; }
         }
     }
-
-    header('Location: kamar.php?tab=kamar');
-    exit;
+    header('Location: kamar.php?tab=kamar'); exit;
 }
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_ubah_kamar'])) {
-    if (!csrf_ok()) {
-        http_response_code(400);
-        exit('Permintaan tidak valid.');
-    }
-
-    $idKamar = filter_var($_POST['id_kamar'] ?? null, FILTER_VALIDATE_INT);
-    $nomorKamar = trim($_POST['nomor_kamar'] ?? '');
-    $hargaBulanan = filter_var($_POST['harga_bulanan'] ?? null, FILTER_VALIDATE_INT);
-
-    if (!$idKamar || $nomorKamar === '' || mb_strlen($nomorKamar) > 10 || $hargaBulanan === false || $hargaBulanan < 1) {
-        $_SESSION['flash_admin'] = 'Data kamar tidak valid. Nomor maksimal 10 karakter dan harga harus lebih dari 0.';
+    if (!csrf_ok()) { http_response_code(400); exit('Permintaan tidak valid.'); }
+    $id = filter_var($_POST['id_kamar'] ?? null, FILTER_VALIDATE_INT);
+    $nomor = trim($_POST['nomor_kamar'] ?? '');
+    $harga = filter_var($_POST['harga_bulanan'] ?? null, FILTER_VALIDATE_INT);
+    $deskripsi = trim($_POST['deskripsi'] ?? '');
+    $errFoto = validasiFotoKamar($_FILES['foto_kamar'] ?? null);
+    if (!$id || $nomor === '' || mb_strlen($nomor) > 10 || $harga === false || $harga < 1 || mb_strlen($deskripsi) > 2000 || $errFoto) {
+        $_SESSION['flash_admin'] = $errFoto ?: 'Data kamar tidak valid. Periksa nomor, harga, dan deskripsi.';
     } else {
+        $fotoBaru = null;
         try {
-            $st = $pdo->prepare(
-                'UPDATE kamar SET nomor_kamar = :nomor_kamar, harga_bulanan = :harga_bulanan WHERE id_kamar = :id_kamar'
-            );
-            $st->execute([
-                ':nomor_kamar' => $nomorKamar,
-                ':harga_bulanan' => $hargaBulanan,
-                ':id_kamar' => $idKamar,
-            ]);
-            $_SESSION['flash_admin'] = $st->rowCount() > 0
-                ? 'Data kamar berhasil diperbarui.'
-                : 'Tidak ada perubahan data atau kamar tidak ditemukan.';
-        } catch (PDOException $e) {
-            if ($e->getCode() === '23505') {
-                $_SESSION['flash_admin'] = 'Nomor kamar tersebut sudah digunakan.';
-            } else {
-                error_log($e->getMessage());
-                $_SESSION['flash_admin'] = 'Data kamar gagal diperbarui.';
-            }
+            $q = $pdo->prepare('SELECT foto_kamar FROM kamar WHERE id_kamar = ?');
+            $q->execute([$id]);
+            $fotoLama = $q->fetchColumn();
+            if ($fotoLama === false) throw new RuntimeException('Kamar tidak ditemukan.');
+            if (!empty($_FILES['foto_kamar']['name'])) $fotoBaru = simpanFotoKamar($_FILES['foto_kamar']);
+            $sql = 'UPDATE kamar SET nomor_kamar=:n,harga_bulanan=:h,deskripsi=:d,foto_kamar=COALESCE(:f,foto_kamar) WHERE id_kamar=:id';
+            $q = $pdo->prepare($sql);
+            $q->execute([':n'=>$nomor, ':h'=>$harga, ':d'=>$deskripsi ?: null, ':f'=>$fotoBaru, ':id'=>$id]);
+            if ($fotoBaru) hapusFotoKamar($fotoLama);
+            $_SESSION['flash_admin'] = 'Data kamar berhasil diperbarui.';
+        } catch (Throwable $e) {
+            hapusFotoKamar($fotoBaru);
+            if ($e instanceof PDOException && $e->getCode() === '23505') $_SESSION['flash_admin'] = 'Nomor kamar tersebut sudah digunakan.';
+            else { error_log($e->getMessage()); $_SESSION['flash_admin'] = 'Data kamar gagal diperbarui. Periksa migrasi SQL dan folder upload.'; }
         }
     }
-
-    header('Location: kamar.php?tab=kamar');
-    exit;
+    header('Location: kamar.php?tab=kamar'); exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_hapus_kamar'])) {
@@ -174,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_pengajuan'])) {
     exit;
 }
 
-$kamarList = $pdo->query('SELECT id_kamar, nomor_kamar, status, harga_bulanan FROM kamar ORDER BY nomor_kamar')->fetchAll();
+$kamarList = $pdo->query('SELECT id_kamar, nomor_kamar, status, harga_bulanan, deskripsi, foto_kamar FROM kamar ORDER BY nomor_kamar')->fetchAll();
 $totalKamar = count($kamarList);
 $jumlahKamarKosong = count(array_filter($kamarList, static fn($k) => $k['status'] === 'kosong'));
 $st = $pdo->query(
