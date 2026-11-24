@@ -267,7 +267,8 @@ include __DIR__ . '/../includes/header.php';
             <div class="daftar-kamar">
                 <?php if (!$kamarList): ?><p>Belum ada data kamar.</p><?php endif; ?>
                 <?php foreach ($kamarList as $kamar): ?>
-                    <article class="kamar-card" data-id="<?= (int) $kamar['id_kamar'] ?>">
+                    <article class="kamar-card" data-id="<?= (int) $kamar['id_kamar'] ?>" data-deskripsi="<?= h($kamar['deskripsi'] ?? '') ?>">
+                        <?php if (!empty($kamar['foto_kamar'])): ?><img class="kamar-card-photo" src="../<?= h($kamar['foto_kamar']) ?>" alt="Foto kamar <?= h($kamar['nomor_kamar']) ?>"><?php endif; ?>
                         <div class="kamar-card-header">
                             <div><h3><?= h($kamar['nomor_kamar']) ?></h3><p>Rp <?= h(number_format((float) $kamar['harga_bulanan'], 0, ',', '.')) ?>/bulan</p></div>
                             <strong class="kamar-status <?= h($kamar['status']) ?>"><?= h(ucfirst($kamar['status'])) ?></strong>
@@ -316,7 +317,7 @@ include __DIR__ . '/../includes/header.php';
         <div class="kamar-form-content">
             <h2>Tambah Kamar Baru</h2>
 
-            <form id="formTambahKamar" method="post" action="kamar.php">
+            <form id="formTambahKamar" method="post" action="kamar.php" enctype="multipart/form-data">
                 <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
                 <input type="hidden" name="aksi_tambah_kamar" value="1">
 
@@ -339,7 +340,12 @@ include __DIR__ . '/../includes/header.php';
                     required
                 >
 
-                <small class="form-hint">Untuk saat ini, data yang disimpan adalah nomor kamar dan harga bulanan.</small>
+                <label for="tambahDeskripsi">Deskripsi Kamar</label>
+                <textarea id="tambahDeskripsi" name="deskripsi" maxlength="2000" placeholder="Tuliskan deskripsi kamar"></textarea>
+                <label for="tambahFoto">Foto Kamar</label>
+                <input type="file" id="tambahFoto" name="foto_kamar" accept="image/jpeg,image/png,image/webp">
+                <small class="form-hint">JPG/PNG/WebP, maksimal 5 MB.</small>
+
 
                 <button type="submit" class="btn-primary">
                     Simpan Kamar
@@ -362,7 +368,7 @@ include __DIR__ . '/../includes/header.php';
         <div class="kamar-form-content">
             <h2>Ubah Data Kamar</h2>
 
-            <form id="formUbahKamar" method="post" action="kamar.php">
+            <form id="formUbahKamar" method="post" action="kamar.php" enctype="multipart/form-data">
                 <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
                 <input type="hidden" name="aksi_ubah_kamar" value="1">
 
@@ -387,7 +393,12 @@ include __DIR__ . '/../includes/header.php';
                     required
                 >
 
-                <small class="form-hint">Data yang dapat diubah saat ini adalah nomor kamar dan harga bulanan.</small>
+                <label for="ubahDeskripsi">Deskripsi Kamar</label>
+                <textarea id="ubahDeskripsi" name="deskripsi" maxlength="2000" placeholder="Deskripsi kamar"></textarea>
+                <label for="ubahFoto">Foto Kamar</label>
+                <input type="file" id="ubahFoto" name="foto_kamar" accept="image/jpeg,image/png,image/webp">
+                <small class="form-hint">Pilih foto baru jika ingin mengganti foto lama.</small>
+
 
                 <button type="submit" class="btn-primary">
                     Simpan Perubahan
