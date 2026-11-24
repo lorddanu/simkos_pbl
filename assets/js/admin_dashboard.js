@@ -303,6 +303,15 @@ document.querySelectorAll('[data-riwayat-kamar]').forEach(button => {
     button.addEventListener('click', () => {
         const kartu = button.closest('.kamar-card');
         const nomorKamar = kartu.querySelector('h3').textContent.trim();
+        const idKamar = kartu.dataset.id;
+        const daftar = document.getElementById('daftarRiwayatKamar');
+        let jumlah = 0;
+        daftar.querySelectorAll('[data-riwayat-room]').forEach(item => {
+            const cocok = item.dataset.riwayatRoom === idKamar;
+            item.hidden = !cocok;
+            if (cocok) jumlah++;
+        });
+        document.getElementById('riwayatKamarKosong').hidden = jumlah > 0;
 
         document.querySelector('#riwayat-huni-kamar h2').textContent =
             'Riwayat Huni ' + nomorKamar;
@@ -352,6 +361,9 @@ document.querySelectorAll('[data-kembali-riwayat]').forEach(button => {
         document.getElementById('ubahHarga').value = harga;
         document.getElementById('ubahDeskripsi').value = kartu.dataset.deskripsi || '';
         document.getElementById('ubahFoto').value = '';
+        document.getElementById('hapusIdDariEdit').value = id;
+        const tombolHapus = document.getElementById('btnHapusDariEdit');
+        tombolHapus.hidden = kartu.dataset.status !== 'kosong';
         tampilkanSectionKamar('ubah-kamar');
     });
 });
