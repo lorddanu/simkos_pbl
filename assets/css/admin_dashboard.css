@@ -417,12 +417,16 @@ button {
 }
 
 /* LAPORAN PEMBAYARAN BULANAN */
+.month-picker-container {
+    position: relative;
+    margin-bottom: 12px;
+}
+
 .month-navigation {
     display: grid;
     grid-template-columns: 52px minmax(0, 1fr) 52px;
     align-items: center;
     gap: 8px;
-    margin-bottom: 12px;
 }
 
 .month-arrow {
@@ -448,23 +452,107 @@ button {
     gap: 8px;
     padding: 0 12px;
     color: #7065ce;
-}
-
-.month-selector input {
-    min-width: 0;
-    width: 100%;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    color: #7065ce;
+    cursor: pointer;
     font: inherit;
     font-weight: 700;
+    justify-content: center;
+}
+
+.month-picker {
+    position: absolute;
+    z-index: 15;
+    top: calc(100% + 6px);
+    left: 50%;
+    width: min(100%, 360px);
+    padding: 14px;
+    transform: translateX(-50%);
+    border: 1px solid #ebeaf2;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 10px 28px rgba(39, 36, 67, 0.18);
+}
+
+.month-picker[hidden],
+.picker-year-grid[hidden] {
+    display: none;
+}
+
+.month-picker-heading {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+    color: var(--text);
+    font-weight: 700;
+}
+
+.month-picker-heading button {
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: #272443;
+    font: inherit;
+    cursor: pointer;
+}
+
+.month-picker-heading button:hover {
+    background: var(--purple-light);
+}
+
+.picker-heading-arrows {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.picker-heading-arrows button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid #e8e7ef;
+    border-radius: 8px;
+    font-size: 20px;
+}
+
+.picker-month-grid,
+.picker-year-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+}
+
+.picker-year-grid {
+    max-height: 225px;
+    overflow-y: auto;
+}
+
+.picker-month-option,
+.picker-year-option {
+    min-height: 42px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #514e5d;
+    font: inherit;
+    cursor: pointer;
+}
+
+.picker-month-option:hover,
+.picker-year-option:hover {
+    background: var(--purple-light);
+}
+
+.picker-month-option.selected,
+.picker-year-option.selected {
+    background: #2862e9;
+    color: white;
 }
 
 .report-stats {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    gap: 7px;
     width: 100%;
     margin-bottom: 12px;
 }
@@ -489,6 +577,16 @@ button {
 
 .report-stats .stat-label {
     white-space: nowrap;
+}
+
+#verifikasi .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+}
+
+#verifikasi .stats-grid .stat-card {
+    width: 100%;
+    min-width: 0;
 }
 
 .report-download {
@@ -577,6 +675,12 @@ button {
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+.previous-report-empty {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
 }
 
 .previous-report-card {

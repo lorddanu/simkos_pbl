@@ -16,10 +16,12 @@ $halamanAktif = 'pembayaran';
 
 require_once __DIR__ . '/../database/database.php';
 
-include __DIR__ . '/../includes_admin/header.php';
-
 $bulanDipilih = trim($_GET['bulan'] ?? '');
-if (!preg_match('/^\d{4}-\d{2}$/', $bulanDipilih)) {
+if (
+    !preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $bulanDipilih)
+    || (int) substr($bulanDipilih, 0, 4) < 1900
+    || (int) substr($bulanDipilih, 0, 4) > 9999
+) {
     $bulanDipilih = '';
 }
 
@@ -38,6 +40,7 @@ $laporanRows = [];
 $totalPendapatan = 0.0;
 $jumlahLunas = 0;
 $bulanSebelumnya = [];
+$tahunTersedia = [];
 $namaBulan = [
     1 => 'Januari',
     2 => 'Februari',
@@ -108,31 +111,42 @@ try {
         }
     }
 
-    for ($offset = 1; $offset <= 3; $offset++) {
-        $bulanRingkasan = $bulanAwal->modify("-{$offset} month");
-        $berikutnyaRingkasan = $bulanRingkasan->modify('+1 month');
-
-        $stmtRingkasan = $conn->prepare(
-            "SELECT
-                COALESCE(SUM(jumlah), 0) AS total,
-                COUNT(DISTINCT id_sewa) AS kamar_lunas
-             FROM pembayaran
-             WHERE status_verifikasi = 'diterima'
-               AND tanggal_bayar >= :bulan_awal
-               AND tanggal_bayar < :bulan_berikutnya"
-        );
-        $stmtRingkasan->execute([
-            'bulan_awal' => $bulanRingkasan->format('Y-m-d'),
-            'bulan_berikutnya' => $berikutnyaRingkasan->format('Y-m-d'),
-        ]);
-        $ringkasan = $stmtRingkasan->fetch();
-
+    $stmtRiwayat = $conn->prepare(
+        "SELECT
+            to_char(date_trunc('month', tanggal_bayar), 'YYYY-MM') AS bulan,
+            COALESCE(SUM(jumlah), 0) AS total,
+            COUNT(DISTINCT s.id_kamar) AS kamar_lunas
+         FROM pembayaran p
+         JOIN sewa s ON s.id_sewa = p.id_sewa
+         WHERE p.status_verifikasi = 'diterima'
+           AND p.tanggal_bayar < :bulan_dipilih
+         GROUP BY date_trunc('month', p.tanggal_bayar)
+         ORDER BY date_trunc('month', p.tanggal_bayar) DESC
+         LIMIT 12"
+    );
+    $stmtRiwayat->execute([
+        'bulan_dipilih' => $bulanAwal->format('Y-m-d'),
+    ]);
+    foreach ($stmtRiwayat->fetchAll() as $ringkasan) {
+        $bulanRingkasan = new DateTimeImmutable($ringkasan['bulan'] . '-01');
         $bulanSebelumnya[] = [
             'value' => $bulanRingkasan->format('Y-m'),
             'label' => $namaBulan[(int) $bulanRingkasan->format('n')] . ' ' . $bulanRingkasan->format('Y'),
             'total' => (float) $ringkasan['total'],
             'kamar_lunas' => (int) $ringkasan['kamar_lunas'],
         ];
+    }
+
+    $stmtRentangTahun = $conn->query(
+        "SELECT MIN(EXTRACT(YEAR FROM tanggal_bayar))::integer AS tahun_min
+         FROM pembayaran
+         WHERE status_verifikasi = 'diterima'"
+    );
+    $tahunMin = $stmtRentangTahun->fetchColumn();
+    $tahunAwal = $tahunMin ? min((int) $tahunMin, (int) $bulanAwal->format('Y')) : (int) $bulanAwal->format('Y');
+    $tahunAkhir = max((int) date('Y'), (int) $bulanAwal->format('Y'));
+    for ($tahun = $tahunAwal; $tahun <= $tahunAkhir; $tahun++) {
+        $tahunTersedia[] = $tahun;
     }
 
     $bulanDipilihLabel = $namaBulan[(int) $bulanAwal->format('n')] . ' ' . $bulanAwal->format('Y');
@@ -143,6 +157,8 @@ try {
     $bulanDipilih = $bulanAwal->format('Y-m');
     $bulanDipilihLabel = $namaBulan[(int) $bulanAwal->format('n')] . ' ' . $bulanAwal->format('Y');
 }
+
+include __DIR__ . '/../includes_admin/header.php';
 ?>
 
 <main class="admin-main">
@@ -210,6 +226,7 @@ try {
         <!-- TAB LAPORAN PEMBAYARAN -->
         <div id="laporan-pembayaran" class="payment-tab" hidden>
 
+            <div class="month-picker-container">
             <div class="month-navigation">
                 <a
                     class="month-arrow"
@@ -219,15 +236,16 @@ try {
                     &#8249;
                 </a>
 
-                <label class="month-selector" for="bulanLaporan">
+                <button
+                    class="month-selector"
+                    id="monthPickerToggle"
+                    type="button"
+                    aria-expanded="false"
+                    aria-controls="monthPicker"
+                >
                     <span aria-hidden="true">&#128197;</span>
-                    <input
-                        type="month"
-                        id="bulanLaporan"
-                        name="bulan"
-                        value="<?= htmlspecialchars($bulanDipilih) ?>"
-                    >
-                </label>
+                    <span id="monthPickerLabel"><?= htmlspecialchars($bulanDipilihLabel) ?></span>
+                </button>
 
                 <a
                     class="month-arrow"
@@ -236,6 +254,63 @@ try {
                 >
                     &#8250;
                 </a>
+            </div>
+
+            <section
+                class="month-picker"
+                id="monthPicker"
+                data-selected-month="<?= (int) $bulanAwal->format('n') ?>"
+                data-selected-year="<?= htmlspecialchars($bulanAwal->format('Y')) ?>"
+                hidden
+                aria-label="Pilih bulan dan tahun"
+            >
+                <div class="month-picker-heading">
+                    <button class="picker-month-heading" id="pickerMonthHeading" type="button">
+                        <?= htmlspecialchars($namaBulan[(int) $bulanAwal->format('n')]) ?>
+                    </button>
+                    <span aria-hidden="true">/</span>
+                    <button class="picker-year-heading" id="pickerYearHeading" type="button">
+                        <?= htmlspecialchars($bulanAwal->format('Y')) ?>
+                    </button>
+                    <div class="picker-heading-arrows">
+                        <button type="button" id="pickerPrevious" aria-label="Sebelumnya">&#8249;</button>
+                        <button type="button" id="pickerNext" aria-label="Berikutnya">&#8250;</button>
+                    </div>
+                </div>
+
+                <div class="picker-month-grid" id="pickerMonthGrid">
+                    <?php foreach ($namaBulan as $nomorBulan => $labelBulan): ?>
+                        <button
+                            type="button"
+                            class="picker-month-option <?= (int) $bulanAwal->format('n') === $nomorBulan ? 'selected' : '' ?>"
+                            data-month="<?= $nomorBulan ?>"
+                        >
+                            <?= htmlspecialchars(substr($labelBulan, 0, 3)) ?>
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="picker-year-grid" id="pickerYearGrid" hidden>
+                    <?php foreach ($tahunTersedia as $tahun): ?>
+                        <button
+                            type="button"
+                            class="picker-year-option <?= (int) $bulanAwal->format('Y') === $tahun ? 'selected' : '' ?>"
+                            data-year="<?= $tahun ?>"
+                        >
+                            <?= $tahun ?>
+                        </button>
+                    <?php endforeach; ?>
+                    <?php if (empty($tahunTersedia)): ?>
+                        <button
+                            type="button"
+                            class="picker-year-option selected"
+                            data-year="<?= htmlspecialchars($bulanAwal->format('Y')) ?>"
+                        >
+                            <?= htmlspecialchars($bulanAwal->format('Y')) ?>
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </section>
             </div>
 
             <div class="stats-grid report-stats">
@@ -330,6 +405,11 @@ try {
                             </div>
                         </a>
                     <?php endforeach; ?>
+                    <?php if (empty($bulanSebelumnya)): ?>
+                        <p class="previous-report-empty">
+                            Belum ada riwayat pembayaran sebelum bulan ini.
+                        </p>
+                    <?php endif; ?>
                 </div>
             </section>
 

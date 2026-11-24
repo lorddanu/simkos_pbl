@@ -94,14 +94,86 @@
             });
         }
 
-        const monthSelector = document.getElementById('bulanLaporan');
+        const monthPicker = document.getElementById('monthPicker');
+        const monthPickerToggle = document.getElementById('monthPickerToggle');
 
-        if (monthSelector) {
-            monthSelector.addEventListener('change', () => {
-                if (monthSelector.value) {
-                    window.location.href =
-                        '?bulan=' + encodeURIComponent(monthSelector.value) +
-                        '#laporan-pembayaran';
+        if (monthPicker && monthPickerToggle) {
+            const monthHeading = document.getElementById('pickerMonthHeading');
+            const yearHeading = document.getElementById('pickerYearHeading');
+            const monthGrid = document.getElementById('pickerMonthGrid');
+            const yearGrid = document.getElementById('pickerYearGrid');
+            let selectedMonth = Number(monthPicker.dataset.selectedMonth);
+            let selectedYear = Number(monthPicker.dataset.selectedYear);
+
+            const submitSelectedMonth = () => {
+                const month = String(selectedMonth).padStart(2, '0');
+                window.location.href =
+                    '?bulan=' + selectedYear + '-' + month +
+                    '#laporan-pembayaran';
+            };
+
+            monthPickerToggle.addEventListener('click', () => {
+                monthPicker.hidden = !monthPicker.hidden;
+                monthPickerToggle.setAttribute(
+                    'aria-expanded',
+                    String(!monthPicker.hidden)
+                );
+            });
+
+            monthHeading.addEventListener('click', () => {
+                yearGrid.hidden = true;
+                monthGrid.hidden = false;
+            });
+
+            yearHeading.addEventListener('click', () => {
+                monthGrid.hidden = true;
+                yearGrid.hidden = false;
+            });
+
+            monthGrid.querySelectorAll('[data-month]').forEach(button => {
+                button.addEventListener('click', () => {
+                    selectedMonth = Number(button.dataset.month);
+                    submitSelectedMonth();
+                });
+            });
+
+            yearGrid.querySelectorAll('[data-year]').forEach(button => {
+                button.addEventListener('click', () => {
+                    selectedYear = Number(button.dataset.year);
+                    monthGrid.hidden = false;
+                    yearGrid.hidden = true;
+                    yearHeading.textContent = String(selectedYear);
+                    yearGrid.querySelectorAll('[data-year]').forEach(option => {
+                        option.classList.toggle(
+                            'selected',
+                            Number(option.dataset.year) === selectedYear
+                        );
+                    });
+                });
+            });
+
+            document.getElementById('pickerPrevious').addEventListener('click', () => {
+                selectedYear--;
+                yearHeading.textContent = String(selectedYear);
+            });
+
+            document.getElementById('pickerNext').addEventListener('click', () => {
+                selectedYear++;
+                yearHeading.textContent = String(selectedYear);
+            });
+
+            document.addEventListener('click', event => {
+                if (!event.target.closest('.month-picker-container')) {
+                    monthPicker.hidden = true;
+                    monthPickerToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape' && !monthPicker.hidden) {
+                    monthPicker.hidden = true;
+                    monthPickerToggle.setAttribute('aria-expanded', 'false');
+                    monthPickerToggle.focus();
                 }
             });
         }
