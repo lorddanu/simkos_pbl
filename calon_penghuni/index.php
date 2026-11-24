@@ -345,15 +345,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'kirim_p
 
 $pengajuan = null;
 if (!empty($user['id_penghuni'])) {
-    $st = $pdo->prepare(
-        'SELECT ps.*, k.nomor_kamar,
-                (EXTRACT(EPOCH FROM ps.batas_pembayaran) * 1000)::BIGINT AS batas_pembayaran_ms,
-                (EXTRACT(EPOCH FROM ps.batas_upload_ulang) * 1000)::BIGINT AS batas_upload_ulang_ms,
-                (EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT AS db_now_ms
-           FROM pengajuan_sewa ps JOIN kamar k USING (id_kamar)
-          WHERE ps.id_penghuni = ?
-          ORDER BY ps.dibuat_pada DESC, ps.id_pengajuan DESC LIMIT 1'
-    );
+        $st = $pdo->prepare(
+            'SELECT ps.*, k.nomor_kamar,
+                    (EXTRACT(EPOCH FROM (ps.batas_pembayaran AT TIME ZONE \'Asia/Jakarta\')) * 1000)::BIGINT AS batas_pembayaran_ms,
+                    (EXTRACT(EPOCH FROM (ps.batas_upload_ulang AT TIME ZONE \'Asia/Jakarta\')) * 1000)::BIGINT AS batas_upload_ulang_ms,
+                    (EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT AS db_now_ms
+            FROM pengajuan_sewa ps JOIN kamar k USING (id_kamar)
+            WHERE ps.id_penghuni = ?
+            ORDER BY ps.dibuat_pada DESC, ps.id_pengajuan DESC LIMIT 1'
+        );
     $st->execute([(int) $user['id_penghuni']]);
     $pengajuan = $st->fetch() ?: null;
 }
