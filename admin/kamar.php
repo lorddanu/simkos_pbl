@@ -7,31 +7,6 @@ if ($user['role'] !== 'admin') {
 }
 $nama = $user['nama'] ?? 'Admin SIMKOS';
 $pdo = db();
-// Upload foto kamar: simpan hanya nama file acak di folder uploads/kamar.
-function validasiFotoKamar(?array $file): ?string {
-    if (!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) return null;
-    if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) return 'Foto gagal diunggah.';
-    if (($file['size'] ?? 0) > 5 * 1024 * 1024) return 'Ukuran foto maksimal 5 MB.';
-    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
-    if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true)) return 'Format foto harus JPG, PNG, atau WebP.';
-    if (@getimagesize($file['tmp_name']) === false) return 'File yang dipilih bukan gambar yang valid.';
-    return null;
-}
-function simpanFotoKamar(array $file): string {
-    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
-    $ext = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'][$mime];
-    $dir = __DIR__ . '/../uploads/kamar';
-    if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) throw new RuntimeException('Folder foto kamar tidak dapat dibuat.');
-    $nama = bin2hex(random_bytes(16)) . '.' . $ext;
-    if (!move_uploaded_file($file['tmp_name'], $dir . '/' . $nama)) throw new RuntimeException('Foto kamar gagal disimpan.');
-    return 'uploads/kamar/' . $nama;
-}
-function hapusFotoKamar(string $path): void {
-    if (!preg_match('~^uploads/kamar/[a-f0-9]{32}\.(?:jpg|png|webp)$~', $path)) return;
-    $file = __DIR__ . '/../' . $path;
-    if (is_file($file)) @unlink($file);
-}
-
 $pesanAdmin = $_SESSION['flash_admin'] ?? '';
 unset($_SESSION['flash_admin']);
 
@@ -43,26 +18,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_tambah_kamar']))
 
     $nomorKamar = trim($_POST['nomor_kamar'] ?? '');
     $hargaBulanan = filter_var($_POST['harga_bulanan'] ?? null, FILTER_VALIDATE_INT);
-    $fotoKamar = null;
-    $errorFoto = validasiFotoKamar($_FILES['foto_kamar'] ?? null);
-    if ($errorFoto === null && !empty($_FILES['foto_kamar']['tmp_name'])) {
-        $fotoKamar = simpanFotoKamar($_FILES['foto_kamar']);
-    }
 
-    if ($errorFoto !== null) {
-        $_SESSION['flash_admin'] = $errorFoto;
-    } elseif ($nomorKamar === '' || mb_strlen($nomorKamar) > 10 || $hargaBulanan === false || $hargaBulanan < 1) {
+    if ($nomorKamar === '' || mb_strlen($nomorKamar) > 10 || $hargaBulanan === false || $hargaBulanan < 1) {
         $_SESSION['flash_admin'] = 'Nomor kamar wajib diisi (maksimal 10 karakter) dan harga harus lebih dari 0.';
     } else {
         try {
             $st = $pdo->prepare(
-                "INSERT INTO kamar (nomor_kamar, status, harga_bulanan, foto_kamar)
-                 VALUES (:nomor_kamar, 'kosong', :harga_bulanan, :foto_kamar)"
+                "INSERT INTO kamar (nomor_kamar, status, harga_bulanan)
+                 VALUES (:nomor_kamar, 'kosong', :harga_bulanan)"
             );
             $st->execute([
                 ':nomor_kamar' => $nomorKamar,
                 ':harga_bulanan' => $hargaBulanan,
-                ':foto_kamar' => $fotoKamar,
             ]);
             $_SESSION['flash_admin'] = 'Kamar berhasil ditambahkan.';
         } catch (PDOException $e) {
@@ -88,35 +55,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_ubah_kamar'])) {
     $idKamar = filter_var($_POST['id_kamar'] ?? null, FILTER_VALIDATE_INT);
     $nomorKamar = trim($_POST['nomor_kamar'] ?? '');
     $hargaBulanan = filter_var($_POST['harga_bulanan'] ?? null, FILTER_VALIDATE_INT);
-    $errorFoto = validasiFotoKamar($_FILES['foto_kamar'] ?? null);
-    $fotoBaru = null;
-    if ($errorFoto === null && !empty($_FILES['foto_kamar']['tmp_name'])) {
-        $fotoBaru = simpanFotoKamar($_FILES['foto_kamar']);
-    }
 
-    if ($errorFoto !== null) {
-        $_SESSION['flash_admin'] = $errorFoto;
-    } elseif (!$idKamar || $nomorKamar === '' || mb_strlen($nomorKamar) > 10 || $hargaBulanan === false || $hargaBulanan < 1) {
+    if (!$idKamar || $nomorKamar === '' || mb_strlen($nomorKamar) > 10 || $hargaBulanan === false || $hargaBulanan < 1) {
         $_SESSION['flash_admin'] = 'Data kamar tidak valid. Nomor maksimal 10 karakter dan harga harus lebih dari 0.';
     } else {
         try {
-            $st = $pdo->prepare('SELECT foto_kamar FROM kamar WHERE id_kamar = :id');
-            $st->execute([':id' => $idKamar]);
-            $fotoLama = $st->fetchColumn();
-            if ($fotoLama === false) {
-                throw new RuntimeException('Kamar tidak ditemukan.');
-            }
-            $sqlFoto = $fotoBaru !== null ? ', foto_kamar = :foto_kamar' : '';
             $st = $pdo->prepare(
-                'UPDATE kamar SET nomor_kamar = :nomor_kamar, harga_bulanan = :harga_bulanan' . $sqlFoto . ' WHERE id_kamar = :id_kamar'
+                'UPDATE kamar SET nomor_kamar = :nomor_kamar, harga_bulanan = :harga_bulanan WHERE id_kamar = :id_kamar'
             );
             $st->execute([
                 ':nomor_kamar' => $nomorKamar,
                 ':harga_bulanan' => $hargaBulanan,
-                ...($fotoBaru !== null ? [':foto_kamar' => $fotoBaru] : []),
                 ':id_kamar' => $idKamar,
             ]);
-            if ($fotoBaru !== null && $fotoLama) hapusFotoKamar($fotoLama);
             $_SESSION['flash_admin'] = $st->rowCount() > 0
                 ? 'Data kamar berhasil diperbarui.'
                 : 'Tidak ada perubahan data atau kamar tidak ditemukan.';
@@ -145,12 +96,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_hapus_kamar'])) 
         $_SESSION['flash_admin'] = 'Kamar tidak valid.';
     } else {
         try {
-            $st = $pdo->prepare('SELECT foto_kamar FROM kamar WHERE id_kamar = :id');
-            $st->execute([':id' => $idKamar]);
-            $fotoLama = $st->fetchColumn();
             $st = $pdo->prepare('DELETE FROM kamar WHERE id_kamar = :id_kamar');
             $st->execute([':id_kamar' => $idKamar]);
-            if ($st->rowCount() > 0 && $fotoLama) hapusFotoKamar($fotoLama);
             $_SESSION['flash_admin'] = $st->rowCount() > 0
                 ? 'Kamar berhasil dihapus.'
                 : 'Kamar tidak ditemukan.';
@@ -227,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_pengajuan'])) {
     exit;
 }
 
-$kamarList = $pdo->query('SELECT id_kamar, nomor_kamar, status, harga_bulanan, foto_kamar FROM kamar ORDER BY nomor_kamar')->fetchAll();
+$kamarList = $pdo->query('SELECT id_kamar, nomor_kamar, status, harga_bulanan FROM kamar ORDER BY nomor_kamar')->fetchAll();
 $totalKamar = count($kamarList);
 $jumlahKamarKosong = count(array_filter($kamarList, static fn($k) => $k['status'] === 'kosong'));
 $st = $pdo->query(
@@ -316,7 +263,6 @@ include __DIR__ . '/../includes/header.php';
                 <?php if (!$kamarList): ?><p>Belum ada data kamar.</p><?php endif; ?>
                 <?php foreach ($kamarList as $kamar): ?>
                     <article class="kamar-card" data-id="<?= (int) $kamar['id_kamar'] ?>">
-                        <?php if (!empty($kamar['foto_kamar'])): ?><img class="kamar-card-photo" src="../<?= h($kamar['foto_kamar']) ?>" alt="Foto kamar <?= h($kamar['nomor_kamar']) ?>"><?php else: ?><div class="kamar-card-photo kamar-photo-empty">Belum ada foto</div><?php endif; ?>
                         <div class="kamar-card-header">
                             <div><h3><?= h($kamar['nomor_kamar']) ?></h3><p>Rp <?= h(number_format((float) $kamar['harga_bulanan'], 0, ',', '.')) ?>/bulan</p></div>
                             <strong class="kamar-status <?= h($kamar['status']) ?>"><?= h(ucfirst($kamar['status'])) ?></strong>
@@ -365,7 +311,7 @@ include __DIR__ . '/../includes/header.php';
         <div class="kamar-form-content">
             <h2>Tambah Kamar Baru</h2>
 
-            <form id="formTambahKamar" method="post" action="kamar.php" enctype="multipart/form-data">
+            <form id="formTambahKamar" method="post" action="kamar.php">
                 <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
                 <input type="hidden" name="aksi_tambah_kamar" value="1">
 
@@ -378,10 +324,6 @@ include __DIR__ . '/../includes/header.php';
                     required
                 >
 
-                <label for="tambahFoto">Foto Kamar</label>
-                <input type="file" id="tambahFoto" name="foto_kamar" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
-                <small class="form-hint">JPG, PNG, atau WebP. Maksimal 5 MB.</small>
-
                 <label for="tambahHarga">Harga Sewa per Bulan (Rp)</label>
                 <input
                     type="number"
@@ -392,7 +334,7 @@ include __DIR__ . '/../includes/header.php';
                     required
                 >
 
-                <small class="form-hint">Foto bersifat opsional. Format JPG, PNG, atau WebP, maksimal 5 MB.</small>
+                <small class="form-hint">Untuk saat ini, data yang disimpan adalah nomor kamar dan harga bulanan.</small>
 
                 <button type="submit" class="btn-primary">
                     Simpan Kamar
@@ -415,7 +357,7 @@ include __DIR__ . '/../includes/header.php';
         <div class="kamar-form-content">
             <h2>Ubah Data Kamar</h2>
 
-            <form id="formUbahKamar" method="post" action="kamar.php" enctype="multipart/form-data">
+            <form id="formUbahKamar" method="post" action="kamar.php">
                 <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
                 <input type="hidden" name="aksi_ubah_kamar" value="1">
 
@@ -430,10 +372,6 @@ include __DIR__ . '/../includes/header.php';
                     required
                 >
 
-                <label for="ubahFoto">Ganti Foto Kamar (opsional)</label>
-                <input type="file" id="ubahFoto" name="foto_kamar" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
-                <small class="form-hint">Kosongkan jika tidak ingin mengganti foto. Maksimal 5 MB.</small>
-
                 <label for="ubahHarga">Harga Sewa per Bulan (Rp)</label>
                 <input
                     type="number"
@@ -444,7 +382,7 @@ include __DIR__ . '/../includes/header.php';
                     required
                 >
 
-                <small class="form-hint">Foto lama tetap digunakan jika kamu tidak memilih foto baru.</small>
+                <small class="form-hint">Data yang dapat diubah saat ini adalah nomor kamar dan harga bulanan.</small>
 
                 <button type="submit" class="btn-primary">
                     Simpan Perubahan
