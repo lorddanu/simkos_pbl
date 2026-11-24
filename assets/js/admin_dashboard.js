@@ -172,30 +172,6 @@
         });
     });
 
-    // Tombol ubah kamar
-    document.querySelectorAll('.kamar-card .btn-kamar').forEach(button => {
-        if (button.textContent.trim() !== 'Ubah') return;
-
-        button.addEventListener('click', () => {
-            const kartu = button.closest('.kamar-card');
-
-            const nama = kartu.querySelector('h3').textContent.trim();
-            const hargaText = kartu.querySelector('p').textContent;
-            const harga = hargaText.replace(/[^\d]/g, '');
-
-            const formUbah = document.getElementById('formUbahKamar');
-
-            formUbah.reset();
-
-            document.getElementById('ubahId').value = nama;
-            document.getElementById('ubahNomor').value = nama;
-            document.getElementById('ubahHarga').value = harga;
-            document.getElementById('ubahDeskripsi').value = '';
-
-            tampilkanHalamanKamar('ubah-kamar');
-        });
-    });
-
 // ======================================
 // NAVIGASI SECTION DI HALAMAN KAMAR
 // ======================================
@@ -378,23 +354,23 @@ document.querySelectorAll('[data-kembali-riwayat]').forEach(button => {
     });
 });
 
-// Membuka popup hapus kamar
-document.getElementById('btnHapusKamar').addEventListener('click', () => {
-    document.getElementById('popupHapusKamar').hidden = false;
+// Konfirmasi dan penghapusan kamar
+const popupHapusKamar = document.getElementById('popupHapusKamar');
+document.querySelectorAll('[data-hapus-kamar]').forEach(button => {
+    button.addEventListener('click', () => {
+        const kartu = button.closest('.kamar-card');
+        const id = kartu.dataset.id;
+        const nomor = kartu.querySelector('h3').textContent.trim();
+
+        document.getElementById('hapusIdKamar').value = id;
+        document.getElementById('teksKonfirmasiHapus').textContent =
+            'Yakin ingin menghapus kamar ' + nomor + '?';
+        popupHapusKamar.hidden = false;
+    });
 });
 
-// Membatalkan hapus
-document.getElementById('btnBatalHapus').addEventListener('click', () => {
-    document.getElementById('popupHapusKamar').hidden = true;
-});
-
-// Konfirmasi hapus
-document.getElementById('btnKonfirmasiHapus').addEventListener('click', () => {
-    const idKamar = document.getElementById('ubahId').value;
-
-    alert('Kamar dengan ID ' + idKamar + ' siap dihapus.');
-
-    document.getElementById('popupHapusKamar').hidden = true;
+document.getElementById('btnBatalHapus')?.addEventListener('click', () => {
+    popupHapusKamar.hidden = true;
 });
 
 // Balas admin
