@@ -46,6 +46,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_tambah_kamar']))
     exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_ubah_kamar'])) {
+    if (!csrf_ok()) {
+        http_response_code(400);
+        exit('Permintaan tidak valid.');
+    }
+
+    $idKamar = filter_var($_POST['id_kamar'] ?? null, FILTER_VALIDATE_INT);
+    $nomorKamar = trim($_POST['nomor_kamar'] ?? '');
+    $hargaBulanan = filter_var($_POST['harga_bulanan'] ?? null, FILTER_VALIDATE_INT);
+
+    if (!$idKamar || $nomorKamar === '' || mb_strlen($nomorKamar) > 10 || $hargaBulanan === false || $hargaBulanan < 1) {
+        $_SESSION['flash_admin'] = 'Data kamar tidak valid. Nomor maksimal 10 karakter dan harga harus lebih dari 0.';
+    } else {
+        try {
+            $st = $pdo->prepare(
+                'UPDATE kamar SET nomor_kamar = :nomor_kamar, harga_bulanan = :harga_bulanan WHERE id_kamar = :id_kamar'
+            );
+            $st->execute([
+                ':nomor_kamar' => $nomorKamar,
+                ':harga_bulanan' => $hargaBulanan,
+                ':id_kamar' => $idKamar,
+            ]);
+            $_SESSION['flash_admin'] = $st->rowCount() > 0
+                ? 'Data kamar berhasil diperbarui.'
+                : 'Tidak ada perubahan data atau kamar tidak ditemukan.';
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23505') {
+                $_SESSION['flash_admin'] = 'Nomor kamar tersebut sudah digunakan.';
+            } else {
+                error_log($e->getMessage());
+                $_SESSION['flash_admin'] = 'Data kamar gagal diperbarui.';
+            }
+        }
+    }
+
+    header('Location: kamar.php?tab=kamar');
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_pengajuan'])) {
     if (!csrf_ok()) {
         http_response_code(400);
@@ -198,7 +237,7 @@ include __DIR__ . '/../includes/header.php';
                             <div><h3><?= h($kamar['nomor_kamar']) ?></h3><p>Rp <?= h(number_format((float) $kamar['harga_bulanan'], 0, ',', '.')) ?>/bulan</p></div>
                             <strong class="kamar-status <?= h($kamar['status']) ?>"><?= h(ucfirst($kamar['status'])) ?></strong>
                         </div>
-                        <div class="kamar-card-actions"><button type="button" class="btn-kamar" data-ubah-status>Ubah Status</button><button type="button" class="btn-kamar" data-riwayat-kamar>Riwayat</button></div>
+                        <div class="kamar-card-actions"><button type="button" class="btn-kamar" data-ubah-kamar>Ubah</button><button type="button" class="btn-kamar" data-ubah-status>Ubah Status</button><button type="button" class="btn-kamar" data-riwayat-kamar>Riwayat</button></div>
                     </article>
                 <?php endforeach; ?>
             </div>
@@ -288,13 +327,11 @@ include __DIR__ . '/../includes/header.php';
         <div class="kamar-form-content">
             <h2>Ubah Data Kamar</h2>
 
-            <form id="formUbahKamar">
+            <form id="formUbahKamar" method="post" action="kamar.php">
+                <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
+                <input type="hidden" name="aksi_ubah_kamar" value="1">
 
-                <input
-                    type="hidden"
-                    id="ubahId"
-                    name="id_kamar"
-                >
+                <input type="hidden" id="ubahId" name="id_kamar">
 
                 <label for="ubahNomor">Nomor / Nama Kamar</label>
                 <input
@@ -315,36 +352,7 @@ include __DIR__ . '/../includes/header.php';
                     required
                 >
 
-                <label for="ubahDeskripsi">Deskripsi Kamar</label>
-                <textarea
-                    id="ubahDeskripsi"
-                    name="deskripsi"
-                    placeholder="Tuliskan deskripsi kamar"
-                ></textarea>
-
-                <label for="ubahFoto">Foto Kamar</label>
-
-                <div class="upload-foto">
-                    <input
-                        type="file"
-                        id="ubahFoto"
-                        name="foto"
-                        accept=".jpg,.jpeg,.png"
-                    >
-
-                    <label for="ubahFoto">
-                        <strong>Ketuk untuk unggah foto</strong>
-                        <small>JPG/PNG, maks 5 MB</small>
-                    </label>
-                </div>
-
-                <button
-                    type="button"
-                    class="btn-hapus-kamar"
-                    id="btnHapusKamar"
-                >
-                    Hapus Kamar
-                </button>
+                <small class="form-hint">Data yang dapat diubah saat ini adalah nomor kamar dan harga bulanan.</small>
 
                 <button type="submit" class="btn-primary">
                     Simpan Perubahan
