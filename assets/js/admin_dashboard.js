@@ -361,8 +361,9 @@ document.querySelectorAll('[data-kembali-riwayat]').forEach(button => {
         document.getElementById('ubahHarga').value = harga;
         document.getElementById('ubahDeskripsi').value = kartu.dataset.deskripsi || '';
         document.getElementById('ubahFoto').value = '';
-        document.getElementById('hapusIdDariEdit').value = id;
         const tombolHapus = document.getElementById('btnHapusDariEdit');
+        tombolHapus.dataset.idKamar = id;
+        tombolHapus.dataset.nomorKamar = nomor;
         tombolHapus.hidden = kartu.dataset.status !== 'kosong';
         tampilkanSectionKamar('ubah-kamar');
     });
@@ -381,6 +382,15 @@ document.querySelectorAll('[data-hapus-kamar]').forEach(button => {
             'Yakin ingin menghapus kamar ' + nomor + '?';
         popupHapusKamar.hidden = false;
     });
+});
+
+document.getElementById('btnHapusDariEdit')?.addEventListener('click', () => {
+    const tombol = document.getElementById('btnHapusDariEdit');
+    if (tombol.hidden || !tombol.dataset.idKamar) return;
+    document.getElementById('hapusIdKamar').value = tombol.dataset.idKamar;
+    document.getElementById('teksKonfirmasiHapus').textContent =
+        'Yakin ingin menghapus kamar ' + tombol.dataset.nomorKamar + '?';
+    popupHapusKamar.hidden = false;
 });
 
 document.getElementById('btnBatalHapus')?.addEventListener('click', () => {
