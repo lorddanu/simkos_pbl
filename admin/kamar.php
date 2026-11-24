@@ -492,7 +492,7 @@ include __DIR__ . '/../includes/header.php';
                 <small class="form-hint">Pilih foto baru jika ingin mengganti foto lama.</small>
 
 
-                <button type="submit" class="btn-hapus-kamar" id="btnHapusDariEdit" form="formHapusKamar" hidden>Hapus Kamar</button>
+                <button type="button" class="btn-hapus-kamar" id="btnHapusDariEdit" hidden>Hapus Kamar</button>
 
                 <button type="submit" class="btn-primary">
                     Simpan Perubahan
@@ -506,11 +506,6 @@ include __DIR__ . '/../includes/header.php';
                     Batal
                 </button>
 
-            </form>
-            <form id="formHapusKamar" method="post" action="kamar.php" onsubmit="return confirm('Yakin ingin menghapus kamar kosong ini?')">
-                <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
-                <input type="hidden" name="aksi_hapus_kamar" value="1">
-                <input type="hidden" name="id_kamar" id="hapusIdDariEdit">
             </form>
         </div>
     </section>
