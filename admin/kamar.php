@@ -85,6 +85,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_ubah_kamar'])) {
     exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_hapus_kamar'])) {
+    if (!csrf_ok()) {
+        http_response_code(400);
+        exit('Permintaan tidak valid.');
+    }
+
+    $idKamar = filter_var($_POST['id_kamar'] ?? null, FILTER_VALIDATE_INT);
+    if (!$idKamar) {
+        $_SESSION['flash_admin'] = 'Kamar tidak valid.';
+    } else {
+        try {
+            $st = $pdo->prepare('DELETE FROM kamar WHERE id_kamar = :id_kamar');
+            $st->execute([':id_kamar' => $idKamar]);
+            $_SESSION['flash_admin'] = $st->rowCount() > 0
+                ? 'Kamar berhasil dihapus.'
+                : 'Kamar tidak ditemukan.';
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23503') {
+                $_SESSION['flash_admin'] = 'Kamar tidak dapat dihapus karena sudah terhubung dengan pengajuan atau riwayat sewa.';
+            } else {
+                error_log($e->getMessage());
+                $_SESSION['flash_admin'] = 'Kamar gagal dihapus.';
+            }
+        }
+    }
+
+    header('Location: kamar.php?tab=kamar');
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_pengajuan'])) {
     if (!csrf_ok()) {
         http_response_code(400);
@@ -237,7 +267,7 @@ include __DIR__ . '/../includes/header.php';
                             <div><h3><?= h($kamar['nomor_kamar']) ?></h3><p>Rp <?= h(number_format((float) $kamar['harga_bulanan'], 0, ',', '.')) ?>/bulan</p></div>
                             <strong class="kamar-status <?= h($kamar['status']) ?>"><?= h(ucfirst($kamar['status'])) ?></strong>
                         </div>
-                        <div class="kamar-card-actions"><button type="button" class="btn-kamar" data-ubah-kamar>Ubah</button><button type="button" class="btn-kamar" data-ubah-status>Ubah Status</button><button type="button" class="btn-kamar" data-riwayat-kamar>Riwayat</button></div>
+                        <div class="kamar-card-actions"><button type="button" class="btn-kamar" data-ubah-kamar>Ubah</button><button type="button" class="btn-kamar" data-hapus-kamar>Hapus</button><button type="button" class="btn-kamar" data-ubah-status>Ubah Status</button><button type="button" class="btn-kamar" data-riwayat-kamar>Riwayat</button></div>
                     </article>
                 <?php endforeach; ?>
             </div>
@@ -373,26 +403,17 @@ include __DIR__ . '/../includes/header.php';
     <!-- POPUP KONFIRMASI HAPUS -->
     <div class="popup-overlay" id="popupHapusKamar" hidden>
         <div class="popup-hapus">
-
             <h3>Hapus Kamar?</h3>
-            <p>Kamar ini akan hilang dari daftar.</p>
-
-            <div class="popup-hapus-actions">
-                <button
-                    type="button"
-                    id="btnBatalHapus"
-                >
-                    Batal
-                </button>
-
-                <button
-                    type="button"
-                    id="btnKonfirmasiHapus"
-                >
-                    Hapus
-                </button>
-            </div>
-
+            <p id="teksKonfirmasiHapus">Yakin ingin menghapus kamar ini?</p>
+            <form method="post" action="kamar.php">
+                <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
+                <input type="hidden" name="aksi_hapus_kamar" value="1">
+                <input type="hidden" name="id_kamar" id="hapusIdKamar">
+                <div class="popup-hapus-actions">
+                    <button type="button" id="btnBatalHapus">Batal</button>
+                    <button type="submit" id="btnKonfirmasiHapus">Hapus</button>
+                </div>
+            </form>
         </div>
     </div>
 
