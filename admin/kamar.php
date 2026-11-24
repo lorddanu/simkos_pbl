@@ -90,6 +90,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_ubah_kamar'])) {
     header('Location: kamar.php?tab=kamar'); exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_ubah_status_kamar'])) {
+    if (!csrf_ok()) {
+        http_response_code(400);
+        exit('Permintaan tidak valid.');
+    }
+
+    $idKamar = filter_var($_POST['id_kamar'] ?? null, FILTER_VALIDATE_INT);
+    $statusInput = trim($_POST['status'] ?? '');
+    $statusMap = [
+        'Kosong' => 'kosong',
+        'Terisi' => 'terisi',
+        'Tidak tersedia' => 'tidak tersedia',
+    ];
+    $statusBaru = $statusMap[$statusInput] ?? null;
+
+    if (!$idKamar || !$statusBaru) {
+        $_SESSION['flash_admin'] = 'ID kamar atau status baru tidak valid.';
+    } else {
+        try {
+            $st = $pdo->prepare('UPDATE kamar SET status = :status WHERE id_kamar = :id');
+            $st->execute([':status' => $statusBaru, ':id' => $idKamar]);
+            $_SESSION['flash_admin'] = $st->rowCount() > 0
+                ? 'Status kamar berhasil diperbarui.'
+                : 'Status kamar tidak berubah atau kamar tidak ditemukan.';
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            $_SESSION['flash_admin'] = 'Status kamar gagal diperbarui. Periksa aturan status pada database.';
+        }
+    }
+
+    header('Location: kamar.php?tab=kamar');
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_hapus_kamar'])) {
     if (!csrf_ok()) {
         http_response_code(400);
@@ -452,7 +486,7 @@ include __DIR__ . '/../includes/header.php';
                 </div>
             </div>
 
-            <form id="formUbahStatus">
+            <form id="formUbahStatus" method="post" action="kamar.php">\n                <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">\n                <input type="hidden" name="aksi_ubah_status_kamar" value="1">
 
                 <input
                     type="hidden"
