@@ -441,6 +441,10 @@ button {
     line-height: 1;
 }
 
+.month-arrow.disabled {
+    opacity: 0.45;
+}
+
 .month-selector {
     min-width: 0;
     height: 52px;
@@ -515,6 +519,11 @@ button {
     font-size: 20px;
 }
 
+.picker-heading-arrows button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
 .picker-month-grid,
 .picker-year-grid {
     display: grid;
@@ -541,6 +550,11 @@ button {
 .picker-month-option:hover,
 .picker-year-option:hover {
     background: var(--purple-light);
+}
+
+.picker-month-option:disabled {
+    color: #c5c3ce;
+    cursor: not-allowed;
 }
 
 .picker-month-option.selected,
@@ -602,52 +616,72 @@ button {
     margin-bottom: 16px;
 }
 
-.payment-report-scroll {
-    width: 100%;
-    overflow-x: auto;
-    border-radius: 12px;
-}
-
-.payment-report-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    overflow: hidden;
+.payment-report-list {
+    padding: 10px 14px;
     background: #7065ce;
     color: white;
-    border-radius: 12px;
-    font-size: 12px;
+    border-radius: 12px 12px 0 0;
 }
 
-.payment-report-table th,
-.payment-report-table td {
-    padding: 10px 8px;
-    text-align: left;
+.payment-report-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.18);
 }
 
-.payment-report-table th {
-    font-size: 11px;
-}
-
-.payment-report-table th:last-child,
-.payment-report-table td:last-child {
-    text-align: right;
-    white-space: nowrap;
-}
-
-.payment-report-table tbody tr:last-child td,
-.payment-report-table tfoot td {
+.payment-report-row:last-child {
     border-bottom: 0;
 }
 
-.payment-report-table tfoot {
+.payment-report-resident,
+.payment-report-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.payment-report-resident {
+    min-width: 0;
+}
+
+.payment-report-resident strong {
+    font-size: 13px;
+}
+
+.payment-report-resident small {
+    font-size: 10px;
+}
+
+.payment-report-detail {
+    align-items: flex-end;
+    max-width: 55%;
+    text-align: right;
+}
+
+.payment-report-amount {
+    font-size: 10px;
+    overflow-wrap: anywhere;
+}
+
+.payment-report-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 10px;
+    border-radius: 0 0 12px 12px;
     background: #50469f;
+    color: white;
+    font-size: 12px;
 }
 
 .payment-report-empty {
-    height: 72px;
-    text-align: center !important;
+    margin: 0;
+    padding: 20px 8px;
+    text-align: center;
+    font-size: 11px;
     opacity: 0.85;
 }
 

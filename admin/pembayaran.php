@@ -16,11 +16,18 @@ $halamanAktif = 'pembayaran';
 
 require_once __DIR__ . '/../database/database.php';
 
+$bulanSekarang = new DateTimeImmutable(date('Y-m-01'));
+$tahunIni = (int) date('Y');
+$rentangBulanAwal = new DateTimeImmutable(($tahunIni - 1) . '-01-01');
+$rentangBulanAkhir = new DateTimeImmutable($tahunIni . '-12-01');
+
 $bulanDipilih = trim($_GET['bulan'] ?? '');
 if (
     !preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $bulanDipilih)
     || (int) substr($bulanDipilih, 0, 4) < 1900
     || (int) substr($bulanDipilih, 0, 4) > 9999
+    || $bulanDipilih < $rentangBulanAwal->format('Y-m')
+    || $bulanDipilih > $rentangBulanAkhir->format('Y-m')
 ) {
     $bulanDipilih = '';
 }
@@ -40,7 +47,7 @@ $laporanRows = [];
 $totalPendapatan = 0.0;
 $jumlahLunas = 0;
 $bulanSebelumnya = [];
-$tahunTersedia = [];
+$tahunTersedia = [$tahunIni - 1, $tahunIni];
 $namaBulan = [
     1 => 'Januari',
     2 => 'Februari',
@@ -60,15 +67,21 @@ try {
     $conn = getConnection();
 
     if ($bulanDipilih === '') {
-        $stmtBulanTerbaru = $conn->query(
+        $stmtBulanTerbaru = $conn->prepare(
             "SELECT to_char(tanggal_bayar, 'YYYY-MM') AS bulan
              FROM pembayaran
              WHERE status_verifikasi = 'diterima'
+               AND tanggal_bayar >= :rentang_awal
+               AND tanggal_bayar < :bulan_berikutnya
              ORDER BY tanggal_bayar DESC
              LIMIT 1"
         );
+        $stmtBulanTerbaru->execute([
+            'rentang_awal' => $rentangBulanAwal->format('Y-m-d'),
+            'bulan_berikutnya' => $bulanSekarang->modify('+1 month')->format('Y-m-d'),
+        ]);
         $bulanTerbaru = $stmtBulanTerbaru->fetchColumn();
-        $bulanDipilih = $bulanTerbaru ?: date('Y-m');
+        $bulanDipilih = $bulanTerbaru ?: $bulanSekarang->format('Y-m');
     }
 
     $bulanAwal = new DateTimeImmutable($bulanDipilih . '-01');
@@ -119,12 +132,14 @@ try {
          FROM pembayaran p
          JOIN sewa s ON s.id_sewa = p.id_sewa
          WHERE p.status_verifikasi = 'diterima'
+           AND p.tanggal_bayar >= :rentang_awal
            AND p.tanggal_bayar < :bulan_dipilih
          GROUP BY date_trunc('month', p.tanggal_bayar)
          ORDER BY date_trunc('month', p.tanggal_bayar) DESC
          LIMIT 12"
     );
     $stmtRiwayat->execute([
+        'rentang_awal' => $rentangBulanAwal->format('Y-m-d'),
         'bulan_dipilih' => $bulanAwal->format('Y-m-d'),
     ]);
     foreach ($stmtRiwayat->fetchAll() as $ringkasan) {
@@ -137,26 +152,17 @@ try {
         ];
     }
 
-    $stmtRentangTahun = $conn->query(
-        "SELECT MIN(EXTRACT(YEAR FROM tanggal_bayar))::integer AS tahun_min
-         FROM pembayaran
-         WHERE status_verifikasi = 'diterima'"
-    );
-    $tahunMin = $stmtRentangTahun->fetchColumn();
-    $tahunAwal = $tahunMin ? min((int) $tahunMin, (int) $bulanAwal->format('Y')) : (int) $bulanAwal->format('Y');
-    $tahunAkhir = max((int) date('Y'), (int) $bulanAwal->format('Y'));
-    for ($tahun = $tahunAwal; $tahun <= $tahunAkhir; $tahun++) {
-        $tahunTersedia[] = $tahun;
-    }
-
     $bulanDipilihLabel = $namaBulan[(int) $bulanAwal->format('n')] . ' ' . $bulanAwal->format('Y');
 } catch (PDOException $e) {
     error_log($e->getMessage());
     $laporanError = 'Laporan pembayaran gagal dimuat dari database.';
-    $bulanAwal = new DateTimeImmutable(date('Y-m') . '-01');
+    $bulanAwal = $bulanSekarang;
     $bulanDipilih = $bulanAwal->format('Y-m');
     $bulanDipilihLabel = $namaBulan[(int) $bulanAwal->format('n')] . ' ' . $bulanAwal->format('Y');
 }
+
+$bulanSebelumnyaTersedia = $bulanAwal->modify('-1 month')->format('Y-m') >= $rentangBulanAwal->format('Y-m');
+$bulanBerikutnyaTersedia = $bulanAwal->modify('+1 month')->format('Y-m') <= $rentangBulanAkhir->format('Y-m');
 
 include __DIR__ . '/../includes_admin/header.php';
 ?>
@@ -228,6 +234,7 @@ include __DIR__ . '/../includes_admin/header.php';
 
             <div class="month-picker-container">
             <div class="month-navigation">
+                <?php if ($bulanSebelumnyaTersedia): ?>
                 <a
                     class="month-arrow"
                     href="?bulan=<?= htmlspecialchars($bulanAwal->modify('-1 month')->format('Y-m')) ?>#laporan-pembayaran"
@@ -235,6 +242,9 @@ include __DIR__ . '/../includes_admin/header.php';
                 >
                     &#8249;
                 </a>
+                <?php else: ?>
+                    <span class="month-arrow disabled" aria-disabled="true">&#8249;</span>
+                <?php endif; ?>
 
                 <button
                     class="month-selector"
@@ -247,13 +257,17 @@ include __DIR__ . '/../includes_admin/header.php';
                     <span id="monthPickerLabel"><?= htmlspecialchars($bulanDipilihLabel) ?></span>
                 </button>
 
-                <a
-                    class="month-arrow"
-                    href="?bulan=<?= htmlspecialchars($bulanAwal->modify('+1 month')->format('Y-m')) ?>#laporan-pembayaran"
-                    aria-label="Bulan berikutnya"
-                >
-                    &#8250;
-                </a>
+                <?php if ($bulanBerikutnyaTersedia): ?>
+                    <a
+                        class="month-arrow"
+                        href="?bulan=<?= htmlspecialchars($bulanAwal->modify('+1 month')->format('Y-m')) ?>#laporan-pembayaran"
+                        aria-label="Bulan berikutnya"
+                    >
+                        &#8250;
+                    </a>
+                <?php else: ?>
+                    <span class="month-arrow disabled" aria-disabled="true">&#8250;</span>
+                <?php endif; ?>
             </div>
 
             <section
@@ -261,6 +275,8 @@ include __DIR__ . '/../includes_admin/header.php';
                 id="monthPicker"
                 data-selected-month="<?= (int) $bulanAwal->format('n') ?>"
                 data-selected-year="<?= htmlspecialchars($bulanAwal->format('Y')) ?>"
+                data-range-start="<?= htmlspecialchars($rentangBulanAwal->format('Y-m')) ?>"
+                data-range-end="<?= htmlspecialchars($rentangBulanAkhir->format('Y-m')) ?>"
                 hidden
                 aria-label="Pilih bulan dan tahun"
             >
@@ -280,10 +296,21 @@ include __DIR__ . '/../includes_admin/header.php';
 
                 <div class="picker-month-grid" id="pickerMonthGrid">
                     <?php foreach ($namaBulan as $nomorBulan => $labelBulan): ?>
+                        <?php
+                        $bulanOpsi = $bulanAwal->setDate(
+                            (int) $bulanAwal->format('Y'),
+                            $nomorBulan,
+                            1
+                        )->format('Y-m');
+                        $bulanOpsiTersedia = $bulanOpsi >= $rentangBulanAwal->format('Y-m')
+                            && $bulanOpsi <= $rentangBulanAkhir->format('Y-m');
+                        ?>
                         <button
                             type="button"
                             class="picker-month-option <?= (int) $bulanAwal->format('n') === $nomorBulan ? 'selected' : '' ?>"
                             data-month="<?= $nomorBulan ?>"
+                            data-label="<?= htmlspecialchars(substr($labelBulan, 0, 3)) ?>"
+                            <?= $bulanOpsiTersedia ? '' : 'disabled' ?>
                         >
                             <?= htmlspecialchars(substr($labelBulan, 0, 3)) ?>
                         </button>
@@ -339,49 +366,37 @@ include __DIR__ . '/../includes_admin/header.php';
                 </section>
             <?php else: ?>
                 <section class="payment-report-panel">
-                    <div class="payment-report-scroll">
-                        <table class="payment-report-table">
-                            <thead>
-                                <tr>
-                                    <th>Nama Penghuni</th>
-                                    <th>Kamar</th>
-                                    <th>Status Pembayaran</th>
-                                    <th>Uang Masuk</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (empty($laporanRows)): ?>
-                                    <tr>
-                                        <td colspan="4" class="payment-report-empty">
-                                            Belum ada data pembayaran pada bulan ini.
-                                        </td>
-                                    </tr>
-                                <?php else: ?>
-                                    <?php foreach ($laporanRows as $row): ?>
-                                        <?php
-                                        $uangMasuk = (float) $row['uang_masuk'];
-                                        $sudahBayar = $uangMasuk > 0;
-                                        ?>
-                                        <tr>
-                                            <td><?= htmlspecialchars($row['nama_penghuni']) ?></td>
-                                            <td><?= htmlspecialchars($row['nomor_kamar']) ?></td>
-                                            <td>
-                                                <span class="payment-status <?= $sudahBayar ? 'paid' : 'unpaid' ?>">
-                                                    <?= $sudahBayar ? 'Sudah Bayar' : 'Belum Bayar' ?>
-                                                </span>
-                                            </td>
-                                            <td><?= htmlspecialchars(formatRupiah($uangMasuk)) ?></td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="3"><strong>Total Pendapatan</strong></td>
-                                    <td><strong><?= htmlspecialchars(formatRupiah($totalPendapatan)) ?></strong></td>
-                                </tr>
-                            </tfoot>
-                        </table>
+                    <div class="payment-report-list">
+                        <?php if (empty($laporanRows)): ?>
+                            <p class="payment-report-empty">
+                                Belum ada data pembayaran pada <?= htmlspecialchars($bulanDipilihLabel) ?>.
+                            </p>
+                        <?php else: ?>
+                            <?php foreach ($laporanRows as $row): ?>
+                                <?php
+                                $uangMasuk = (float) $row['uang_masuk'];
+                                $sudahBayar = $uangMasuk > 0;
+                                ?>
+                                <article class="payment-report-row">
+                                    <div class="payment-report-resident">
+                                        <strong><?= htmlspecialchars($row['nama_penghuni']) ?></strong>
+                                        <small>Kamar <?= htmlspecialchars($row['nomor_kamar']) ?></small>
+                                    </div>
+                                    <div class="payment-report-detail">
+                                        <span class="payment-status <?= $sudahBayar ? 'paid' : 'unpaid' ?>">
+                                            <?= $sudahBayar ? 'Lunas' : 'Belum Bayar' ?>
+                                        </span>
+                                        <span class="payment-report-amount">
+                                            Uang Masuk: <?= htmlspecialchars(formatRupiah($uangMasuk)) ?>
+                                        </span>
+                                    </div>
+                                </article>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                    <div class="payment-report-total">
+                        <strong>Total Pendapatan</strong>
+                        <strong><?= htmlspecialchars(formatRupiah($totalPendapatan)) ?></strong>
                     </div>
                 </section>
             <?php endif; ?>

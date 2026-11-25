@@ -31,7 +31,7 @@
         if (downloadReport) {
             downloadReport.addEventListener('click', () => {
                 const report = document.querySelector(
-                    '#laporan-pembayaran .payment-report-table'
+                    '#laporan-pembayaran .payment-report-list'
                 );
 
                 if (!report) {
@@ -48,22 +48,24 @@
                     ]
                 ];
 
-                report.querySelectorAll('tbody tr').forEach(row => {
-                    const cells = Array.from(row.querySelectorAll('td'));
-                    if (cells.length !== 4) return;
-                    if (cells[0].classList.contains('payment-report-empty')) return;
-
-                    rows.push(cells.map(cell => cell.textContent.trim()));
+                report.querySelectorAll('.payment-report-row').forEach(row => {
+                    rows.push([
+                        row.querySelector('.payment-report-resident strong')?.textContent.trim() ?? '',
+                        row.querySelector('.payment-report-resident small')?.textContent.trim().replace(/^Kamar\s*/, '') ?? '',
+                        row.querySelector('.payment-status')?.textContent.trim() ?? '',
+                        row.querySelector('.payment-report-amount')?.textContent.trim().replace(/^Uang Masuk:\s*/, '') ?? ''
+                    ]);
                 });
 
-                const totalRow = report.querySelector('tfoot tr');
-                if (totalRow) {
-                    const totalCells = Array.from(totalRow.querySelectorAll('td'));
+                const total = document.querySelector(
+                    '#laporan-pembayaran .payment-report-total strong:last-child'
+                );
+                if (total) {
                     rows.push([
                         'Total Pendapatan',
                         '',
                         '',
-                        totalCells[1]?.textContent.trim() ?? ''
+                        total.textContent.trim()
                     ]);
                 }
 
@@ -104,6 +106,68 @@
             const yearGrid = document.getElementById('pickerYearGrid');
             let selectedMonth = Number(monthPicker.dataset.selectedMonth);
             let selectedYear = Number(monthPicker.dataset.selectedYear);
+            const rangeStart = monthPicker.dataset.rangeStart;
+            const rangeEnd = monthPicker.dataset.rangeEnd;
+            const yearOptions = Array.from(
+                yearGrid.querySelectorAll('[data-year]')
+            ).map(button => Number(button.dataset.year));
+            const originalMonth = selectedMonth;
+            const originalYear = selectedYear;
+            const previousYear = document.getElementById('pickerPrevious');
+            const nextYear = document.getElementById('pickerNext');
+
+            const updateMonthOptions = () => {
+                monthGrid.querySelectorAll('[data-month]').forEach(button => {
+                    const month = String(button.dataset.month).padStart(2, '0');
+                    const value = String(selectedYear).padStart(4, '0') + '-' + month;
+                    button.disabled = value < rangeStart || value > rangeEnd;
+                    button.classList.toggle(
+                        'selected',
+                        selectedYear === originalYear &&
+                        Number(button.dataset.month) === originalMonth
+                    );
+                });
+            };
+
+            const updateYearControls = () => {
+                const index = yearOptions.indexOf(selectedYear);
+                previousYear.disabled = index <= 0;
+                nextYear.disabled = index < 0 || index >= yearOptions.length - 1;
+            };
+
+            const chooseYear = year => {
+                if (!yearOptions.includes(year)) return;
+
+                selectedYear = year;
+                yearHeading.textContent = String(selectedYear);
+                yearGrid.querySelectorAll('[data-year]').forEach(option => {
+                    option.classList.toggle(
+                        'selected',
+                        Number(option.dataset.year) === selectedYear
+                    );
+                });
+                updateMonthOptions();
+                updateYearControls();
+
+                const existingMonth = monthGrid.querySelector(
+                    '[data-month="' + selectedMonth + '"]'
+                );
+                const monthToSelect = selectedYear === originalYear &&
+                    existingMonth && !existingMonth.disabled
+                    ? existingMonth
+                    : monthGrid.querySelector('[data-month]:not(:disabled)');
+
+                if (monthToSelect) {
+                    selectedMonth = Number(monthToSelect.dataset.month);
+                    monthHeading.textContent = monthToSelect.dataset.label;
+                    monthGrid.querySelectorAll('[data-month]').forEach(option => {
+                        option.classList.toggle('selected', option === monthToSelect);
+                    });
+                }
+            };
+
+            updateMonthOptions();
+            updateYearControls();
 
             const submitSelectedMonth = () => {
                 const month = String(selectedMonth).padStart(2, '0');
@@ -139,27 +203,22 @@
 
             yearGrid.querySelectorAll('[data-year]').forEach(button => {
                 button.addEventListener('click', () => {
-                    selectedYear = Number(button.dataset.year);
+                    chooseYear(Number(button.dataset.year));
                     monthGrid.hidden = false;
                     yearGrid.hidden = true;
-                    yearHeading.textContent = String(selectedYear);
-                    yearGrid.querySelectorAll('[data-year]').forEach(option => {
-                        option.classList.toggle(
-                            'selected',
-                            Number(option.dataset.year) === selectedYear
-                        );
-                    });
                 });
             });
 
-            document.getElementById('pickerPrevious').addEventListener('click', () => {
-                selectedYear--;
-                yearHeading.textContent = String(selectedYear);
+            previousYear.addEventListener('click', () => {
+                const index = yearOptions.indexOf(selectedYear);
+                if (index > 0) chooseYear(yearOptions[index - 1]);
             });
 
-            document.getElementById('pickerNext').addEventListener('click', () => {
-                selectedYear++;
-                yearHeading.textContent = String(selectedYear);
+            nextYear.addEventListener('click', () => {
+                const index = yearOptions.indexOf(selectedYear);
+                if (index >= 0 && index < yearOptions.length - 1) {
+                    chooseYear(yearOptions[index + 1]);
+                }
             });
 
             document.addEventListener('click', event => {
