@@ -925,7 +925,7 @@ include __DIR__ . '/../includes/header.php';
     </section>
 
     <div id="popupAkhiriSewa" class="popup-overlay" hidden>
-        <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="judulAkhiriSewa">
+        <div class="popup-hapus" role="dialog" aria-modal="true" aria-labelledby="judulAkhiriSewa">
             <h2 id="judulAkhiriSewa">Akhiri Sewa</h2>
             <p id="teksKonfirmasiAkhiriSewa"></p>
             <form method="post" action="kamar.php?tab=penghuni">
