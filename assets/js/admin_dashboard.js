@@ -416,6 +416,31 @@ document.getElementById('btnBatalHapus')?.addEventListener('click', () => {
     popupHapusKamar.hidden = true;
 });
 
+
+    // Konfirmasi dan pengakhiran sewa oleh admin
+    const popupAkhiriSewa = document.getElementById('popupAkhiriSewa');
+    document.querySelectorAll('[data-akhiri-sewa]').forEach(button => {
+        button.addEventListener('click', () => {
+            const nama = button.dataset.namaPenghuni || 'penghuni';
+            const kamar = button.dataset.nomorKamar || '-';
+            const mulai = button.dataset.tanggalMulai || '-';
+
+            document.getElementById('akhiriIdSewa').value = button.dataset.idSewa;
+            document.getElementById('teksKonfirmasiAkhiriSewa').textContent =
+                'Akhiri sewa ' + nama + ' untuk kamar ' + kamar +
+                ' (mulai ' + mulai + ')? Data pembayaran dan riwayat tetap disimpan.';
+            popupAkhiriSewa.hidden = false;
+        });
+    });
+
+    document.getElementById('btnBatalAkhiriSewa')?.addEventListener('click', () => {
+        popupAkhiriSewa.hidden = true;
+    });
+
+    popupAkhiriSewa?.addEventListener('click', event => {
+        if (event.target === popupAkhiriSewa) popupAkhiriSewa.hidden = true;
+    });
+
 // Balas admin
 function toggleBalasan(button) {
     const laporanCard = button.closest('.laporan-card');
