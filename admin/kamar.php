@@ -934,9 +934,9 @@ include __DIR__ . '/../includes/header.php';
                 <input type="hidden" name="id_sewa" id="akhiriIdSewa">
                 <label for="tanggalSelesaiSewa">Tanggal selesai sewa</label>
                 <input type="date" name="tanggal_selesai" id="tanggalSelesaiSewa" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
-                <div class="kamar-card-actions">
-                    <button type="button" class="btn-secondary" id="btnBatalAkhiriSewa">Batal</button>
-                    <button type="submit" class="btn-primary">Konfirmasi Akhiri Sewa</button>
+                <div class="popup-hapus-actions">
+                    <button type="button" id="btnBatalAkhiriSewa">Batal</button>
+                    <button type="submit">Akhiri Sewa</button>
                 </div>
             </form>
         </div>
