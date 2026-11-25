@@ -198,17 +198,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_akhiri_sewa'])) 
             $st = $pdo->prepare("UPDATE sewa SET tanggal_selesai = ? WHERE id_sewa = ?");
             $st->execute([$tanggalSelesai, $idSewa]);
 
-            $st = $pdo->prepare(
-                "SELECT COUNT(*) FROM sewa
-                  WHERE id_kamar = ?
-                    AND (tanggal_selesai IS NULL OR tanggal_selesai >= CURRENT_DATE)
-                    AND id_sewa <> ?"
-            );
-            $st->execute([(int) $sewa['id_kamar'], $idSewa]);
-            if ((int) $st->fetchColumn() === 0) {
-                $pdo->prepare("UPDATE kamar SET status = 'kosong' WHERE id_kamar = ?")->execute([(int) $sewa['id_kamar']]);
-            }
-
+            // Status kamar tidak diubah saat kontrak diakhiri.
+            // Admin mengubahnya menjadi 'kosong' setelah penghuni benar-benar keluar.
+            
             $st = $pdo->prepare(
                 "SELECT COUNT(*) FROM sewa
                   WHERE id_penghuni = ?
