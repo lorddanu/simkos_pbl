@@ -1222,6 +1222,38 @@ button {
     background: #d26368;
 }
 
+/* Penyesuaian tombol dan tanggal pada popup Akhiri Sewa */
+#btnBatalAkhiriSewa {
+    background: #5d51b6;
+}
+
+#btnKonfirmasiAkhiriSewa {
+    background: #d26368;
+}
+
+#popupAkhiriSewa .label-akhiri-sewa {
+    display: block;
+    margin: 0 0 6px;
+    color: white;
+    font-size: 13px;
+}
+
+#popupAkhiriSewa input[type="date"] {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0 0 14px;
+    padding: 9px 10px;
+    border: 1px solid rgba(255,255,255,.55);
+    border-radius: 6px;
+    background: white;
+    color: #333;
+    font: inherit;
+}
+
+#popupAkhiriSewa .popup-hapus-actions {
+    margin-top: 2px;
+}
+
 /* FORM BALASAN ADMIN */
 .form-balasan {
     margin-top: 18px;
