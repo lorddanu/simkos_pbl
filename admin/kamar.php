@@ -166,6 +166,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_hapus_kamar'])) 
     exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_akhiri_sewa'])) {
+    if (!csrf_ok()) { http_response_code(400); exit('Permintaan tidak valid.'); }
+
+    $idSewa = filter_var($_POST['id_sewa'] ?? null, FILTER_VALIDATE_INT);
+    $tanggalSelesai = trim($_POST['tanggal_selesai'] ?? '');
+    $tanggalValid = DateTime::createFromFormat('!Y-m-d', $tanggalSelesai);
+    $tanggalHariIni = new DateTime('today');
+
+    if (!$idSewa || !$tanggalValid || $tanggalValid->format('Y-m-d') !== $tanggalSelesai || $tanggalValid > $tanggalHariIni) {
+        $_SESSION['flash_admin'] = 'Data pengakhiran sewa tidak valid. Tanggal selesai tidak boleh melewati hari ini.';
+    } else {
+        try {
+            $pdo->beginTransaction();
+            $st = $pdo->prepare(
+                "SELECT s.id_sewa, s.id_kamar, s.id_penghuni, s.tanggal_mulai, s.tanggal_selesai
+                   FROM sewa s
+                  WHERE s.id_sewa = ?
+                  FOR UPDATE"
+            );
+            $st->execute([$idSewa]);
+            $sewa = $st->fetch(PDO::FETCH_ASSOC);
+
+            if (!$sewa || ($sewa['tanggal_selesai'] !== null && $sewa['tanggal_selesai'] < date('Y-m-d'))) {
+                throw new RuntimeException('Data sewa aktif tidak ditemukan atau sudah berakhir.');
+            }
+            if ($tanggalSelesai < $sewa['tanggal_mulai']) {
+                throw new RuntimeException('Tanggal selesai tidak boleh lebih awal dari tanggal mulai sewa.');
+            }
+
+            $st = $pdo->prepare("UPDATE sewa SET tanggal_selesai = ? WHERE id_sewa = ?");
+            $st->execute([$tanggalSelesai, $idSewa]);
+
+            $st = $pdo->prepare(
+                "SELECT COUNT(*) FROM sewa
+                  WHERE id_kamar = ?
+                    AND (tanggal_selesai IS NULL OR tanggal_selesai >= CURRENT_DATE)
+                    AND id_sewa <> ?"
+            );
+            $st->execute([(int) $sewa['id_kamar'], $idSewa]);
+            if ((int) $st->fetchColumn() === 0) {
+                $pdo->prepare("UPDATE kamar SET status = 'kosong' WHERE id_kamar = ?")->execute([(int) $sewa['id_kamar']]);
+            }
+
+            $st = $pdo->prepare(
+                "SELECT COUNT(*) FROM sewa
+                  WHERE id_penghuni = ?
+                    AND (tanggal_selesai IS NULL OR tanggal_selesai >= CURRENT_DATE)
+                    AND id_sewa <> ?"
+            );
+            $st->execute([(int) $sewa['id_penghuni'], $idSewa]);
+            if ((int) $st->fetchColumn() === 0) {
+                $pdo->prepare("UPDATE penghuni SET status = 'nonaktif' WHERE id_penghuni = ?")->execute([(int) $sewa['id_penghuni']]);
+            }
+
+            $pdo->commit();
+            $_SESSION['flash_admin'] = 'Sewa berhasil diakhiri. Riwayat pembayaran dan data penghuni tetap disimpan.';
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            $_SESSION['flash_admin'] = $e instanceof RuntimeException ? $e->getMessage() : 'Sewa gagal diakhiri.';
+            if (!$e instanceof RuntimeException) error_log($e->getMessage());
+        }
+    }
+
+    header('Location: kamar.php?tab=penghuni');
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_pengajuan'])) {
     if (!csrf_ok()) {
         http_response_code(400);
@@ -259,14 +326,20 @@ $riwayatKamar = $pdo->query(
       ORDER BY s.tanggal_selesai DESC"
 )->fetchAll();
 $penghuniAktif = $pdo->query(
-    "SELECT p.id_penghuni, p.nama, a.email, k.nomor_kamar, s.tanggal_mulai
+    "SELECT s.id_sewa, s.id_kamar, p.id_penghuni, p.nama, a.email, k.nomor_kamar, s.tanggal_mulai
        FROM sewa s JOIN penghuni p USING (id_penghuni)
        JOIN akun a USING (id_penghuni) JOIN kamar k USING (id_kamar)
       WHERE s.tanggal_selesai IS NULL OR s.tanggal_selesai >= CURRENT_DATE
       ORDER BY p.nama"
 )->fetchAll();
 
-// Ambil seluruh riwayat sewa dan pembayaran untuk penghuni yang sedang aktif.
+// Ambil seluruh riwayat sewa dan pembayaran, termasuk penghuni yang sudah tidak aktif.
+$daftarRiwayatPenghuni = $pdo->query(
+    "SELECT DISTINCT p.id_penghuni, p.nama
+       FROM penghuni p JOIN sewa s USING (id_penghuni)
+       ORDER BY p.nama"
+)->fetchAll();
+
 $riwayatSewaPenghuni = $pdo->query(
     "SELECT s.id_penghuni, k.nomor_kamar, s.tanggal_mulai, s.tanggal_selesai
        FROM sewa s
@@ -427,6 +500,7 @@ include __DIR__ . '/../includes/header.php';
                     <div class="kamar-card-actions">
                         <a class="btn-kamar" href="penghuni.php">Ubah Data</a>
                         <button type="button" class="btn-kamar" data-riwayat-penghuni data-id-penghuni="<?= (int) $aktif['id_penghuni'] ?>">Riwayat Penghuni</button>
+                        <button type="button" class="btn-kamar" data-akhiri-sewa data-id-sewa="<?= (int) $aktif['id_sewa'] ?>" data-nama-penghuni="<?= h($aktif['nama']) ?>" data-nomor-kamar="<?= h($aktif['nomor_kamar']) ?>" data-tanggal-mulai="<?= h($aktif['tanggal_mulai']) ?>">Akhiri Sewa</button>
                     </div>
                 </article>
             <?php endforeach; ?>
@@ -801,7 +875,7 @@ include __DIR__ . '/../includes/header.php';
             </small>
 
             <div class="riwayat-list" id="daftarRiwayatPenghuni">
-                <?php foreach ($penghuniAktif as $aktif): ?>
+                <?php foreach ($daftarRiwayatPenghuni as $aktif): ?>
                     <?php $idRiwayat = (int) $aktif['id_penghuni']; ?>
                     <article class="riwayat-pembungkus" data-riwayat-penghuni-id="<?= $idRiwayat ?>" hidden>
                         <h3>Riwayat Kamar</h3>
@@ -836,7 +910,7 @@ include __DIR__ . '/../includes/header.php';
                         <?php endif; ?>
                     </article>
                 <?php endforeach; ?>
-                <?php if (!$penghuniAktif): ?><p>Belum ada penghuni aktif.</p><?php endif; ?>
+                <?php if (!$daftarRiwayatPenghuni): ?><p>Belum ada riwayat penghuni.</p><?php endif; ?>
             </div>
 
             <button
@@ -849,6 +923,24 @@ include __DIR__ . '/../includes/header.php';
 
         </div>
     </section>
+
+    <div id="popupAkhiriSewa" class="popup-overlay" hidden>
+        <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="judulAkhiriSewa">
+            <h2 id="judulAkhiriSewa">Akhiri Sewa</h2>
+            <p id="teksKonfirmasiAkhiriSewa"></p>
+            <form method="post" action="kamar.php?tab=penghuni">
+                <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
+                <input type="hidden" name="aksi_akhiri_sewa" value="1">
+                <input type="hidden" name="id_sewa" id="akhiriIdSewa">
+                <label for="tanggalSelesaiSewa">Tanggal selesai sewa</label>
+                <input type="date" name="tanggal_selesai" id="tanggalSelesaiSewa" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
+                <div class="kamar-card-actions">
+                    <button type="button" class="btn-secondary" id="btnBatalAkhiriSewa">Batal</button>
+                    <button type="submit" class="btn-primary">Konfirmasi Akhiri Sewa</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 </main>
 
