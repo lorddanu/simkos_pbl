@@ -926,17 +926,17 @@ include __DIR__ . '/../includes/header.php';
 
     <div id="popupAkhiriSewa" class="popup-overlay" hidden>
         <div class="popup-hapus" role="dialog" aria-modal="true" aria-labelledby="judulAkhiriSewa">
-            <h2 id="judulAkhiriSewa">Akhiri Sewa</h2>
+            <h3 id="judulAkhiriSewa">Akhiri Sewa?</h3>
             <p id="teksKonfirmasiAkhiriSewa"></p>
             <form method="post" action="kamar.php?tab=penghuni">
                 <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
                 <input type="hidden" name="aksi_akhiri_sewa" value="1">
                 <input type="hidden" name="id_sewa" id="akhiriIdSewa">
-                <label for="tanggalSelesaiSewa">Tanggal selesai sewa</label>
+                <label class="label-akhiri-sewa" for="tanggalSelesaiSewa">Tanggal selesai sewa</label>
                 <input type="date" name="tanggal_selesai" id="tanggalSelesaiSewa" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
                 <div class="popup-hapus-actions">
                     <button type="button" id="btnBatalAkhiriSewa">Batal</button>
-                    <button type="submit">Akhiri Sewa</button>
+                    <button type="submit" id="btnKonfirmasiAkhiriSewa">Akhiri Sewa</button>
                 </div>
             </form>
         </div>
