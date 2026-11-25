@@ -200,7 +200,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi_akhiri_sewa'])) 
 
             // Status kamar tidak diubah saat kontrak diakhiri.
             // Admin mengubahnya menjadi 'kosong' setelah penghuni benar-benar keluar.
-            
+
             $st = $pdo->prepare(
                 "SELECT COUNT(*) FROM sewa
                   WHERE id_penghuni = ?
@@ -450,14 +450,14 @@ include __DIR__ . '/../includes/header.php';
         </div>
 
         <!-- TAB PENGHUNI -->
-        <div id="tab-penghuni" class="data-tab-content" <?= $tabPenghuniAktif ? '' : 'hidden' ?>>>
+        <div id="tab-penghuni" class="data-tab-content" <?= $tabPenghuniAktif ? '' : 'hidden' ?>>
 
             <h2 class="section-title" id="pengajuan-masuk">Pengajuan Sewa Masuk</h2>
             <?php if (!$pengajuanMasuk): ?><p>Belum ada pengajuan sewa masuk.</p><?php endif; ?>
             <?php foreach ($pengajuanMasuk as $pengajuan): ?>
                 <article class="admin-application-card">
-                    <div><strong><?= h($pengajuan['nama']) ?> Â· Kamar <?= h($pengajuan['nomor_kamar']) ?></strong><small><?= h($pengajuan['email']) ?></small></div>
-                    <p><?= h($pengajuan['tanggal_mulai']) ?> sampai <?= h($pengajuan['tanggal_selesai']) ?> Â· <?= (int) $pengajuan['jumlah_bulan'] ?> bulan</p>
+                    <div><strong><?= h($pengajuan['nama']) ?> Kamar <?= h($pengajuan['nomor_kamar']) ?></strong><small><?= h($pengajuan['email']) ?></small></div>
+                    <p><?= h($pengajuan['tanggal_mulai']) ?> sampai <?= h($pengajuan['tanggal_selesai']) ?> <?= (int) $pengajuan['jumlah_bulan'] ?> bulan</p>
                     <p>Total: Rp <?= h(number_format((float) $pengajuan['total'], 0, ',', '.')) ?></p>
                     <?php if (!empty($pengajuan['catatan'])): ?><p><?= h($pengajuan['catatan']) ?></p><?php endif; ?>
                     <form method="post" class="admin-application-actions">
