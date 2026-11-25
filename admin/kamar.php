@@ -456,8 +456,11 @@ include __DIR__ . '/../includes/header.php';
             <?php if (!$pengajuanMasuk): ?><p>Belum ada pengajuan sewa masuk.</p><?php endif; ?>
             <?php foreach ($pengajuanMasuk as $pengajuan): ?>
                 <article class="admin-application-card">
-                    <div><strong><?= h($pengajuan['nama']) ?> Kamar <?= h($pengajuan['nomor_kamar']) ?></strong><small><?= h($pengajuan['email']) ?></small></div>
+
+                    <div><strong><?= h($pengajuan['nama']) ?> Kamar <?= h($pengajuan['nomor_kamar']) ?></strong></div>
+                    <small style="display: block; margin-top: 4px;"><?= h($pengajuan['email']) ?></small>
                     <p><?= h($pengajuan['tanggal_mulai']) ?> sampai <?= h($pengajuan['tanggal_selesai']) ?> <?= (int) $pengajuan['jumlah_bulan'] ?> bulan</p>
+
                     <p>Total: Rp <?= h(number_format((float) $pengajuan['total'], 0, ',', '.')) ?></p>
                     <?php if (!empty($pengajuan['catatan'])): ?><p><?= h($pengajuan['catatan']) ?></p><?php endif; ?>
                     <form method="post" class="admin-application-actions">
