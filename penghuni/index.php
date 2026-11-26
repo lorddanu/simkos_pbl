@@ -84,14 +84,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($aksi === 'saran' && $idPenghuni) {
-        $kategori = $_POST['kategori'] ?? '';
-        $catatan = trim($_POST['catatan'] ?? '');
-        if (!in_array($kategori, ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'], true)) {
-            $kategori = 'Lainnya';
+        $jenis = $_POST['jenis'] ?? '';
+        $judul = trim($_POST['judul'] ?? '');
+        $isi = trim($_POST['isi'] ?? '');
+        if (!in_array($jenis, ['saran', 'kritik'], true) || $judul === '' || $isi === '') {
+            $_SESSION['error'] = 'Jenis, judul, dan isi laporan wajib diisi.';
+            go('feedback');
         }
-        $ins = $pdo->prepare('INSERT INTO keluhan (id_penghuni, isi_keluhan, kategori) VALUES (?, ?, ?) RETURNING id_keluhan');
-        $ins->execute([$idPenghuni, $catatan !== '' ? $catatan : '(tanpa catatan)', $kategori]);
-        demo_track_insert('keluhan', (int) $ins->fetchColumn());
+        if (mb_strlen($judul) > 150) {
+            $_SESSION['error'] = 'Judul maksimal 150 karakter.';
+            go('feedback');
+        }
+        $ins = $pdo->prepare(
+            "INSERT INTO saran_kritik (id_penghuni, jenis, judul, isi)
+             VALUES (?, ?, ?, ?)"
+        );
+        $ins->execute([$idPenghuni, $jenis, $judul, $isi]);
         go('sent');
     }
 
@@ -106,14 +114,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // ---------- Tentukan halaman (GET) ----------
 $page = $_GET['page'] ?? 'dash';
-if (!in_array($page, ['dash', 'upload', 'proof', 'feedback', 'sent'], true)) $page = 'dash';
+if (!in_array($page, ['dash', 'upload', 'proof', 'feedback', 'sent', 'history'], true)) $page = 'dash';
 if (!$sewa && in_array($page, ['upload', 'proof'], true)) $page = 'dash';
-if (!$idPenghuni && in_array($page, ['feedback', 'sent'], true)) $page = 'dash';
+if (!$idPenghuni && in_array($page, ['feedback', 'sent', 'history'], true)) $page = 'dash';
 if ($page === 'upload' && $sudahUnggah) $page = 'proof';
 if ($page === 'proof' && !$sudahUnggah) $page = 'upload';
 
 $navAktif = match ($page) { 'upload', 'proof' => 'pay', 'sent', 'feedback' => 'feedback', default => 'dash' };
-$kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
+$riwayatSaran = [];
+if ($idPenghuni && $page === 'history') {
+    $st = $pdo->prepare(
+        'SELECT jenis, judul, isi, tanggal_kirim, status
+           FROM saran_kritik WHERE id_penghuni = ?
+          ORDER BY tanggal_kirim DESC, id_saran DESC'
+    );
+    $st->execute([$idPenghuni]);
+    $riwayatSaran = $st->fetchAll();
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -232,24 +249,38 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
     <form method="post" class="form">
       <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
       <input type="hidden" name="aksi" value="saran">
-      <label id="kat-label">Kategori</label>
-      <div class="category-picker" data-category-picker>
-        <input type="hidden" id="kat" name="kategori" value="<?= h($kategoriList[0] ?? 'Lainnya') ?>">
-        <button type="button" class="category-trigger" data-category-trigger aria-labelledby="kat-label" aria-haspopup="listbox" aria-expanded="false" aria-controls="categoryOptions">
-          <span data-category-label><?= h($kategoriList[0] ?? 'Pilih kategori') ?></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-        <div class="category-options" id="categoryOptions" data-category-options role="listbox" aria-labelledby="kat-label" hidden>
-          <?php foreach ($kategoriList as $i => $k): ?>
-          <button type="button" class="category-option" role="option" aria-selected="<?= $i === 0 ? 'true' : 'false' ?>" data-value="<?= h($k) ?>"><?= h($k) ?></button>
-          <?php endforeach; ?>
-        </div>
-      </div>
-      <label for="cat">Catatan (opsional)</label>
-      <textarea id="cat" name="catatan" placeholder="Tulis saran atau kritikmu di sini..."></textarea>
+      <label for="jenis">Jenis laporan</label>
+      <select id="jenis" name="jenis" required>
+        <option value="">Pilih jenis laporan</option>
+        <option value="saran">Saran</option>
+        <option value="kritik">Kritik</option>
+      </select>
+      <label for="judul">Judul</label>
+      <input id="judul" name="judul" type="text" maxlength="150" required placeholder="Masukkan judul laporan">
+      <label for="isi">Isi laporan</label>
+      <textarea id="isi" name="isi" required placeholder="Tulis saran atau kritikmu di sini..."></textarea>
+      <?php if ($error): ?><p class="err" role="alert"><?= h($error) ?></p><?php endif; ?>
       <div class="spacer"></div>
       <button class="btn" type="submit">Kirim Masukan</button>
     </form>
+
+  <?php elseif ($page === 'history'): ?>
+    <h2 class="t">Riwayat Saran dan Kritik</h2>
+    <?php if (!$riwayatSaran): ?>
+      <div class="card"><p class="s">Kamu belum pernah mengirim saran atau kritik.</p></div>
+    <?php else: ?>
+      <?php foreach ($riwayatSaran as $laporan): ?>
+        <div class="card">
+          <div class="row">
+            <b><?= h(ucfirst($laporan['jenis'])) ?>: <?= h($laporan['judul']) ?></b>
+            <span class="badge"><?= h(ucfirst(str_replace('_', ' ', $laporan['status']))) ?></span>
+          </div>
+          <p><?= nl2br(h($laporan['isi'])) ?></p>
+          <small><?= h(date('d-m-Y H:i', strtotime($laporan['tanggal_kirim']))) ?></small>
+        </div>
+      <?php endforeach; ?>
+    <?php endif; ?>
+    <a class="btn" href="index.php?page=feedback">Kirim Laporan Baru</a>
 
   <?php elseif ($page === 'sent'): ?>
     <div class="done">
@@ -261,6 +292,7 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
     <div class="spacer"></div>
     <a class="btn" href="index.php?page=dash">Kembali ke Beranda</a>
     <a class="btn alt" href="index.php?page=feedback">Kirim Masukan Lain</a>
+    <a class="btn inv" href="index.php?page=history">Lihat Riwayat Laporan</a>
   <?php endif; ?>
   </main>
 
@@ -271,6 +303,8 @@ $kategoriList = ['Fasilitas Kos', 'Pelayanan Admin', 'Kebersihan', 'Lainnya'];
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="3"/></svg>Unggah</a>
     <a href="index.php?page=feedback" <?= $navAktif === 'feedback' ? 'aria-current="page"' : '' ?>>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H8l-4 4z"/></svg>Saran</a>
+    <a href="index.php?page=history" <?= $page === 'history' ? 'aria-current="page"' : '' ?>>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18M3 12h18M3 19h18"/></svg>Riwayat</a>
   </nav>
 </div>
 <div id="demo-reset-config" hidden data-endpoint="../reset_demo.php" data-home="index.php" data-csrf="<?= h(csrf_token()) ?>"></div>
