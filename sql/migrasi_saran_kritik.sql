@@ -23,3 +23,11 @@ CREATE INDEX IF NOT EXISTS idx_saran_kritik_status
 
 CREATE INDEX IF NOT EXISTS idx_saran_kritik_tanggal
     ON saran_kritik(tanggal_kirim DESC);
+
+
+-- Tambahan kategori untuk tampilan Saran dan Kritik penghuni.
+ALTER TABLE saran_kritik
+    ADD COLUMN IF NOT EXISTS kategori VARCHAR(40);
+
+CREATE INDEX IF NOT EXISTS idx_saran_kritik_kategori
+    ON saran_kritik(kategori);
