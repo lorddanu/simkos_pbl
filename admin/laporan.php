@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $jumlahBelumDibaca = (int) $pdo->query("SELECT COUNT(*) FROM saran_kritik WHERE status = 'belum_dibaca'")->fetchColumn();
 $totalBulanIni = (int) $pdo->query("SELECT COUNT(*) FROM saran_kritik WHERE tanggal_kirim >= date_trunc('month', CURRENT_DATE)")->fetchColumn();
 $laporan = $pdo->query(
-    "SELECT sk.id_saran, sk.jenis, sk.judul, sk.isi, sk.tanggal_kirim, sk.status,
+    "SELECT sk.id_saran, sk.jenis, sk.judul, sk.kategori, sk.isi, sk.tanggal_kirim, sk.status,
             p.nama, p.kontak
        FROM saran_kritik sk
        JOIN penghuni p ON p.id_penghuni = sk.id_penghuni
@@ -62,7 +62,7 @@ include __DIR__ . '/../includes/header.php';
                     <?php foreach ($laporan as $item): ?>
                         <article class="laporan-card">
                             <div class="laporan-card-header">
-                                <strong><?= h(ucfirst($item['jenis'])) ?>: <?= h($item['judul']) ?></strong>
+                                <strong><?= h($item['kategori'] ?: (ucfirst($item['jenis']) . ': ' . $item['judul'])) ?></strong>
                                 <span class="status pending"><?= h(ucfirst(str_replace('_', ' ', $item['status']))) ?></span>
                             </div>
                             <p><strong>Penghuni:</strong> <?= h($item['nama']) ?></p>
