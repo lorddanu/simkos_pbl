@@ -296,8 +296,6 @@ if ($idPenghuni && $page === 'feedback') {
     <a href="index.php?page=<?= $sudahUnggah ? 'proof' : 'upload' ?>" <?= $navAktif === 'pay' ? 'aria-current="page"' : '' ?>>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="3"/></svg>Unggah</a>
     <a href="index.php?page=feedback" <?= $navAktif === 'feedback' ? 'aria-current="page"' : '' ?>>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H8l-4 4z"/></svg>Saran</a>
-    <a href="index.php?page=feedback" <?= $navAktif === 'feedback' ? 'aria-current="page"' : '' ?>>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H8l-4 4z"/></svg>Saran &amp; Kritik</a>
   </nav>
 </div>
