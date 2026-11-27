@@ -105,3 +105,18 @@ body.auth.recovery-auth{width:min(100%,390px);min-height:100vh;min-height:100dvh
 /* Ikon pesan pada header penghuni. */
 .notification-button{width:28px;height:34px;flex:none;display:grid;place-items:center;color:#fff;text-decoration:none}
 .notification-button svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- Form Saran & Kritik + riwayat dalam satu halaman ---------- */
+.feedback-form{flex:none;gap:9px}
+.feedback-form select{min-height:42px;background:#f5f3ff;color:#7770c9;font-size:11px}
+.feedback-form textarea{min-height:88px;background:#f5f3ff;border-color:#a69df0;font-size:11px}
+.feedback-form textarea::placeholder{color:#928bd2;font-style:italic}
+.feedback-form .btn{margin-top:12px}
+.feedback-history{display:flex;flex-direction:column;gap:9px;margin-top:8px}
+.feedback-history h2{font-size:16px}
+.feedback-history-item{padding:10px 12px;border:1px solid #a69df0;border-radius:10px;background:#e7e4f8;color:#7770c9}
+.feedback-history-category{font-size:11px;font-weight:600}
+.feedback-history-item p{margin:3px 0 7px;font-size:10px;line-height:1.5}
+.feedback-history-meta{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.feedback-history-meta small{font-size:9px}
+.feedback-empty{padding:12px;border:1px solid #a69df0;border-radius:10px;background:#f5f3ff}
