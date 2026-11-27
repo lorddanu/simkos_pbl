@@ -2279,3 +2279,33 @@ body.admin-app {
     margin: 5px 0 0;
     font-size: 12px;
 }
+
+
+/* Halaman admin Saran & Kritik mengikuti kartu pada referensi mobile */
+.admin-app .laporan-page .page-title{margin-bottom:14px}
+.admin-app .laporan-page .laporan-content{padding:0;border:0;background:transparent}
+.admin-app .laporan-page .laporan-statistik{gap:3px;margin-bottom:14px}
+.admin-app .laporan-page .laporan-stat-card{min-height:75px;padding:12px 15px;border-radius:15px}
+.admin-app .laporan-page .laporan-stat-card strong{font-size:27px}
+.admin-app .laporan-page .laporan-stat-card span{font-size:13px;font-weight:600}
+.admin-app .laporan-page .laporan-daftar{padding:0;margin:0;background:transparent;color:var(--text)}
+.admin-app .laporan-page .laporan-card{padding:11px 12px;margin:0 0 9px;border:1px solid #8d82ed;border-radius:12px;background:#f3f1fc;color:var(--text)}
+.admin-app .laporan-page .laporan-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.admin-app .laporan-page .laporan-identitas{display:flex;min-width:0;flex-direction:column;gap:2px}
+.admin-app .laporan-page .laporan-identitas strong{color:#7165d1;font-size:12px;font-weight:600;line-height:1.35}
+.admin-app .laporan-page .laporan-identitas small{color:#8d83df;font-size:10px;font-style:italic}
+.admin-app .laporan-page .laporan-status{font-size:10px;font-weight:700;white-space:nowrap}
+.admin-app .laporan-page .status-baru{color:#7165d1}
+.admin-app .laporan-page .status-dibaca,.admin-app .laporan-page .status-selesai{color:#65b83e}
+.admin-app .laporan-page .laporan-pesan{display:flex;align-items:flex-start;gap:7px;margin:9px 0 12px}
+.admin-app .laporan-page .laporan-kategori{padding:4px 8px;border-radius:12px;background:#73bf9b;color:#fff;font-size:10px;line-height:1.2;white-space:nowrap}
+.admin-app .laporan-page .kategori-pelayanan{background:#73bf9b}
+.admin-app .laporan-page .kategori-kebersihan{background:#79b9a0}
+.admin-app .laporan-page .kategori-lainnya{background:#8d83df}
+.admin-app .laporan-page .laporan-pesan p{min-width:0;margin:2px 0 0;color:#8d83df;font-size:10px;font-style:italic;line-height:1.45}
+.admin-app .laporan-page .laporan-kontak{display:block;margin:-4px 0 8px;color:#8179a6;font-size:10px}
+.admin-app .laporan-page .laporan-actions{display:flex;gap:7px;margin-top:8px}
+.admin-app .laporan-page .laporan-btn{width:100%;min-height:32px;padding:7px 10px;border:0;border-radius:6px;color:#fff;font-size:10px;font-weight:600}
+.admin-app .laporan-page .btn-dibaca{background:#88c947}
+.admin-app .laporan-page .btn-selesai{background:#514797}
+.admin-app .laporan-page .laporan-btn:hover{filter:brightness(.96)}
