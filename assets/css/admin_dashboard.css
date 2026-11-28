@@ -2309,3 +2309,25 @@ body.admin-app {
 .admin-app .laporan-page .btn-dibaca{background:#88c947}
 .admin-app .laporan-page .btn-selesai{background:#514797}
 .admin-app .laporan-page .laporan-btn:hover{filter:brightness(.96)}
+
+
+/* Laporan pembayaran: filter periode dan unduhan bulanan/tahunan */
+.report-filter{display:flex;flex-direction:column;gap:10px;margin:12px 0 16px}
+.report-filter-form{display:flex;flex-wrap:wrap;align-items:end;gap:8px;padding:12px;border-radius:12px;background:var(--purple-light)}
+.report-filter-form label{width:100%;font-size:12px;font-weight:700;color:var(--purple-dark)}
+.report-filter-form input,.report-filter-form select{flex:1;min-width:130px;min-height:38px;padding:8px;border:1px solid #a69cf5;border-radius:8px;background:#fff;color:var(--text)}
+.report-filter-form .action-button{min-height:38px;padding:9px 12px;text-decoration:none;text-align:center}
+.report-download-link{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:9px 12px;border-radius:8px;background:var(--green);color:#fff;text-decoration:none;font-size:11px;font-weight:700}
+.report-stats{margin-top:12px}
+.payment-report-panel{margin-top:12px}
+.payment-report-panel .activity-item{color:var(--text);border-bottom:1px solid #e5e1f7}
+.payment-report-panel .item-description{color:var(--muted)}
+.payment-report-total{display:flex;justify-content:space-between;gap:10px;padding-top:12px;margin-top:10px;border-top:1px solid #ddd8f8;font-size:13px}
+.previous-report-section{margin-top:20px}
+.previous-report-card{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;margin-bottom:8px;border:1px solid #ddd8f8;border-radius:12px;background:#f7f6fc;color:var(--text)}
+.previous-report-card>div:first-child{display:flex;flex-direction:column;gap:4px}
+.previous-report-card strong{font-size:12px;color:var(--purple-dark)}
+.previous-report-card span{font-size:10px;color:var(--muted)}
+.previous-report-total{display:flex;align-items:center;gap:10px}
+.report-year-form{margin-bottom:10px}
+@media(min-width:760px){.report-filter{flex-direction:row;align-items:stretch}.report-filter-form{flex:1}.report-filter>.report-download-link{align-self:end}}
