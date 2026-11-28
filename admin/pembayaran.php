@@ -121,6 +121,77 @@ $st = $pdo->query(
 );
 $pembayaranMenunggu = $st->fetchAll();
 
+
+/* Data laporan pembayaran: hanya pembayaran yang sudah diterima. */
+$tahunSekarang = (int) date('Y');
+$tahunDipilih = filter_input(INPUT_GET, 'tahun', FILTER_VALIDATE_INT) ?: $tahunSekarang;
+if ($tahunDipilih < 2000 || $tahunDipilih > $tahunSekarang) $tahunDipilih = $tahunSekarang;
+
+$bulanDipilih = trim($_GET['bulan'] ?? date('Y-m'));
+if (!preg_match('/^\\d{4}-(0[1-9]|1[0-2])$/', $bulanDipilih)) $bulanDipilih = date('Y-m');
+if ($bulanDipilih > date('Y-m')) $bulanDipilih = date('Y-m');
+
+$awalBulan = $bulanDipilih . '-01';
+$awalBulanBerikut = (new DateTimeImmutable($awalBulan))->modify('+1 month')->format('Y-m-d');
+$awalTahun = sprintf('%04d-01-01', $tahunDipilih);
+$awalTahunBerikut = sprintf('%04d-01-01', $tahunDipilih + 1);
+
+$sqlLaporan = "SELECT p.id_pembayaran, p.jumlah, p.tanggal_upload,
+                      COALESCE(ph.nama, a.nama, 'Penghuni') AS nama_penghuni,
+                      k.nomor_kamar, p.status_verifikasi
+                 FROM pembayaran p
+                 LEFT JOIN sewa s ON s.id_sewa = p.id_sewa
+                 LEFT JOIN pengajuan_sewa ps ON ps.id_pengajuan = p.id_pengajuan_sewa
+                 LEFT JOIN penghuni ph ON ph.id_penghuni = COALESCE(s.id_penghuni, ps.id_penghuni)
+                 LEFT JOIN akun a ON a.id_penghuni = ph.id_penghuni
+                 LEFT JOIN kamar k ON k.id_kamar = COALESCE(s.id_kamar, ps.id_kamar)
+                WHERE p.status_verifikasi = 'diterima'
+                  AND p.tanggal_upload >= ? AND p.tanggal_upload < ?
+                ORDER BY p.tanggal_upload ASC, p.id_pembayaran ASC";
+$stLaporanBulan = $pdo->prepare($sqlLaporan);
+$stLaporanBulan->execute([$awalBulan, $awalBulanBerikut]);
+$laporanBulan = $stLaporanBulan->fetchAll();
+$totalBulan = array_sum(array_map(static fn($r) => (float) $r['jumlah'], $laporanBulan));
+
+$stLaporanTahun = $pdo->prepare($sqlLaporan);
+$stLaporanTahun->execute([$awalTahun, $awalTahunBerikut]);
+$laporanTahun = $stLaporanTahun->fetchAll();
+$totalTahun = array_sum(array_map(static fn($r) => (float) $r['jumlah'], $laporanTahun));
+
+$ringkasanBulanan = [];
+foreach ($laporanTahun as $row) {
+    $kunciBulan = date('Y-m', strtotime($row['tanggal_upload']));
+    if (!isset($ringkasanBulanan[$kunciBulan])) $ringkasanBulanan[$kunciBulan] = ['total' => 0, 'jumlah' => 0];
+    $ringkasanBulanan[$kunciBulan]['total'] += (float) $row['jumlah'];
+    $ringkasanBulanan[$kunciBulan]['jumlah']++;
+}
+
+/* Ekspor CSV untuk laporan bulanan maupun tahunan. */
+$jenisUnduhan = $_GET['unduh'] ?? '';
+if (in_array($jenisUnduhan, ['bulan', 'tahun'], true)) {
+    $dataEkspor = $jenisUnduhan === 'tahun' ? $laporanTahun : $laporanBulan;
+    $periodeEkspor = $jenisUnduhan === 'tahun' ? (string) $tahunDipilih : $bulanDipilih;
+    $namaFile = 'laporan-pembayaran-' . $periodeEkspor . '.csv';
+    header('Content-Type: text/csv; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="' . $namaFile . '"');
+    $output = fopen('php://output', 'w');
+    fwrite($output, "\xEF\xBB\xBF");
+    fputcsv($output, ['Nama Penghuni', 'Nomor Kamar', 'Tanggal Pembayaran', 'Nominal', 'Status']);
+    foreach ($dataEkspor as $row) {
+        fputcsv($output, [
+            $row['nama_penghuni'],
+            $row['nomor_kamar'] ?? '-',
+            $row['tanggal_upload'],
+            (float) $row['jumlah'],
+            'Diterima'
+        ]);
+    }
+    fputcsv($output, []);
+    fputcsv($output, ['Total Pendapatan', '', '', $jenisUnduhan === 'tahun' ? $totalTahun : $totalBulan, '']);
+    fclose($output);
+    exit;
+}
+
 $halamanAktif = 'pembayaran';
 
 include __DIR__ . '/../includes/header.php';
@@ -205,47 +276,77 @@ include __DIR__ . '/../includes/header.php';
         <!-- TAB LAPORAN PEMBAYARAN -->
         <div id="laporan-pembayaran" class="payment-tab" hidden>
 
-            <!-- STATISTIK LAPORAN -->
-            <div class="stats-grid">
-
-                <article class="stat-card">
-                    <span class="stat-number">Rp.0</span>
-                    <span class="stat-label">
-                        Total Pembayaran Diterima
-                    </span>
-                </article>
-
-                <article class="stat-card">
-                    <span class="stat-number">0</span>
-                    <span class="stat-label">
-                        Menunggu Verifikasi
-                    </span>
-                </article>
-
+            <h2 class="section-title">Laporan Pembayaran</h2>
+            <div class="report-filter">
+                <form method="get" class="report-filter-form">
+                    <label for="bulanLaporan">Laporan bulanan</label>
+                    <input type="month" id="bulanLaporan" name="bulan" value="<?= h($bulanDipilih) ?>" max="<?= h(date('Y-m')) ?>">
+                    <button type="submit" class="action-button btn-proof">Tampilkan</button>
+                </form>
+                <a class="action-button btn-approve report-download-link" href="pembayaran.php?unduh=bulan&amp;bulan=<?= h($bulanDipilih) ?>">Unduh bulan ini</a>
             </div>
 
-            <!-- TOMBOL UNDUH LAPORAN -->
-            <div class="report-actions">
-                <button
-                    type="button"
-                    id="downloadReport"
-                    class="action-button btn-approve"
-                >
-                    Unduh Laporan
-                </button>
+            <div class="stats-grid report-stats">
+                <article class="stat-card">
+                    <span class="stat-number">Rp <?= h(number_format($totalBulan, 0, ',', '.')) ?></span>
+                    <span class="stat-label">Pendapatan diterima · <?= h($bulanDipilih) ?></span>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-number"><?= count($laporanBulan) ?></span>
+                    <span class="stat-label">Pembayaran diterima</span>
+                </article>
             </div>
 
-            <!-- RIWAYAT PEMBAYARAN -->
-            <section class="panel">
+            <section class="panel payment-report-panel">
+                <h2 class="section-title">Riwayat Pembayaran Bulan Ini</h2>
+                <?php if (!$laporanBulan): ?>
+                    <p class="item-description">Belum ada pembayaran diterima pada periode ini.</p>
+                <?php else: ?>
+                    <?php foreach ($laporanBulan as $row): ?>
+                        <article class="activity-item">
+                            <div>
+                                <strong><?= h($row['nama_penghuni']) ?> · <?= h($row['nomor_kamar'] ?? 'Kamar -') ?></strong>
+                                <span class="item-description"><?= h(date('d-m-Y', strtotime($row['tanggal_upload']))) ?> · Rp <?= h(number_format((float) $row['jumlah'], 0, ',', '.')) ?></span>
+                            </div>
+                            <span class="status paid">Diterima</span>
+                        </article>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                <div class="payment-report-total"><strong>Total</strong><strong>Rp <?= h(number_format($totalBulan, 0, ',', '.')) ?></strong></div>
+            </section>
 
-                <h2 class="section-title">
-                    Riwayat Pembayaran
-                </h2>
+            <section class="previous-report-section">
+                <h2 class="section-title">Laporan Bulan Sebelumnya</h2>
+                <?php if (!$ringkasanBulanan): ?>
+                    <p class="item-description">Belum ada riwayat pembayaran pada tahun ini.</p>
+                <?php else: ?>
+                    <?php foreach (array_reverse($ringkasanBulanan, true) as $bulan => $ringkasan): ?>
+                        <?php if ($bulan !== $bulanDipilih): ?>
+                            <article class="previous-report-card">
+                                <div><strong><?= h(date('F Y', strtotime($bulan . '-01'))) ?></strong><span><?= (int) $ringkasan['jumlah'] ?> pembayaran</span></div>
+                                <div class="previous-report-total">
+                                    <strong>Rp <?= h(number_format($ringkasan['total'], 0, ',', '.')) ?></strong>
+                                    <a href="pembayaran.php?unduh=bulan&amp;bulan=<?= h($bulan) ?>" class="report-download-link">Unduh</a>
+                                </div>
+                            </article>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </section>
 
-                <p class="item-description">
-                    Belum ada riwayat pembayaran.
-                </p>
-
+            <section class="previous-report-section">
+                <h2 class="section-title">Laporan Tahunan</h2>
+                <form method="get" class="report-filter-form report-year-form">
+                    <label for="tahunLaporan">Pilih tahun</label>
+                    <select id="tahunLaporan" name="tahun">
+                        <?php for ($tahun = $tahunSekarang; $tahun >= $tahunSekarang - 5; $tahun--): ?>
+                            <option value="<?= $tahun ?>" <?= $tahunDipilih === $tahun ? 'selected' : '' ?>><?= $tahun ?></option>
+                        <?php endfor; ?>
+                    </select>
+                    <button type="submit" class="action-button btn-proof">Tampilkan</button>
+                    <a class="action-button btn-approve report-download-link" href="pembayaran.php?unduh=tahun&amp;tahun=<?= $tahunDipilih ?>">Unduh tahunan</a>
+                </form>
+                <div class="payment-report-total"><strong>Total pendapatan <?= $tahunDipilih ?></strong><strong>Rp <?= h(number_format($totalTahun, 0, ',', '.')) ?></strong></div>
             </section>
 
         </div>
